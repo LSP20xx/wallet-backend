@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceConfig } from './config/data.source';
 import { WalletsModule } from './wallets/wallets.module';
 import { TradeOrdersModule } from './trade-orders/trade-orders.module';
+import { SmsModule } from './sms/sms.module';
+import { VerificationsModule } from './verifications/verifications.module';
 //import { TradeOrdersModule } from './tradeOrders/tradeOrders.module'; // Nuevo
 //import { NodeIntegrationsModule } from './nodeIntegrations/nodeIntegrations.module'; // Nuevo
 
@@ -18,6 +20,8 @@ import { TradeOrdersModule } from './trade-orders/trade-orders.module';
     UsersModule,
     WalletsModule,
     TradeOrdersModule,
+    SmsModule,
+    VerificationsModule,
     // TradeOrdersModule,
     // NodeIntegrationsModule,
   ],

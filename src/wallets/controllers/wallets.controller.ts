@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { FindOneOptions } from 'typeorm';
-import { WalletsService } from '../services/wallets.services';
+import { WalletsService } from '../services/wallets.service';
 @Controller('wallets')
 export class WalletsController {
   constructor(private readonly walletService: WalletsService) {}
