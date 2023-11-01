@@ -7,8 +7,14 @@ import { WalletsModule } from './wallets/wallets.module';
 import { TradeOrdersModule } from './trade-orders/trade-orders.module';
 import { SmsModule } from './sms/sms.module';
 import { VerificationsModule } from './verifications/verifications.module';
+import { OneTimeTokenModule } from './one-time-tokens/one-time-token.module';
+import { EncryptionsModule } from './encryptions/encryptions.module';
+import { SignUpModule } from './sign-up/sign-up.module';
+import { SessionModule } from './session/sessions.module';
+import { NetworkModule } from './networks/network.module';
 //import { TradeOrdersModule } from './tradeOrders/tradeOrders.module'; // Nuevo
 //import { NodeIntegrationsModule } from './nodeIntegrations/nodeIntegrations.module'; // Nuevo
+import { TokensModule } from './tokens/tokens.module';
 
 @Module({
   imports: [
@@ -22,6 +28,12 @@ import { VerificationsModule } from './verifications/verifications.module';
     TradeOrdersModule,
     SmsModule,
     VerificationsModule,
+    EncryptionsModule,
+    OneTimeTokenModule,
+    SignUpModule,
+    SessionModule,
+    NetworkModule,
+    TokensModule,
     // TradeOrdersModule,
     // NodeIntegrationsModule,
   ],

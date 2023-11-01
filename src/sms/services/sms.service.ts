@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as Twilio from 'twilio';
 import { Repository } from 'typeorm';
 import { SmsEntity } from '../entities/sms.entity';
-import { SMS_VERIFICATION_MESSAGE } from 'src/constants/sms-verification-message';
+import { SMS_VERIFICATION_MESSAGE } from '../../constants/sms-verification-message';
 
 @Injectable()
 export class SmsService {
@@ -40,5 +40,15 @@ export class SmsService {
   }
   async saveSMSRecord(smsRecord: SmsEntity): Promise<SmsEntity> {
     return this.smsRepository.save(smsRecord);
+  }
+
+  async findLatestSMSByPhoneNumber(
+    phoneNumber: string,
+  ): Promise<SmsEntity | undefined> {
+    return this.smsRepository
+      .createQueryBuilder('sms')
+      .where('sms.to = :phoneNumber', { phoneNumber })
+      .orderBy('sms.created_at', 'DESC')
+      .getOne();
   }
 }

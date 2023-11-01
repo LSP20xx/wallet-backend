@@ -1,8 +1,15 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { SendVerificationDto } from '../dtos/send-sms-code.dto';
-import { SmsService } from 'src/sms/services/sms.service';
-import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
+import { SmsService } from '../../sms/services/sms.service';
+import { EncryptionsService } from '../../encryptions/services/encryptions.service';
 import { VerificationsService } from '../services/verifications.service';
+import { VerifySmsCodeDto } from '../dtos/verify-sms-code.dto';
 
 @Controller('verification')
 export class VerificationController {
@@ -12,8 +19,8 @@ export class VerificationController {
     private readonly verificationsService: VerificationsService,
   ) {}
 
-  @Post('send-sms-verification')
-  async sendSMSVerification(@Body() sendVerificationDto: SendVerificationDto) {
+  @Post('send-sms-code')
+  async sendSMSCode(@Body() sendVerificationDto: SendVerificationDto) {
     const { code } = this.verificationsService.generateVerificationCode();
 
     const { smsMessage } = this.smsService.createSMSMessage(code);
@@ -34,5 +41,27 @@ export class VerificationController {
     return {
       smsResult,
     };
+  }
+
+  @Post('verify-sms-code')
+  async verifySmsCode(@Body() verifySmsCodeDto: VerifySmsCodeDto) {
+    const { to, code } = verifySmsCodeDto;
+
+    const smsRecord = await this.smsService.findLatestSMSByPhoneNumber(to);
+    if (!smsRecord) {
+      throw new HttpException(
+        'No SMS record found for this phone number',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const decryptedCode = this.encryptionsService.decrypt(smsRecord.code);
+
+    const isValid = this.verificationsService.isCodeValid(
+      code,
+      decryptedCode,
+      smsRecord.createdAt,
+    );
+    return { isValid };
   }
 }

@@ -6,4 +6,4 @@ import { EncryptionsService } from './services/encryptions.service';
   controllers: [],
   exports: [EncryptionsService],
 })
-export class SmsModule {}
+export class EncryptionsModule {}

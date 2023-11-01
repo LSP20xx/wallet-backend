@@ -3,6 +3,7 @@ import { UserRole } from '../../enums/user-role.enum';
 import { TradeOrdersEntity } from '../../trade-orders/entities/trade-orders.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { WalletsEntity } from '../../wallets/entities/wallets.entity';
+import { SessionEntity } from '../../session/entities/session.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity {
@@ -23,4 +24,7 @@ export class UsersEntity extends BaseEntity {
 
   @OneToMany(() => TradeOrdersEntity, (order) => order.buyer)
   buyOrders: TradeOrdersEntity[];
+
+  @OneToMany(() => SessionEntity, (session) => session.user)
+  sessions: SessionEntity[];
 }

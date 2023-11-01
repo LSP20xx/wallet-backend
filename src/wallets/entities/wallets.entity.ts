@@ -1,14 +1,13 @@
 import Big from 'big.js';
+import { EthereumNetworkEntity } from '../../networks/entities/network.entity';
+import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
+import { TransactionEntity } from '../../transactions/entities/transactions.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
-import { Currency } from '../../enums';
 import { UsersEntity } from '../../users/entities/users.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity({ name: 'wallets' })
 export class WalletsEntity extends BaseEntity {
-  @Column({ type: 'enum', enum: Currency })
-  currencyType: Currency;
-
   @Column({
     type: 'varchar',
     transformer: {
@@ -26,4 +25,13 @@ export class WalletsEntity extends BaseEntity {
 
   @ManyToOne(() => UsersEntity, (user) => user.wallets)
   user: UsersEntity;
+
+  @ManyToOne(() => EthereumNetworkEntity, (network) => network.wallets)
+  network: EthereumNetworkEntity;
+
+  @OneToMany(() => TransactionEntity, (transaction) => transaction.wallet)
+  transactions: TransactionEntity[];
+
+  @OneToMany(() => EvmTokensEntity, (token) => token.wallet)
+  tokens: EvmTokensEntity[];
 }

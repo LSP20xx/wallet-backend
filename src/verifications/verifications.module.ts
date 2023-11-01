@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { VerificationController } from './controllers/verifications.controller';
-import { SmsModule } from 'src/sms/sms.module';
 import { VerificationsService } from './services/verifications.service';
-import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
-
+import { SmsModule } from '../sms/sms.module';
+import { EncryptionsService } from '../encryptions/services/encryptions.service';
 @Module({
   imports: [SmsModule],
   controllers: [VerificationController],
