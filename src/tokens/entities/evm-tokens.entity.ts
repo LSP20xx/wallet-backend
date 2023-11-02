@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 import { WalletsEntity } from '../../wallets/entities/wallets.entity';
-import { EthereumNetworkEntity } from 'src/networks/entities/network.entity';
+import { EvmNetworkEntity } from 'src/networks/entities/evm-network.entity';
 
 @Entity({ name: 'tokens' })
 export class EvmTokensEntity extends BaseEntity {
@@ -14,8 +14,8 @@ export class EvmTokensEntity extends BaseEntity {
   @ManyToOne(() => WalletsEntity, (wallet) => wallet.tokens)
   wallet: WalletsEntity;
 
-  @ManyToOne(() => EthereumNetworkEntity, (network) => network.tokens)
-  network: EthereumNetworkEntity;
+  @ManyToOne(() => EvmNetworkEntity, (network) => network.tokens)
+  network: EvmNetworkEntity;
 
   @OneToMany(() => EvmTokensEntity, (token) => token.network)
   tokens: EvmTokensEntity[];

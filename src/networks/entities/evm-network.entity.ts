@@ -6,7 +6,7 @@ import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
 import { NodesEntity } from '../../nodes/entities/nodes.entity';
 
 @Entity({ name: 'networks' })
-export class EthereumNetworkEntity extends BaseEntity {
+export class EvmNetworkEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Column()
   name: string;

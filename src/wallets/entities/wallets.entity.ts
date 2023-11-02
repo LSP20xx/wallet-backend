@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { EthereumNetworkEntity } from '../../networks/entities/network.entity';
+import { EvmNetworkEntity } from '../../networks/entities/evm-network.entity';
 import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
 import { TransactionEntity } from '../../transactions/entities/transactions.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
@@ -26,8 +26,8 @@ export class WalletsEntity extends BaseEntity {
   @ManyToOne(() => UsersEntity, (user) => user.wallets)
   user: UsersEntity;
 
-  @ManyToOne(() => EthereumNetworkEntity, (network) => network.wallets)
-  network: EthereumNetworkEntity;
+  @ManyToOne(() => EvmNetworkEntity, (network) => network.wallets)
+  network: EvmNetworkEntity;
 
   @OneToMany(() => TransactionEntity, (transaction) => transaction.wallet)
   transactions: TransactionEntity[];

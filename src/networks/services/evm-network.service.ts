@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { NetworkService } from '../../interfaces/INetworkService';
 import { TransactionDetails } from 'src/interfaces/ITransactionDetails';
-import { EvmNetworkService } from 'src/interfaces/IEvmNetworkService';
 import { TransactionReceipt } from 'web3';
 import Web3 from 'web3';
 
 @Injectable()
-export class EthereumNetworkService
-  implements NetworkService, EvmNetworkService
-{
+export class EvmNetworkService implements NetworkService, EvmNetworkService {
   private web3: Web3;
 
   constructor() {

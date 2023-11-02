@@ -15,6 +15,7 @@ import { NetworkModule } from './networks/network.module';
 //import { TradeOrdersModule } from './tradeOrders/tradeOrders.module'; // Nuevo
 //import { NodeIntegrationsModule } from './nodeIntegrations/nodeIntegrations.module'; // Nuevo
 import { TokensModule } from './tokens/tokens.module';
+import { Web3Module } from './web3/web3.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TokensModule } from './tokens/tokens.module';
     SessionModule,
     NetworkModule,
     TokensModule,
+    Web3Module,
     // TradeOrdersModule,
     // NodeIntegrationsModule,
   ],
