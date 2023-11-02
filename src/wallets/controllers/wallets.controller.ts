@@ -9,8 +9,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { WalletsEntity } from '../entities/wallets.entity';
-import { FindOneOptions } from 'typeorm';
 import { WalletsService } from '../services/wallets.service';
+
 @Controller('wallets')
 export class WalletsController {
   constructor(private readonly walletService: WalletsService) {}
@@ -21,14 +21,12 @@ export class WalletsController {
   }
 
   @Get(':id')
-  findOne(
-    @Param() options: FindOneOptions<WalletsEntity>,
-  ): Promise<WalletsEntity> {
-    return this.walletService.findOne(options);
+  findOne(@Param('id') id: string): Promise<WalletsEntity> {
+    return this.walletService.findOne({ where: { id } });
   }
 
   @Post(':chainId')
-  createWallet(@Param() chainId: string): Promise<WalletsEntity> {
+  createWallet(@Param('chainId') chainId: string): Promise<WalletsEntity> {
     return this.walletService.createWallet(chainId);
   }
 

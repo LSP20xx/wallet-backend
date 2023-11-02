@@ -1,5 +1,5 @@
 interface IWalletService {
-  createWallet(): { address: string; privateKey: string };
+  createWallet(): { address: string; encryptedPrivateKey: string };
 }
 
 export { IWalletService };
