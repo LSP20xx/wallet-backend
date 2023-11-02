@@ -21,7 +21,7 @@ export class WalletsEntity extends BaseEntity {
   address: string;
 
   @Column({ unique: true })
-  privateKey: string;
+  encryptedPrivateKey: string;
 
   @ManyToOne(() => UsersEntity, (user) => user.wallets)
   user: UsersEntity;

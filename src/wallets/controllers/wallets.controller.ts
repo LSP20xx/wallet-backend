@@ -27,9 +27,9 @@ export class WalletsController {
     return this.walletService.findOne(options);
   }
 
-  @Post()
-  create(@Body() wallet: WalletsEntity): Promise<WalletsEntity> {
-    return this.walletService.create(wallet);
+  @Post(':chainId')
+  createWallet(@Param() chainId: string): Promise<WalletsEntity> {
+    return this.walletService.createWallet(chainId);
   }
 
   @Put(':id')

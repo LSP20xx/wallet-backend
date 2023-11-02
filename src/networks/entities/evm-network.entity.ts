@@ -3,7 +3,6 @@ import { BaseEntity } from '../../config/base.entity';
 import { WalletsEntity } from '../../wallets/entities/wallets.entity';
 import { TransactionEntity } from '../../transactions/entities/transactions.entity';
 import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
-import { NodesEntity } from '../../nodes/entities/nodes.entity';
 
 @Entity({ name: 'networks' })
 export class EvmNetworkEntity extends BaseEntity {
@@ -22,7 +21,4 @@ export class EvmNetworkEntity extends BaseEntity {
 
   @OneToMany(() => EvmTokensEntity, (token) => token.wallet)
   tokens: EvmTokensEntity[];
-
-  @OneToMany(() => NodesEntity, (node) => node.network)
-  nodes: NodesEntity[];
 }

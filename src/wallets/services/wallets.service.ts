@@ -4,12 +4,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { FindOneOptions } from 'typeorm';
+import { Web3Service } from 'src/web3/services/web3.service';
+import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 
 @Injectable()
 export class WalletsService {
   constructor(
     @InjectRepository(WalletsEntity)
     private walletRepository: Repository<WalletsEntity>,
+    private web3Service: Web3Service,
+    private encryptionService: EncryptionsService,
   ) {}
 
   async findAll(): Promise<WalletsEntity[]> {
@@ -22,8 +26,23 @@ export class WalletsService {
     return this.walletRepository.findOne(options);
   }
 
-  async create(wallet: WalletsEntity): Promise<WalletsEntity> {
-    return this.walletRepository.save(wallet);
+  async createWallet(chainId: string): Promise<WalletsEntity> {
+    const account = this.web3Service
+      .getWeb3Instance(chainId)
+      .eth.accounts.create();
+    const encryptedPrivateKeyObject = this.encryptionService.encrypt(
+      account.privateKey,
+    );
+
+    // Assuming the encrypt method returns an object with encryptedData and iv
+    const encryptedPrivateKey = `${encryptedPrivateKeyObject.encryptedData}:${encryptedPrivateKeyObject.iv}`;
+
+    const newWallet = this.walletRepository.create({
+      address: account.address,
+      encryptedPrivateKey: encryptedPrivateKey, // Now it's a string
+    });
+
+    return this.walletRepository.save(newWallet);
   }
 
   async update(id: string, wallet: WalletsEntity): Promise<WalletsEntity> {

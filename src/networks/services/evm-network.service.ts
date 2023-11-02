@@ -4,7 +4,7 @@ import { TransactionReceipt } from 'web3';
 import { Web3Service } from '../../web3/services/web3.service';
 
 @Injectable()
-export class EvmNetworkService implements EvmNetworkService {
+export class EvmNetworkService {
   private web3Service: Web3Service;
 
   constructor(web3Service: Web3Service) {

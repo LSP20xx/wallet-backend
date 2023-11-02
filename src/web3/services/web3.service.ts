@@ -1,6 +1,7 @@
 // src/web3/web3.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { TransactionDetails } from 'src/interfaces/ITransactionDetails';
 import Web3, { TransactionReceipt } from 'web3';
 
@@ -8,7 +9,10 @@ import Web3, { TransactionReceipt } from 'web3';
 export class Web3Service {
   private web3Instances = new Map<string, Web3>();
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly encryptionService: EncryptionsService,
+  ) {}
 
   getWeb3Instance(chainId: string): Web3 {
     let web3 = this.web3Instances.get(chainId);
@@ -66,5 +70,53 @@ export class Web3Service {
     return await this.getWeb3Instance(chainId).eth.getTransactionReceipt(
       txHash,
     );
+  }
+
+  createWallet(chainId: string): {
+    address: string;
+    encryptedPrivateKey: string;
+  } {
+    const account = this.getWeb3Instance(chainId).eth.accounts.create();
+    const { encryptedData, iv } = this.encryptionService.encrypt(
+      account.privateKey,
+    );
+
+    // Aquí deberías implementar la lógica para almacenar de forma segura la clave privada cifrada
+    // Por ejemplo, guardarla en una base de datos con la dirección como referencia
+
+    return {
+      address: account.address,
+      encryptedPrivateKey: `${iv}:${encryptedData}`, // Concatenar IV y datos cifrados
+    };
+  }
+  unlockWallet(
+    chainId: string,
+    address: string,
+    encryptedPrivateKey: string,
+  ): boolean {
+    try {
+      const privateKey = this.decryptPrivateKey(encryptedPrivateKey);
+      const web3 = this.getWeb3Instance(chainId);
+
+      // Verifica si la clave privada corresponde a la dirección proporcionada
+      const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+      if (account.address.toLowerCase() !== address.toLowerCase()) {
+        console.error('The private key does not match the provided address.');
+        return false;
+      }
+
+      web3.eth.accounts.wallet.add(account);
+      // Asegúrate de eliminar la clave privada de la memoria después de su uso
+      // Por ejemplo, después de realizar una transacción
+      return true;
+    } catch (error) {
+      console.error('Error unlocking wallet:', error);
+      return false;
+    }
+  }
+
+  private decryptPrivateKey(encryptedPrivateKey: string): string {
+    const [iv, encryptedData] = encryptedPrivateKey.split(':');
+    return this.encryptionService.decrypt(`${iv}${encryptedData}`);
   }
 }
