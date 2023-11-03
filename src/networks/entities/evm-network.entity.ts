@@ -4,7 +4,7 @@ import { WalletsEntity } from '../../wallets/entities/wallets.entity';
 import { TransactionEntity } from '../../transactions/entities/transactions.entity';
 import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
 
-@Entity({ name: 'networks' })
+@Entity({ name: 'evm-networks' })
 export class EvmNetworkEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Column()

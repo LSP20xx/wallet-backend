@@ -43,13 +43,22 @@ export class Web3Service {
     encryptedPrivateKey: string,
   ): Promise<string> {
     const web3 = this.getWeb3Instance(chainId);
-    const privateKey = this.decryptPrivateKey(encryptedPrivateKey);
+    const privateKey = this.encryptionService.decrypt(encryptedPrivateKey);
+    const gasPrice = await this.getGasPrice(chainId);
+
+    const gas = await this.estimateGas(
+      chainId,
+      details.from,
+      details.to,
+      details.amount.toString(),
+    );
 
     const transaction = {
       from: details.from,
       to: details.to,
       value: web3.utils.toWei(details.amount.toString(), 'ether'),
-      gas: 21000,
+      gas,
+      gasPrice,
     };
 
     const signedTransaction = await web3.eth.accounts.signTransaction(
@@ -67,6 +76,21 @@ export class Web3Service {
 
   async getGasPrice(chainId: string): Promise<bigint> {
     return await this.getWeb3Instance(chainId).eth.getGasPrice();
+  }
+
+  async estimateGas(
+    chainId: string,
+    from: string,
+    to: string,
+    value: string,
+  ): Promise<bigint> {
+    const web3 = this.getWeb3Instance(chainId);
+    const gasEstimate = await web3.eth.estimateGas({
+      from,
+      to,
+      value: web3.utils.toWei(value, 'ether'),
+    });
+    return gasEstimate;
   }
 
   async getTransactionCount(chainId: string, address: string): Promise<bigint> {
@@ -102,7 +126,9 @@ export class Web3Service {
     encryptedPrivateKey: string,
   ): boolean {
     try {
-      const privateKey = this.decryptPrivateKey(encryptedPrivateKey);
+      console.log('Starting to unlock wallet');
+
+      const privateKey = this.encryptionService.decrypt(encryptedPrivateKey);
       const web3 = this.getWeb3Instance(chainId);
       console.log('privateKey', privateKey);
 
@@ -118,10 +144,5 @@ export class Web3Service {
       console.error('Error unlocking wallet:', error);
       return false;
     }
-  }
-
-  private decryptPrivateKey(encryptedPrivateKey: string): string {
-    const [iv, encryptedData] = encryptedPrivateKey.split(':');
-    return this.encryptionService.decrypt(`${iv}${encryptedData}`);
   }
 }

@@ -15,7 +15,7 @@ import { SendTransactionDto } from '../dto/send-transaction.dto';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { WalletsService } from '../services/wallets.service';
 
-@Controller('wallets')
+@Controller('evm-wallets')
 export class WalletsController {
   constructor(
     private readonly walletService: WalletsService,
