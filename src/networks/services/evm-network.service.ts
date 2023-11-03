@@ -22,8 +22,13 @@ export class EvmNetworkService {
   async sendTransaction(
     chainId: string,
     details: TransactionDetails,
+    encryptedPrivateKey: string,
   ): Promise<string> {
-    return this.web3Service.sendTransaction(chainId, details);
+    return this.web3Service.sendTransaction(
+      chainId,
+      details,
+      encryptedPrivateKey,
+    );
   }
 
   async getGasPrice(chainId: string): Promise<bigint> {

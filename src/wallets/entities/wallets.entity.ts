@@ -10,9 +10,10 @@ import { UsersEntity } from '../../users/entities/users.entity';
 export class WalletsEntity extends BaseEntity {
   @Column({
     type: 'varchar',
+    default: '0',
     transformer: {
       from: (value: string) => new Big(value),
-      to: (value: Big) => value.toString(),
+      to: (value: Big) => (value ? value.toString() : '0'),
     },
   })
   balance: Big;

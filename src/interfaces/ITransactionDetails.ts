@@ -1,6 +1,6 @@
 interface TransactionDetails {
   from: string;
   to: string;
-  amount: number;
+  amount: string;
 }
 export { TransactionDetails };

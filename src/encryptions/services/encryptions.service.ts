@@ -15,7 +15,6 @@ export class EncryptionsService {
   }
 
   encrypt(code: string): { encryptedData: string; iv: string } {
-    console.log(this.encryptionKey);
     const iv = this.generateIv();
     const cipher = createCipheriv(
       this.algorithm,

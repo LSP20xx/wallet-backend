@@ -1,19 +1,26 @@
-// wallet.controller.ts
 import {
+  Body,
   Controller,
-  Get,
+  HttpException,
+  HttpStatus,
+  Param,
   Post,
+  Get,
   Put,
   Delete,
-  Body,
-  Param,
 } from '@nestjs/common';
+
+import { Web3Service } from '../../web3/services/web3.service';
+import { SendTransactionDto } from '../dto/send-transaction.dto';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { WalletsService } from '../services/wallets.service';
 
 @Controller('wallets')
 export class WalletsController {
-  constructor(private readonly walletService: WalletsService) {}
+  constructor(
+    private readonly walletService: WalletsService,
+    private readonly web3Service: Web3Service,
+  ) {}
 
   @Get()
   findAll(): Promise<WalletsEntity[]> {
@@ -28,6 +35,35 @@ export class WalletsController {
   @Post(':chainId')
   createWallet(@Param('chainId') chainId: string): Promise<WalletsEntity> {
     return this.walletService.createWallet(chainId);
+  }
+
+  @Post(':chainId/send')
+  async send(
+    @Param('chainId') chainId: string,
+    @Body() sendTransactionDto: SendTransactionDto,
+  ): Promise<string> {
+    try {
+      const isUnlocked = this.web3Service.unlockWallet(
+        chainId,
+        sendTransactionDto.from,
+        sendTransactionDto.encryptedPrivateKey,
+      );
+
+      if (!isUnlocked) {
+        throw new HttpException(
+          'No se pudo desbloquear la wallet.',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      return await this.web3Service.sendTransaction(
+        chainId,
+        sendTransactionDto,
+        sendTransactionDto.encryptedPrivateKey,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Put(':id')

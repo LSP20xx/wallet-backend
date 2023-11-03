@@ -40,18 +40,28 @@ export class Web3Service {
   async sendTransaction(
     chainId: string,
     details: TransactionDetails,
+    encryptedPrivateKey: string,
   ): Promise<string> {
+    const web3 = this.getWeb3Instance(chainId);
+    const privateKey = this.decryptPrivateKey(encryptedPrivateKey);
+
     const transaction = {
       from: details.from,
       to: details.to,
-      value: this.getWeb3Instance(chainId).utils.toWei(
-        details.amount.toString(),
-        'ether',
-      ),
+      value: web3.utils.toWei(details.amount.toString(), 'ether'),
+      gas: 21000,
     };
-    const receipt =
-      await this.getWeb3Instance(chainId).eth.sendTransaction(transaction);
-    const txHash = '0x' + Buffer.from(receipt.transactionHash).toString('hex');
+
+    const signedTransaction = await web3.eth.accounts.signTransaction(
+      transaction,
+      privateKey,
+    );
+
+    const receipt = await web3.eth.sendSignedTransaction(
+      signedTransaction.rawTransaction,
+    );
+
+    const txHash = '0x' + receipt.transactionHash.slice(2);
     return txHash;
   }
 
@@ -81,9 +91,6 @@ export class Web3Service {
       account.privateKey,
     );
 
-    // Aquí deberías implementar la lógica para almacenar de forma segura la clave privada cifrada
-    // Por ejemplo, guardarla en una base de datos con la dirección como referencia
-
     return {
       address: account.address,
       encryptedPrivateKey: `${iv}:${encryptedData}`, // Concatenar IV y datos cifrados
@@ -97,8 +104,8 @@ export class Web3Service {
     try {
       const privateKey = this.decryptPrivateKey(encryptedPrivateKey);
       const web3 = this.getWeb3Instance(chainId);
+      console.log('privateKey', privateKey);
 
-      // Verifica si la clave privada corresponde a la dirección proporcionada
       const account = web3.eth.accounts.privateKeyToAccount(privateKey);
       if (account.address.toLowerCase() !== address.toLowerCase()) {
         console.error('The private key does not match the provided address.');
@@ -106,8 +113,6 @@ export class Web3Service {
       }
 
       web3.eth.accounts.wallet.add(account);
-      // Asegúrate de eliminar la clave privada de la memoria después de su uso
-      // Por ejemplo, después de realizar una transacción
       return true;
     } catch (error) {
       console.error('Error unlocking wallet:', error);

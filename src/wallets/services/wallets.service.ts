@@ -1,4 +1,3 @@
-// wallet.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -34,12 +33,11 @@ export class WalletsService {
       account.privateKey,
     );
 
-    // Assuming the encrypt method returns an object with encryptedData and iv
     const encryptedPrivateKey = `${encryptedPrivateKeyObject.encryptedData}:${encryptedPrivateKeyObject.iv}`;
 
     const newWallet = this.walletRepository.create({
       address: account.address,
-      encryptedPrivateKey: encryptedPrivateKey, // Now it's a string
+      encryptedPrivateKey: encryptedPrivateKey,
     });
 
     return this.walletRepository.save(newWallet);

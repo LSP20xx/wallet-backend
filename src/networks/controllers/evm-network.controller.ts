@@ -1,5 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { TransactionDetails } from 'src/interfaces/ITransactionDetails';
+import { Controller, Get, Param } from '@nestjs/common';
 import { Web3Service } from 'src/web3/services/web3.service';
 import { TransactionReceipt } from 'web3';
 
@@ -14,20 +13,13 @@ export class EvmNetworkController {
   ): Promise<bigint> {
     return await this.web3Service.getBalance(chainId, address);
   }
+
   @Get(':chainId/transaction/:txHash')
   async getTransaction(
     @Param('chainId') chainId: string,
     @Param('txHash') txHash: string,
   ): Promise<any> {
     return await this.web3Service.getTransaction(chainId, txHash);
-  }
-
-  @Post(':chainId/send-transaction')
-  async sendTransaction(
-    @Param('chainId') chainId: string,
-    @Body() details: TransactionDetails,
-  ): Promise<string> {
-    return await this.web3Service.sendTransaction(chainId, details);
   }
 
   @Get(':chainId/gas-price')
