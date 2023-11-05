@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 import { WalletsEntity } from '../../wallets/entities/wallets.entity';
-import { TransactionEntity } from '../../transactions/entities/transactions.entity';
+import { TransactionEntity } from '../../transactions/entities/transaction.entity';
 import { EvmTokensEntity } from '../../tokens/entities/evm-tokens.entity';
 
 @Entity({ name: 'evm-networks' })

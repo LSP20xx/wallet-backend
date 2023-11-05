@@ -9,6 +9,12 @@ export class TransactionEntity extends BaseEntity {
   txHash: string;
 
   @Column()
+  from: string;
+
+  @Column()
+  to: string;
+
+  @Column()
   amount: number;
 
   @ManyToOne(() => WalletsEntity, (wallet) => wallet.transactions)

@@ -14,12 +14,14 @@ import { Web3Service } from '../../web3/services/web3.service';
 import { SendTransactionDto } from '../dto/send-transaction.dto';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { WalletsService } from '../services/wallets.service';
+import { TransactionsService } from '../../transactions/services/transaction.service';
 
 @Controller('evm-wallets')
 export class WalletsController {
   constructor(
     private readonly walletService: WalletsService,
     private readonly web3Service: Web3Service,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   @Get()
@@ -56,11 +58,22 @@ export class WalletsController {
         );
       }
 
-      return await this.web3Service.sendTransaction(
+      const txHash = await this.web3Service.sendTransaction(
         chainId,
         sendTransactionDto,
         sendTransactionDto.encryptedPrivateKey,
       );
+
+      const txData = {
+        txHash,
+        from: sendTransactionDto.from,
+        to: sendTransactionDto.to,
+        amount: sendTransactionDto.amount,
+      };
+
+      await this.transactionsService.saveTransaction(txData);
+
+      return txHash;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
