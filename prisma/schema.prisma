@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EvmNetwork {
+  id           Int            @id @default(autoincrement())
+  name         String
+  chainId      String
+  wallets      Wallet[]       @relation("WalletNetwork")
+  transactions Transaction[]  @relation("TransactionNetwork")
+  tokens       EvmToken[]     @relation("TokenNetwork")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("evm-networks")
+}
+
+model OneTimeToken {
+  id        Int      @id @default(autoincrement())
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("one_time_tokens")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], name: "UserSessions")
+  userId    Int
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model Sms {
+  id        String   @id @default(uuid())
+  to        String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sms")
+}
+
+model EvmToken {
+  id              Int            @id @default(autoincrement())
+  symbol          String
+  contractAddress String
+  wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
+  walletId        Int
+  network         EvmNetwork     @relation(fields: [networkId], references: [id], name: "TokenNetwork")
+  networkId       Int
+  transactions    Transaction[]  @relation("TokenTransactions")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("evm_tokens")
+}
+
+model TradeOrder {
+  id           String   @id @default(uuid())
+  seller       User     @relation("UserSellOrders", fields: [sellerId], references: [id])
+  sellerId     Int
+  buyer        User     @relation("UserBuyOrders", fields: [buyerId], references: [id])
+  buyerId      Int
+  balance      String
+  pricePerUnit String
+  currencyType Currency
+  tradeStatus  TradeStatus
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("trade_orders")
+}
+
+model Transaction {
+  id        Int        @id @default(autoincrement())
+  txHash    String
+  from      String
+  to        String
+  amount    Float
+  wallet    Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
+  walletId  Int
+  network   EvmNetwork @relation(fields: [networkId], references: [id], name: "TransactionNetwork")
+  networkId Int
+  evmToken  EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
+  evmTokenId Int?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("transactions")
+}
+
+model User {
+  id                Int           @id @default(autoincrement())
+  phoneNumber       String        @unique
+  encryptedPassword String
+  userRole          UserRole      @default(USER)
+  wallets           Wallet[]      @relation("UserWallets")
+  sellOrders        TradeOrder[]  @relation("UserSellOrders")
+  buyOrders         TradeOrder[]  @relation("UserBuyOrders")
+  sessions          Session[]     @relation("UserSessions")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("users")
+}
+
+model Wallet {
+  id                 Int          @id @default(autoincrement())
+  balance            String
+  address            String       @unique
+  encryptedPrivateKey String      @unique
+  user               User         @relation(fields: [userId], references: [id], name: "UserWallets")
+  userId             Int
+  network            EvmNetwork   @relation(fields: [networkId], references: [id], name: "WalletNetwork")
+  networkId          Int
+  transactions       Transaction[] @relation("WalletTransactions")
+  tokens             EvmToken[]    @relation("WalletTokens")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@map("wallets")
+}
+
+enum ConnectionStatus {
+  CONNECTED
+  DISCONNECTED
+}
+
+enum Currency {
+  Ethereum
+  BnbChain
+  Polygon
+  Avalanche
+  Fantom
+  Harmony
+  Elrond
+  Solana 
+  Bitcoin
+  Litecoin
+  Dogecoin
+}
+
+enum TradeStatus {
+  OPEN 
+  IN_PROGRESS 
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
