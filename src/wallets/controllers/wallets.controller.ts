@@ -36,7 +36,6 @@ export class WalletsController {
     return await this.walletService.findOne(id);
   }
 
-  // Crear un nuevo monedero
   @Post(':chainId')
   async createWallet(
     @Param('chainId') chainId: string,
@@ -48,6 +47,7 @@ export class WalletsController {
       createWalletDto.networkId,
     );
   }
+
   @Post(':chainId/send')
   @UseGuards(AuthGuard('jwt'))
   async send(
