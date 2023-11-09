@@ -22,13 +22,9 @@ export class WalletsService {
     });
   }
 
-  async createWallet(
-    chainId: string,
-    userId: string,
-    networkId: string,
-  ): Promise<Wallet> {
+  async createWallet(userId: string, networkId: string): Promise<Wallet> {
     const account = this.web3Service
-      .getWeb3Instance(chainId)
+      .getWeb3Instance(networkId)
       .eth.accounts.create();
     const encryptedPrivateKeyObject = this.encryptionService.encrypt(
       account.privateKey,

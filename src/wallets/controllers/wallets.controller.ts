@@ -1,23 +1,23 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   HttpException,
   HttpStatus,
   Param,
   Post,
-  Get,
   Put,
-  Delete,
   UseGuards,
 } from '@nestjs/common';
 
+import { AuthGuard } from '@nestjs/passport';
+import { Wallet } from '@prisma/client';
+import { GetUserIdFromSub } from 'src/users/decorators/get-user-id-from-sub.decorator';
+import { TransactionsService } from '../../transactions/services/transaction.service';
 import { Web3Service } from '../../web3/services/web3.service';
 import { SendTransactionDto } from '../dto/send-transaction.dto';
 import { WalletsService } from '../services/wallets.service';
-import { TransactionsService } from '../../transactions/services/transaction.service';
-import { AuthGuard } from '@nestjs/passport';
-import { Wallet } from '@prisma/client';
-import { CreateWalletDto } from '../dto/create-wallet.dto';
 
 @Controller('evm-wallets')
 export class WalletsController {
@@ -36,16 +36,13 @@ export class WalletsController {
     return await this.walletService.findOne(id);
   }
 
-  @Post(':chainId')
+  @Post(':networkId')
+  @UseGuards(AuthGuard('jwt'))
   async createWallet(
-    @Param('chainId') chainId: string,
-    @Body() createWalletDto: CreateWalletDto,
+    @Param('networkId') networkId: string,
+    @GetUserIdFromSub() userIdFromSub: string,
   ): Promise<Wallet> {
-    return await this.walletService.createWallet(
-      chainId,
-      createWalletDto.userId,
-      createWalletDto.networkId,
-    );
+    return await this.walletService.createWallet(userIdFromSub, networkId);
   }
 
   @Post(':chainId/send')
