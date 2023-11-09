@@ -9,4 +9,4 @@ import { EvmNetworkService } from './services/evm-network.service';
   exports: [EvmNetworkService],
   controllers: [EvmNetworkController],
 })
-export class NetworkModule {}
+export class EvmNetworkModule {}

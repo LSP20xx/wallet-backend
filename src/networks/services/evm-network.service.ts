@@ -2,13 +2,39 @@ import { Injectable } from '@nestjs/common';
 import { TransactionDetails } from 'src/interfaces/ITransactionDetails';
 import { TransactionReceipt } from 'web3';
 import { Web3Service } from '../../web3/services/web3.service';
+import { DatabaseService } from 'src/database/services/database/database.service';
 
 @Injectable()
 export class EvmNetworkService {
-  private web3Service: Web3Service;
-
-  constructor(web3Service: Web3Service) {
+  constructor(
+    private web3Service: Web3Service,
+    private databaseService: DatabaseService,
+  ) {
     this.web3Service = web3Service;
+  }
+
+  async syncEvmNetworks(): Promise<void> {
+    const networks = [
+      {
+        chainId: process.env.NETWORK_CHAIN_ID_1,
+        name: process.env.NETWORK_NAME_1,
+      },
+    ];
+
+    for (const network of networks) {
+      const existingNetwork = await this.databaseService.evmNetwork.findUnique({
+        where: { chainId: network.chainId },
+      });
+
+      if (!existingNetwork) {
+        await this.databaseService.evmNetwork.create({
+          data: {
+            name: network.name,
+            chainId: network.chainId,
+          },
+        });
+      }
+    }
   }
 
   async getBalance(chainId: string, address: string): Promise<bigint> {

@@ -10,7 +10,7 @@ datasource db {
 model EvmNetwork {
   id           String         @id @default(uuid())
   name         String
-  chainId      String
+  chainId      String         @unique
   wallets      Wallet[]       @relation("WalletNetwork")
   transactions Transaction[]  @relation("TransactionNetwork")
   tokens       EvmToken[]     @relation("TokenNetwork")
