@@ -2,7 +2,6 @@
 import Big from 'big.js';
 import { UsersEntity } from '../../users/entities/users.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Currency, TradeStatus } from '../../enums';
 
 @Entity()
 export class TradeOrdersEntity {
@@ -32,10 +31,10 @@ export class TradeOrdersEntity {
     },
   })
   pricePerUnit: Big;
-
+  /*
   @Column()
   currencyType: Currency;
 
   @Column()
-  tradeStatus: TradeStatus;
+  tradeStatus: TradeStatus;*/
 }

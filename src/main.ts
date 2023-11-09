@@ -13,6 +13,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
       transformOptions: {
         enableImplicitConversion: true,
       },

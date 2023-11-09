@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,7 @@ datasource db {
 }
 
 model EvmNetwork {
-  id           Int            @id @default(autoincrement())
+  id           String         @id @default(uuid())
   name         String
   chainId      String
   wallets      Wallet[]       @relation("WalletNetwork")
@@ -24,7 +21,7 @@ model EvmNetwork {
 }
 
 model OneTimeToken {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -35,7 +32,7 @@ model OneTimeToken {
 model Session {
   id        String   @id @default(uuid())
   user      User     @relation(fields: [userId], references: [id], name: "UserSessions")
-  userId    Int
+  userId    String
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,13 +51,13 @@ model Sms {
 }
 
 model EvmToken {
-  id              Int            @id @default(autoincrement())
+  id              String         @id @default(uuid())
   symbol          String
   contractAddress String
   wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
-  walletId        Int
+  walletId        String
   network         EvmNetwork     @relation(fields: [networkId], references: [id], name: "TokenNetwork")
-  networkId       Int
+  networkId       String
   transactions    Transaction[]  @relation("TokenTransactions")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -71,9 +68,9 @@ model EvmToken {
 model TradeOrder {
   id           String   @id @default(uuid())
   seller       User     @relation("UserSellOrders", fields: [sellerId], references: [id])
-  sellerId     Int
+  sellerId     String
   buyer        User     @relation("UserBuyOrders", fields: [buyerId], references: [id])
-  buyerId      Int
+  buyerId      String
   balance      String
   pricePerUnit String
   currencyType Currency
@@ -85,17 +82,17 @@ model TradeOrder {
 }
 
 model Transaction {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(uuid())
   txHash    String
   from      String
   to        String
   amount    Float
   wallet    Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
-  walletId  Int
+  walletId  String
   network   EvmNetwork @relation(fields: [networkId], references: [id], name: "TransactionNetwork")
-  networkId Int
+  networkId String
   evmToken  EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
-  evmTokenId Int?
+  evmTokenId String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -103,8 +100,9 @@ model Transaction {
 }
 
 model User {
-  id                Int           @id @default(autoincrement())
-  phoneNumber       String        @unique
+  id                String        @id @default(uuid())
+  email             String?       @unique
+  phoneNumber       String?       @unique
   encryptedPassword String
   userRole          UserRole      @default(USER)
   wallets           Wallet[]      @relation("UserWallets")
@@ -118,14 +116,14 @@ model User {
 }
 
 model Wallet {
-  id                 Int          @id @default(autoincrement())
+  id                 String       @id @default(uuid())
   balance            String
   address            String       @unique
   encryptedPrivateKey String      @unique
   user               User         @relation(fields: [userId], references: [id], name: "UserWallets")
-  userId             Int
+  userId             String
   network            EvmNetwork   @relation(fields: [networkId], references: [id], name: "WalletNetwork")
-  networkId          Int
+  networkId          String
   transactions       Transaction[] @relation("WalletTransactions")
   tokens             EvmToken[]    @relation("WalletTokens")
   createdAt          DateTime      @default(now())

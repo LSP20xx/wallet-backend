@@ -8,6 +8,7 @@ import {
   Get,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 
 import { Web3Service } from '../../web3/services/web3.service';
@@ -15,6 +16,7 @@ import { SendTransactionDto } from '../dto/send-transaction.dto';
 import { WalletsEntity } from '../entities/wallets.entity';
 import { WalletsService } from '../services/wallets.service';
 import { TransactionsService } from '../../transactions/services/transaction.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('evm-wallets')
 export class WalletsController {
@@ -40,6 +42,7 @@ export class WalletsController {
   }
 
   @Post(':chainId/send')
+  @UseGuards(AuthGuard('jwt'))
   async send(
     @Param('chainId') chainId: string,
     @Body() sendTransactionDto: SendTransactionDto,

@@ -27,8 +27,6 @@ export class EncryptionsService {
   }
 
   decrypt(encryptedCode: string): string {
-    console.log('encryptedCode', encryptedCode);
-
     const [encrypted, ivHex] = encryptedCode.split(':');
 
     const iv = Buffer.from(ivHex, 'hex');
@@ -39,7 +37,6 @@ export class EncryptionsService {
 
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    console.log('decrypted', decrypted);
     return decrypted;
   }
 }

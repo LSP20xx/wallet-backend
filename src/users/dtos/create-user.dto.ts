@@ -4,7 +4,6 @@ import {
   IsNumberString,
   Length,
 } from 'class-validator';
-import { UserRole } from '../../enums/user-role.enum';
 
 export class CreateUserDTO {
   @IsNotEmpty()
@@ -18,6 +17,6 @@ export class CreateUserDTO {
   @IsNumberString()
   @Length(6, 6)
   smsCode?: string;
-
-  userRole?: UserRole;
+  /*
+  userRole?: UserRole;*/
 }
