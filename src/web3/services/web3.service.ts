@@ -126,11 +126,8 @@ export class Web3Service {
     encryptedPrivateKey: string,
   ): boolean {
     try {
-      console.log('Starting to unlock wallet');
-
       const privateKey = this.encryptionService.decrypt(encryptedPrivateKey);
       const web3 = this.getWeb3Instance(chainId);
-      console.log('privateKey', privateKey);
 
       const account = web3.eth.accounts.privateKeyToAccount(privateKey);
       if (account.address.toLowerCase() !== address.toLowerCase()) {
