@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as Twilio from 'twilio';
-import { Repository } from 'typeorm';
-import { SmsEntity } from '../entities/sms.entity';
 import { SMS_VERIFICATION_MESSAGE } from '../../constants/sms-verification-message';
+import { Sms } from '@prisma/client';
+import { DatabaseService } from 'src/database/services/database/database.service';
 
 @Injectable()
 export class SmsService {
   private client: Twilio.Twilio;
 
-  constructor(
-    @InjectRepository(SmsEntity)
-    private smsRepository: Repository<SmsEntity>,
-  ) {
+  constructor(private databaseService: DatabaseService) {
     this.client = Twilio(
       process.env.TWILIO_ACCOUNT_SID,
       process.env.TWILIO_AUTH_TOKEN,
@@ -31,24 +27,18 @@ export class SmsService {
     });
   }
 
-  async createSMSRecord(
-    to: string,
-    code: string,
-  ): Promise<{ smsRecord: SmsEntity }> {
-    const smsRecord = this.smsRepository.create({ to, code });
-    return { smsRecord };
-  }
-  async saveSMSRecord(smsRecord: SmsEntity): Promise<SmsEntity> {
-    return this.smsRepository.save(smsRecord);
+  async createSMSRecord(to: string, code: string): Promise<{ smsRecord: Sms }> {
+    return {
+      smsRecord: await this.databaseService.sms.create({
+        data: { to, code },
+      }),
+    };
   }
 
-  async findLatestSMSByPhoneNumber(
-    phoneNumber: string,
-  ): Promise<SmsEntity | undefined> {
-    return this.smsRepository
-      .createQueryBuilder('sms')
-      .where('sms.to = :phoneNumber', { phoneNumber })
-      .orderBy('sms.created_at', 'DESC')
-      .getOne();
+  async findLatestSMSByPhoneNumber(phoneNumber: string): Promise<Sms | null> {
+    return this.databaseService.sms.findFirst({
+      where: { to: phoneNumber },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

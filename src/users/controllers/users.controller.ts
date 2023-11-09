@@ -1,42 +1,27 @@
-// user.controller.ts
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, Put, Delete, Body, Param } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import { UsersEntity } from '../entities/users.entity';
-import { FindOneOptions } from 'typeorm';
+import { User } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Get()
-  findAll(): Promise<UsersEntity[]> {
+  findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
-  @Post()
-  create(@Body() user: UsersEntity): Promise<UsersEntity> {
-    return this.userService.create(user);
-  }
-
   @Get(':id')
-  findOne(@Param() options: FindOneOptions<UsersEntity>): Promise<UsersEntity> {
-    return this.userService.findOne(options);
+  findOne(@Param('id') id: string): Promise<User | null> {
+    return this.userService.findOne(id);
   }
 
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() user: UsersEntity,
-  ): Promise<UsersEntity> {
-    return this.userService.update(id, user);
+    @Body() updateUserDto: Partial<User>,
+  ): Promise<User> {
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

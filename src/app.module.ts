@@ -8,9 +8,7 @@ import { WalletsModule } from './wallets/wallets.module';
 import { TradeOrdersModule } from './trade-orders/trade-orders.module';
 import { SmsModule } from './sms/sms.module';
 import { VerificationsModule } from './verifications/verifications.module';
-import { OneTimeTokenModule } from './one-time-tokens/one-time-token.module';
 import { EncryptionsModule } from './encryptions/encryptions.module';
-import { SessionModule } from './session/sessions.module';
 import { NetworkModule } from './networks/network.module';
 import { TokensModule } from './tokens/tokens.module';
 import { Web3Module } from './web3/web3.module';
@@ -31,8 +29,6 @@ import { AuthModule } from './auth/auth.module';
     SmsModule,
     VerificationsModule,
     EncryptionsModule,
-    OneTimeTokenModule,
-    SessionModule,
     NetworkModule,
     TokensModule,
     Web3Module,

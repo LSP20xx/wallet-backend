@@ -13,10 +13,11 @@ import {
 
 import { Web3Service } from '../../web3/services/web3.service';
 import { SendTransactionDto } from '../dto/send-transaction.dto';
-import { WalletsEntity } from '../entities/wallets.entity';
 import { WalletsService } from '../services/wallets.service';
 import { TransactionsService } from '../../transactions/services/transaction.service';
 import { AuthGuard } from '@nestjs/passport';
+import { Wallet } from '@prisma/client';
+import { CreateWalletDto } from '../dto/create-wallet.dto';
 
 @Controller('evm-wallets')
 export class WalletsController {
@@ -27,20 +28,26 @@ export class WalletsController {
   ) {}
 
   @Get()
-  findAll(): Promise<WalletsEntity[]> {
+  findAll(): Promise<Wallet[]> {
     return this.walletService.findAll();
   }
-
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<WalletsEntity> {
-    return this.walletService.findOne({ where: { id } });
+  async findOne(@Param('id') id: string): Promise<Wallet | null> {
+    return await this.walletService.findOne(id);
   }
 
+  // Crear un nuevo monedero
   @Post(':chainId')
-  createWallet(@Param('chainId') chainId: string): Promise<WalletsEntity> {
-    return this.walletService.createWallet(chainId);
+  async createWallet(
+    @Param('chainId') chainId: string,
+    @Body() createWalletDto: CreateWalletDto,
+  ): Promise<Wallet> {
+    return await this.walletService.createWallet(
+      chainId,
+      createWalletDto.userId,
+      createWalletDto.networkId,
+    );
   }
-
   @Post(':chainId/send')
   @UseGuards(AuthGuard('jwt'))
   async send(
@@ -83,10 +90,7 @@ export class WalletsController {
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() wallet: WalletsEntity,
-  ): Promise<WalletsEntity> {
+  update(@Param('id') id: string, @Body() wallet: Wallet): Promise<Wallet> {
     return this.walletService.update(id, wallet);
   }
 

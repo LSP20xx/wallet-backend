@@ -1,38 +1,41 @@
 // tradeOrder.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
-import { TradeOrdersEntity } from '../entities/trade-orders.entity';
+import { Prisma, TradeOrder } from '@prisma/client';
+import { DatabaseService } from 'src/database/services/database/database.service';
 
 @Injectable()
 export class TradeOrdersService {
-  constructor(
-    @InjectRepository(TradeOrdersEntity)
-    private tradeOrdersRepository: Repository<TradeOrdersEntity>,
-  ) {}
+  constructor(private databaseService: DatabaseService) {}
 
-  findAll(): Promise<TradeOrdersEntity[]> {
-    return this.tradeOrdersRepository.find();
+  findAll(): Promise<TradeOrder[]> {
+    return this.databaseService.tradeOrder.findMany();
   }
 
-  findOne(
-    options: FindOneOptions<TradeOrdersEntity>,
-  ): Promise<TradeOrdersEntity | undefined> {
-    return this.tradeOrdersRepository.findOne(options);
+  findOne(id: string): Promise<TradeOrder | null> {
+    return this.databaseService.tradeOrder.findUnique({
+      where: { id },
+    });
   }
 
-  create(tradeOrder: TradeOrdersEntity): Promise<TradeOrdersEntity> {
-    return this.tradeOrdersRepository.save(tradeOrder);
+  create(tradeOrderData: Prisma.TradeOrderCreateInput): Promise<TradeOrder> {
+    return this.databaseService.tradeOrder.create({
+      data: tradeOrderData,
+    });
   }
 
   update(
     id: string,
-    tradeOrder: TradeOrdersEntity,
-  ): Promise<TradeOrdersEntity> {
-    return this.tradeOrdersRepository.save({ ...tradeOrder, orderID: id });
+    tradeOrderData: Prisma.TradeOrderUpdateInput,
+  ): Promise<TradeOrder> {
+    return this.databaseService.tradeOrder.update({
+      where: { id },
+      data: tradeOrderData,
+    });
   }
 
   async remove(id: string): Promise<void> {
-    await this.tradeOrdersRepository.delete(id);
+    await this.databaseService.tradeOrder.delete({
+      where: { id },
+    });
   }
 }

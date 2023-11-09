@@ -1,36 +1,32 @@
 // user.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
-import { UsersEntity } from '../entities/users.entity';
-import { CreateUserDTO } from '../dtos/create-user.dto';
+import { DatabaseService } from 'src/database/services/database/database.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(UsersEntity)
-    private readonly userRepository: Repository<UsersEntity>,
-  ) {}
+  constructor(private databaseService: DatabaseService) {}
 
-  public async findAll(): Promise<UsersEntity[]> {
-    return this.userRepository.find();
+  public async findAll(): Promise<User[]> {
+    return this.databaseService.user.findMany();
   }
 
-  public async findOne(
-    options: FindOneOptions<UsersEntity>,
-  ): Promise<UsersEntity | undefined> {
-    return this.userRepository.findOne(options);
+  public async findOne(userId: string): Promise<User | null> {
+    return this.databaseService.user.findUnique({
+      where: { id: userId },
+    });
   }
 
-  public async create(createUser: CreateUserDTO): Promise<UsersEntity> {
-    return this.userRepository.save(createUser);
-  }
-
-  public async update(id: string, user: UsersEntity): Promise<UsersEntity> {
-    return this.userRepository.save({ ...user, userID: id });
+  public async update(id: string, userData: Partial<User>): Promise<User> {
+    return this.databaseService.user.update({
+      where: { id },
+      data: userData,
+    });
   }
 
   public async remove(id: string): Promise<void> {
-    await this.userRepository.delete(id);
+    await this.databaseService.user.delete({
+      where: { id },
+    });
   }
 }

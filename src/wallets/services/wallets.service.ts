@@ -1,31 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { WalletsEntity } from '../entities/wallets.entity';
-import { FindOneOptions } from 'typeorm';
-import { Web3Service } from 'src/web3/services/web3.service';
+import { Wallet } from '@prisma/client';
+import { DatabaseService } from 'src/database/services/database/database.service';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
+import { Web3Service } from 'src/web3/services/web3.service';
 
 @Injectable()
 export class WalletsService {
   constructor(
-    @InjectRepository(WalletsEntity)
-    private walletRepository: Repository<WalletsEntity>,
     private web3Service: Web3Service,
     private encryptionService: EncryptionsService,
+    private databaseService: DatabaseService,
   ) {}
 
-  async findAll(): Promise<WalletsEntity[]> {
-    return this.walletRepository.find();
+  async findAll(): Promise<Wallet[]> {
+    return this.databaseService.wallet.findMany();
   }
 
-  async findOne(
-    options: FindOneOptions<WalletsEntity>,
-  ): Promise<WalletsEntity> {
-    return this.walletRepository.findOne(options);
+  async findOne(id: string): Promise<Wallet | null> {
+    return this.databaseService.wallet.findUnique({
+      where: { id },
+    });
   }
 
-  async createWallet(chainId: string): Promise<WalletsEntity> {
+  async createWallet(
+    chainId: string,
+    userId: string,
+    networkId: string,
+  ): Promise<Wallet> {
     const account = this.web3Service
       .getWeb3Instance(chainId)
       .eth.accounts.create();
@@ -35,19 +36,27 @@ export class WalletsService {
 
     const encryptedPrivateKey = `${encryptedPrivateKeyObject.encryptedData}:${encryptedPrivateKeyObject.iv}`;
 
-    const newWallet = this.walletRepository.create({
-      address: account.address,
-      encryptedPrivateKey: encryptedPrivateKey,
+    return this.databaseService.wallet.create({
+      data: {
+        address: account.address,
+        encryptedPrivateKey: encryptedPrivateKey,
+        balance: '0',
+        user: { connect: { id: userId } },
+        network: { connect: { id: networkId } },
+      },
     });
-
-    return this.walletRepository.save(newWallet);
   }
 
-  async update(id: string, wallet: WalletsEntity): Promise<WalletsEntity> {
-    return this.walletRepository.save({ ...wallet, walletID: id });
+  async update(id: string, walletData: Partial<Wallet>): Promise<Wallet> {
+    return this.databaseService.wallet.update({
+      where: { id },
+      data: walletData,
+    });
   }
 
   async remove(id: string): Promise<void> {
-    await this.walletRepository.delete(id);
+    await this.databaseService.wallet.delete({
+      where: { id },
+    });
   }
 }

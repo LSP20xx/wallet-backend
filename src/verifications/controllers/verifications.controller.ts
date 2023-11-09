@@ -32,12 +32,11 @@ export class VerificationController {
 
     const { encryptedData } = this.encryptionsService.encrypt(code);
 
-    const { smsRecord } = await this.smsService.createSMSRecord(
+    await this.smsService.createSMSRecord(
       sendVerificationDto.to,
       encryptedData,
     );
 
-    await this.smsService.saveSMSRecord(smsRecord);
     return {
       smsResult,
     };
