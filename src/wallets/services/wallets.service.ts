@@ -26,7 +26,6 @@ export class WalletsService {
     const chain = await this.databaseService.evmChain.findUnique({
       where: { chainId: chainId },
     });
-    console.log(chain);
 
     const account = this.web3Service
       .getWeb3Instance(chainId)

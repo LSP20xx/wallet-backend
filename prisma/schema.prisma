@@ -56,7 +56,7 @@ model EvmToken {
   contractAddress String
   wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String
-  chain           EvmChain     @relation(fields: [chainId], references: [id], name: "TokenChain")
+  chain           EvmChain       @relation(fields: [chainId], references: [id], name: "TokenChain")
   chainId         String
   transactions    Transaction[]  @relation("TokenTransactions")
   createdAt       DateTime       @default(now())
@@ -66,17 +66,17 @@ model EvmToken {
 }
 
 model TradeOrder {
-  id           String   @id @default(uuid())
-  seller       User     @relation("UserSellOrders", fields: [sellerId], references: [id])
+  id           String      @id @default(uuid())
+  seller       User        @relation("UserSellOrders", fields: [sellerId], references: [id])
   sellerId     String
-  buyer        User     @relation("UserBuyOrders", fields: [buyerId], references: [id])
+  buyer        User        @relation("UserBuyOrders", fields: [buyerId], references: [id])
   buyerId      String
   balance      String
   pricePerUnit String
   currencyType Currency
   tradeStatus  TradeStatus
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@map("trade_orders")
 }
@@ -89,7 +89,7 @@ model Transaction {
   amount     Float
   wallet     Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
   walletId   String
-  chain      EvmChain @relation(fields: [chainId], references: [id], name: "TransactionChain")
+  chain      EvmChain   @relation(fields: [chainId], references: [id], name: "TransactionChain")
   chainId    String
   evmToken   EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
   evmTokenId String?
@@ -116,18 +116,18 @@ model User {
 }
 
 model Wallet {
-  id                 String       @id @default(uuid())
-  balance            String
-  address            String       @unique
-  encryptedPrivateKey String      @unique
-  user               User         @relation(fields: [userId], references: [id], name: "UserWallets")
-  userId             String
-  chain            EvmChain   @relation(fields: [chainId], references: [id], name: "WalletChain")
-  chainId          String
-  transactions       Transaction[] @relation("WalletTransactions")
-  tokens             EvmToken[]    @relation("WalletTokens")
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  id                  String        @id @default(uuid())
+  balance             String
+  address             String        @unique
+  encryptedPrivateKey String        @unique
+  user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
+  userId              String
+  chain               EvmChain      @relation(fields: [chainId], references: [id], name: "WalletChain")
+  chainId             String
+  transactions        Transaction[] @relation("WalletTransactions")
+  tokens              EvmToken[]    @relation("WalletTokens")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
   @@map("wallets")
 }
