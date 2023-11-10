@@ -30,23 +30,23 @@ export class EvmChainSubgraphConfigService {
         file: ./schema.graphql
       dataSources:
         - kind: ethereum/contract
-          name: ContractName
+          name: ERC20Token
           network: ${chain.name}
           source:
             address: "<contract-address>"
-            abi: ContractABI
+            abi: ERC20
           mapping:
             kind: ethereum/events
             apiVersion: 0.0.5
             language: wasm/assemblyscript
             entities:
-              - EntityName
+              - Transfer
             abis:
-              - name: ContractABI
-                file: ./abis/ContractABI.json
+              - name: ERC20
+                file: ./abis/ERC20.json
             eventHandlers:
-              - event: EventName(params)
-                handler: handleEventName
+              - event: Transfer(address,address,uint256)
+                handler: handleTransfer
             file: ./src/mapping.ts
     `;
   }
