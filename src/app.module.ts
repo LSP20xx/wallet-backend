@@ -9,7 +9,7 @@ import { TradeOrdersModule } from './trade-orders/trade-orders.module';
 import { SmsModule } from './sms/sms.module';
 import { VerificationsModule } from './verifications/verifications.module';
 import { EncryptionsModule } from './encryptions/encryptions.module';
-import { EvmNetworkModule } from './networks/evm-network.module';
+import { EvmChainModule } from './networks/evm-chain.module';
 import { TokensModule } from './tokens/tokens.module';
 import { Web3Module } from './web3/web3.module';
 import { TransactionsModule } from './transactions/transaction.module';
@@ -29,7 +29,7 @@ import { AuthModule } from './auth/auth.module';
     SmsModule,
     VerificationsModule,
     EncryptionsModule,
-    EvmNetworkModule,
+    EvmChainModule,
     TokensModule,
     Web3Module,
     TransactionsModule,

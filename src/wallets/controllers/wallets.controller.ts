@@ -36,13 +36,13 @@ export class WalletsController {
     return await this.walletService.findOne(id);
   }
 
-  @Post(':networkId')
+  @Post(':chainId')
   @UseGuards(AuthGuard('jwt'))
   async createWallet(
-    @Param('networkId') networkId: string,
+    @Param('chainId') chainId: string,
     @GetUserIdFromSub() userIdFromSub: string,
   ): Promise<Wallet> {
-    return await this.walletService.createWallet(userIdFromSub, networkId);
+    return await this.walletService.createWallet(userIdFromSub, chainId);
   }
 
   @Post(':chainId/send')

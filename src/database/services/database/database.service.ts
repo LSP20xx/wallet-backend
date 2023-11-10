@@ -1,14 +1,10 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
-import { EvmNetworkService } from 'src/networks/services/evm-network.service';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit {
-  constructor(
-    configService: ConfigService,
-    private evmNetworkService: EvmNetworkService,
-  ) {
+export class DatabaseService extends PrismaClient {
+  constructor(configService: ConfigService) {
     super({
       datasources: {
         db: {
@@ -16,8 +12,5 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
         },
       },
     });
-  }
-  async onModuleInit(): Promise<void> {
-    await this.evmNetworkService.syncEvmNetworks();
   }
 }

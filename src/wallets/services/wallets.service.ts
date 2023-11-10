@@ -22,9 +22,14 @@ export class WalletsService {
     });
   }
 
-  async createWallet(userId: string, networkId: string): Promise<Wallet> {
+  async createWallet(userId: string, chainId: string): Promise<Wallet> {
+    const chain = await this.databaseService.evmChain.findUnique({
+      where: { chainId: chainId },
+    });
+    console.log(chain);
+
     const account = this.web3Service
-      .getWeb3Instance(networkId)
+      .getWeb3Instance(chainId)
       .eth.accounts.create();
     const encryptedPrivateKeyObject = this.encryptionService.encrypt(
       account.privateKey,
@@ -38,7 +43,7 @@ export class WalletsService {
         encryptedPrivateKey: encryptedPrivateKey,
         balance: '0',
         user: { connect: { id: userId } },
-        network: { connect: { id: networkId } },
+        chain: { connect: { id: chain.id } },
       },
     });
   }

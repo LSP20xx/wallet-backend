@@ -7,17 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model EvmNetwork {
+model EvmChain {
   id           String         @id @default(uuid())
   name         String
   chainId      String         @unique
-  wallets      Wallet[]       @relation("WalletNetwork")
-  transactions Transaction[]  @relation("TransactionNetwork")
-  tokens       EvmToken[]     @relation("TokenNetwork")
+  wallets      Wallet[]       @relation("WalletChain")
+  transactions Transaction[]  @relation("TransactionChain")
+  tokens       EvmToken[]     @relation("TokenChain")
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  @@map("evm-networks")
+  @@map("evm-chains")
 }
 
 model OneTimeToken {
@@ -56,8 +56,8 @@ model EvmToken {
   contractAddress String
   wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String
-  network         EvmNetwork     @relation(fields: [networkId], references: [id], name: "TokenNetwork")
-  networkId       String
+  chain           EvmChain     @relation(fields: [chainId], references: [id], name: "TokenChain")
+  chainId         String
   transactions    Transaction[]  @relation("TokenTransactions")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -82,19 +82,19 @@ model TradeOrder {
 }
 
 model Transaction {
-  id        String     @id @default(uuid())
-  txHash    String
-  from      String
-  to        String
-  amount    Float
-  wallet    Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
-  walletId  String
-  network   EvmNetwork @relation(fields: [networkId], references: [id], name: "TransactionNetwork")
-  networkId String
-  evmToken  EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
+  id         String     @id @default(uuid())
+  txHash     String
+  from       String
+  to         String
+  amount     Float
+  wallet     Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
+  walletId   String
+  chain      EvmChain @relation(fields: [chainId], references: [id], name: "TransactionChain")
+  chainId    String
+  evmToken   EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
   evmTokenId String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("transactions")
 }
@@ -122,8 +122,8 @@ model Wallet {
   encryptedPrivateKey String      @unique
   user               User         @relation(fields: [userId], references: [id], name: "UserWallets")
   userId             String
-  network            EvmNetwork   @relation(fields: [networkId], references: [id], name: "WalletNetwork")
-  networkId          String
+  chain            EvmChain   @relation(fields: [chainId], references: [id], name: "WalletChain")
+  chainId          String
   transactions       Transaction[] @relation("WalletTransactions")
   tokens             EvmToken[]    @relation("WalletTokens")
   createdAt          DateTime      @default(now())

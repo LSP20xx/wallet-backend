@@ -2,8 +2,8 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { Web3Service } from 'src/web3/services/web3.service';
 import { TransactionReceipt } from 'web3';
 
-@Controller('evm-network')
-export class EvmNetworkController {
+@Controller('evm-chain')
+export class EvmChainController {
   constructor(private readonly web3Service: Web3Service) {}
 
   @Get(':chainId/balance/:address')
