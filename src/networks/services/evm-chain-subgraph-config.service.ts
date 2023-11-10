@@ -47,7 +47,7 @@ export class EvmChainSubgraphConfigService {
             eventHandlers:
               - event: Transfer(address,address,uint256)
                 handler: handleTransfer
-            file: ./src/mapping.ts
+            file: ./mapping.ts
     `;
   }
 }
