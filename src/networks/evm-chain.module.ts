@@ -25,7 +25,7 @@ export class EvmChainModule implements OnModuleInit {
       .get('ALLOWED_CHAINS_IDS')
       .split(',');
 
-    const networkData = allowedChains.map((chainId) => {
+    const networkData = allowedChains.map((chainId: string) => {
       const networkNameEnvVar = `CHAIN_${chainId}_NAME`;
       const networkName = this.configService.get(networkNameEnvVar);
 
