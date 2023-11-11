@@ -4,10 +4,16 @@ import { Web3Module } from '../web3/web3.module';
 import { EvmChainController } from './controllers/evm-chain.controller';
 import { EvmChainService } from './services/evm-chain.service';
 import { ConfigService } from '@nestjs/config';
+import { EvmChainConfigService } from './services/evm-chain-config.service';
+import { EvmChainSubgraphConfigService } from './services/evm-chain-subgraph-config.service';
 
 @Module({
   imports: [Web3Module],
-  providers: [EvmChainService],
+  providers: [
+    EvmChainService,
+    EvmChainConfigService,
+    EvmChainSubgraphConfigService,
+  ],
   exports: [EvmChainService],
   controllers: [EvmChainController],
 })
@@ -15,9 +21,12 @@ export class EvmChainModule implements OnModuleInit {
   constructor(
     private readonly databaseService: DatabaseService,
     private configService: ConfigService,
+    private evmChainSubgraphConfigService: EvmChainSubgraphConfigService,
   ) {}
   async onModuleInit(): Promise<void> {
     await this.syncEvmChains();
+    await this.evmChainSubgraphConfigService.generateSubgraphConfigs();
+    console.log('EVM Chain Module Initialized');
   }
 
   async syncEvmChains(): Promise<void> {

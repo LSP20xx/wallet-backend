@@ -11,7 +11,7 @@ export class EvmChainSubgraphConfigService {
     private configService: ConfigService,
   ) {}
 
-  generateSubgraphConfigs() {
+  async generateSubgraphConfigs() {
     const chains = this.chainConfigService.allowedChains;
     chains.forEach((chain) => {
       const configContent = this.createYamlConfigForChain(chain);
