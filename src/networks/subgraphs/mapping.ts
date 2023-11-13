@@ -1,5 +1,4 @@
-import { Transfer } from '../generated/ERC20Token/ERC20Token';
-import { TransferEntity } from '../generated/schema';
+import { Transfer } from 'generated/schema';
 
 export function handleTransfer(event: Transfer): void {
   const entity = new TransferEntity(event.transaction.hash.toHex());

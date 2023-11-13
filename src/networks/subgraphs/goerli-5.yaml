@@ -13,12 +13,12 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
-      file: ./src/networks/subgraphs/mapping.ts
+      file: ./mapping.ts
       entities:
         - Transfer
       abis:
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
-        - event: Transfer(address,address,uint256)
+        - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
