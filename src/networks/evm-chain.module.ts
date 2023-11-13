@@ -6,11 +6,12 @@ import { DatabaseService } from 'src/database/services/database/database.service
 import { Web3Module } from '../web3/web3.module';
 import { EvmChainController } from './controllers/evm-chain.controller';
 import { EvmChainService } from './services/evm-chain.service';
+import { GraphQueryService } from './services/graph-query.service';
 
 @Module({
   imports: [Web3Module],
-  providers: [EvmChainService],
-  exports: [EvmChainService],
+  providers: [EvmChainService, GraphQueryService],
+  exports: [EvmChainService, GraphQueryService],
   controllers: [EvmChainController],
 })
 export class EvmChainModule implements OnModuleInit {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Wallet } from '@prisma/client';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
+import { GraphQueryService } from 'src/networks/services/graph-query.service';
 import { Web3Service } from 'src/web3/services/web3.service';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class WalletsService {
     private web3Service: Web3Service,
     private encryptionService: EncryptionsService,
     private databaseService: DatabaseService,
+    private graphQueryService: GraphQueryService,
   ) {}
 
   async findAll(): Promise<Wallet[]> {
@@ -20,6 +22,32 @@ export class WalletsService {
     return this.databaseService.wallet.findUnique({
       where: { id },
     });
+  }
+
+  async findAllByChainId(chainId: string): Promise<Wallet[]> {
+    return this.databaseService.wallet.findMany({
+      where: { chain: { chainId } },
+    });
+  }
+
+  async getTransfersForChain(chainId: string) {
+    const wallets = await this.findAllByChainId(chainId);
+
+    const addresses = wallets.map((wallet) => wallet.address);
+
+    const graphqlQuery = `{
+      transfers(where: {from_in: ${JSON.stringify(
+        addresses,
+      )}, to_in: ${JSON.stringify(addresses)}}) {
+        id
+        from
+        to
+        value
+      }
+    }`;
+    const result = await this.graphQueryService.querySubgraph(graphqlQuery);
+
+    return result;
   }
 
   async createWallet(userId: string, chainId: string): Promise<Wallet> {

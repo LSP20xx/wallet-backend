@@ -1,24 +1,26 @@
-specVersion: 0.0.2
-description: Subgraph for mainnet
-schema:
-  file: ./schema.graphql
-dataSources:
-  - kind: ethereum/contract
-    name: ERC20Token
-    network: mainnet
-    source:
-      address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-      abi: ERC20
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./mapping.ts
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(address,address,uint256)
-          handler: handleTransfer
+
+      specVersion: 0.0.2
+      description: Subgraph for mainnet
+      schema:
+        file: ./schema.graphql
+      dataSources: 
+      - kind: ethereum/contract
+        name: ERC20Token
+        network: mainnet
+        source:
+          address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+          abi: ERC20
+        mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.5
+          language: wasm/assemblyscript
+          entities:
+            - Transfer
+          abis:
+            - name: ERC20
+              file: ./abis/ERC20.json
+          eventHandlers:
+            - event: Transfer(address,address,uint256)
+              handler: handleTransfer
+    
+    

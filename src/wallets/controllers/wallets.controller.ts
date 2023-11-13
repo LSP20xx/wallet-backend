@@ -86,6 +86,16 @@ export class WalletsController {
     }
   }
 
+  @Get(':chainId/transfers')
+  async getTransfersForChain(@Param('chainId') chainId: string) {
+    try {
+      const transfers = await this.walletService.getTransfersForChain(chainId);
+      return transfers;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Put(':id')
   update(@Param('id') id: string, @Body() wallet: Wallet): Promise<Wallet> {
     return this.walletService.update(id, wallet);
