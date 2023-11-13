@@ -1,5 +1,5 @@
-import { Transfer as TransferEvent } from 'generated/ERC20Token/ERC20';
-import { Transfer } from 'generated/schema';
+import { Transfer as TransferEvent } from './generated/ERC20Token/ERC20';
+import { Transfer } from './generated/schema';
 
 export function handleTransfer(event: TransferEvent): void {
   const id = event.transaction.hash.toHex() + '-' + event.logIndex.toString();
