@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { Web3Module } from '../web3/web3.module';
 import { EvmChainController } from './controllers/evm-chain.controller';
@@ -58,10 +58,11 @@ export class EvmChainModule implements OnModuleInit {
   }
   async generateSubgraphConfigs() {
     const chains = this.networkData;
+    const basePath = resolve(__dirname, '../../src/networks/subgraphs');
     chains.forEach((chain) => {
       const configContent = this.createYamlConfigForChain(chain);
       writeFileSync(
-        join(__dirname, `../subgraphs/${chain.name}_${chain.chainId}.yaml`),
+        join(basePath, `${chain.name}-${chain.chainId}.yaml`),
         configContent,
       );
     });

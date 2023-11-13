@@ -26,9 +26,13 @@
     "prisma:dev:deploy": "prisma migrate deploy",
     "db:dev:rm": "docker-compose rm -s -f -v billete_pg",
     "db:dev:up": "docker-compose up -d billete_pg",
-    "db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && npm run prisma:dev:deploy"
+    "db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && npm run prisma:dev:deploy",
+    "generate-deploy-scripts": "node src/utils/generateGraphDeployScripts.js",
+    "deploy:subgraph:goerli-5": "graph deploy --studio 0x2d83—EC0B66/goerli-5 C:\\Users\\lsper\\Desktop\\Backend\\billete\\src\\networks\\subgraphs\\goerli-5.yaml",
+    "deploy:subgraph:mainnet-1": "graph deploy --studio 0x2d83—EC0B66/mainnet-1 C:\\Users\\lsper\\Desktop\\Backend\\billete\\src\\networks\\subgraphs\\mainnet-1.yaml"
   },
   "dependencies": {
+    "@graphprotocol/graph-ts": "^0.31.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
