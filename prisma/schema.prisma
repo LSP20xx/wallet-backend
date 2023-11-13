@@ -122,13 +122,14 @@ model Wallet {
   encryptedPrivateKey String        @unique
   user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
   userId              String
-  chain               EvmChain      @relation(fields: [chainId], references: [id], name: "WalletChain")
-  chainId             String
+  chain               EvmChain?     @relation(fields: [chainId], references: [id], name: "WalletChain")
+  chainId             String?
   transactions        Transaction[] @relation("WalletTransactions")
   tokens              EvmToken[]    @relation("WalletTokens")
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-
+  chainType           ChainType       
+  additionalData      Json?         
   @@map("wallets")
 }
 
@@ -167,4 +168,11 @@ enum TransactionStatus {
 enum UserRole {
   ADMIN
   USER
+}
+
+enum ChainType {
+  EVM
+  BTC
+  LTC
+  DOGE
 }

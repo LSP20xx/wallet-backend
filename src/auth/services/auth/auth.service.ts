@@ -6,7 +6,8 @@ import { hash, verify } from 'argon2';
 import { AuthDTO } from 'src/auth/dtos/auth.dto';
 import { SignTokenDTO } from 'src/auth/dtos/sign-token.dto';
 import { DatabaseService } from 'src/database/services/database/database.service';
-import { WalletsService } from 'src/wallets/services/evm-wallet.service';
+import { BitcoinWalletService } from 'src/wallets/services/bitcoin-wallet.service';
+import { EvmWalletService } from 'src/wallets/services/evm-wallet.service';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,8 @@ export class AuthService {
     private databaseService: DatabaseService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private walletsService: WalletsService,
+    private evmWalletService: EvmWalletService,
+    private bitcoinWalletService: BitcoinWalletService,
   ) {}
 
   async signUpUser(
@@ -40,8 +42,10 @@ export class AuthService {
         .split(',');
 
       for (const chainId of allowedChains) {
-        await this.walletsService.createWallet(user.id, chainId);
+        await this.evmWalletService.createWallet(user.id, chainId);
       }
+
+      await this.bitcoinWalletService.createWallet('testnet');
 
       return {
         userId: user.id,

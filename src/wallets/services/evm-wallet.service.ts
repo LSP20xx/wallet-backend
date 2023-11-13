@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Wallet } from '@prisma/client';
+import { Wallet, ChainType } from '@prisma/client';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { GraphQueryService } from 'src/networks/services/graph-query.service';
 import { Web3Service } from 'src/web3/services/web3.service';
 
 @Injectable()
-export class WalletsService {
+export class EvmWalletService {
   constructor(
     private web3Service: Web3Service,
     private encryptionService: EncryptionsService,
@@ -71,6 +71,7 @@ export class WalletsService {
         balance: '0',
         user: { connect: { id: userId } },
         chain: { connect: { id: chain.id } },
+        chainType: ChainType.EVM,
       },
     });
   }
