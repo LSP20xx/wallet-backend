@@ -17,7 +17,7 @@ import { GetUserIdFromSub } from 'src/users/decorators/get-user-id-from-sub.deco
 import { TransactionsService } from '../../transactions/services/transaction.service';
 import { Web3Service } from '../../web3/services/web3.service';
 import { SendTransactionDto } from '../dto/send-transaction.dto';
-import { WalletsService } from '../services/wallets.service';
+import { WalletsService } from '../services/evm-wallet.service';
 
 @Controller('evm-wallets')
 export class WalletsController {

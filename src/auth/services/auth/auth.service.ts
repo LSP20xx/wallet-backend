@@ -6,7 +6,7 @@ import { hash, verify } from 'argon2';
 import { AuthDTO } from 'src/auth/dtos/auth.dto';
 import { SignTokenDTO } from 'src/auth/dtos/sign-token.dto';
 import { DatabaseService } from 'src/database/services/database/database.service';
-import { WalletsService } from 'src/wallets/services/wallets.service';
+import { WalletsService } from 'src/wallets/services/evm-wallet.service';
 
 @Injectable()
 export class AuthService {
