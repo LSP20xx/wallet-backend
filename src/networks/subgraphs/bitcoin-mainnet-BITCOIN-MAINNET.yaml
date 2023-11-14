@@ -1,7 +1,0 @@
-
-      specVersion: 0.0.2
-      description: Subgraph for bitcoin-mainnet
-      schema:
-        file: ./schema.graphql
-      dataSources: 
-    

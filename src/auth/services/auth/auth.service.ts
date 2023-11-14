@@ -6,7 +6,7 @@ import { hash, verify } from 'argon2';
 import { AuthDTO } from 'src/auth/dtos/auth.dto';
 import { SignTokenDTO } from 'src/auth/dtos/sign-token.dto';
 import { DatabaseService } from 'src/database/services/database/database.service';
-import { BitcoinWalletService } from 'src/wallets/services/bitcoin-wallet.service';
+import { UtxoWalletService } from 'src/wallets/services/utxo-wallet.service';
 import { EvmWalletService } from 'src/wallets/services/evm-wallet.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private evmWalletService: EvmWalletService,
-    private bitcoinWalletService: BitcoinWalletService,
+    private utxoWalletService: UtxoWalletService,
   ) {}
 
   async signUpUser(
@@ -45,8 +45,12 @@ export class AuthService {
         await this.evmWalletService.createWallet(user.id, chainId);
       }
 
-      await this.bitcoinWalletService.createWallet(user.id, 'mainnet');
-      await this.bitcoinWalletService.createWallet(user.id, 'testnet');
+      await this.utxoWalletService.createWallet(user.id, 'bitcoin', 'mainnet');
+      await this.utxoWalletService.createWallet(user.id, 'bitcoin', 'testnet');
+      await this.utxoWalletService.createWallet(user.id, 'litecoin', 'mainnet');
+      await this.utxoWalletService.createWallet(user.id, 'litecoin', 'testnet');
+      await this.utxoWalletService.createWallet(user.id, 'dogecoin', 'mainnet');
+      await this.utxoWalletService.createWallet(user.id, 'dogecoin', 'testnet');
       return {
         userId: user.id,
         token: await this.signToken({

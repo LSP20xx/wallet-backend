@@ -16,7 +16,11 @@ import { GraphQueryService } from './services/graph-query.service';
 })
 export class BlockchainModule implements OnModuleInit {
   private allowedChains: string[] = [];
-  private networkData: { name: any; chainId: string }[] = [];
+  private networkData: {
+    name: any;
+    chainId: string;
+    isEvmCompatible: boolean;
+  }[] = [];
 
   constructor(
     private readonly databaseService: DatabaseService,
@@ -35,20 +39,28 @@ export class BlockchainModule implements OnModuleInit {
     this.networkData = this.allowedChains.map((chainId: string) => {
       const networkNameEnvVar = `CHAIN_${chainId}_NAME`;
       const networkName = this.configService.get(networkNameEnvVar);
-
       return {
         chainId: chainId.trim(),
         name: networkName || `Unknown Network for Chain ID ${chainId}`,
+        isEvmCompatible: true,
       };
     });
 
-    const bitcoinNetworks = ['bitcoin-mainnet', 'bitcoin-testnet'];
-    for (const network of bitcoinNetworks) {
-      this.networkData.push({
-        name: network,
-        chainId: network.toUpperCase(),
+    const coinNetworks = {
+      bitcoin: ['bitcoin-mainnet', 'bitcoin-testnet'],
+      litecoin: ['litecoin-mainnet', 'litecoin-testnet'],
+      dogecoin: ['dogecoin-mainnet', 'dogecoin-testnet'],
+    };
+
+    Object.values(coinNetworks).forEach((networks) => {
+      networks.forEach((network) => {
+        this.networkData.push({
+          name: network,
+          chainId: network.toUpperCase(),
+          isEvmCompatible: false,
+        });
       });
-    }
+    });
 
     for (const network of this.networkData) {
       const existingNetwork = await this.databaseService.blockchain.findUnique({
@@ -65,15 +77,19 @@ export class BlockchainModule implements OnModuleInit {
       }
     }
   }
+
   async generateSubgraphConfigs() {
     const chains = this.networkData;
     const basePath = resolve(__dirname, '../../src/networks/subgraphs');
+
     chains.forEach((chain) => {
-      const configContent = this.createYamlConfigForChain(chain);
-      writeFileSync(
-        join(basePath, `${chain.name}-${chain.chainId}.yaml`),
-        configContent,
-      );
+      if (chain.isEvmCompatible) {
+        const configContent = this.createYamlConfigForChain(chain);
+        writeFileSync(
+          join(basePath, `${chain.name}-${chain.chainId}.yaml`),
+          configContent,
+        );
+      }
     });
   }
 
