@@ -76,7 +76,7 @@ export class EvmWalletService {
         user: { connect: { id: userId } },
         blockchain: { connect: { id: blockchain.id } },
         chainType: ChainType.EVM,
-        network: chainId === '1!' ? Network.MAINNET : Network.TESTNET,
+        network: chainId === '5' ? Network.TESTNET : Network.MAINNET,
       },
     });
   }

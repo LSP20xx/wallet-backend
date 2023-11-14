@@ -16,7 +16,7 @@ import { GraphQueryService } from './services/graph-query.service';
 })
 export class BlockchainModule implements OnModuleInit {
   private allowedChains: string[] = [];
-  private networkData: { name: any; chainId?: string }[] = [];
+  private networkData: { name: any; chainId: string }[] = [];
 
   constructor(
     private readonly databaseService: DatabaseService,
@@ -46,7 +46,7 @@ export class BlockchainModule implements OnModuleInit {
     for (const network of bitcoinNetworks) {
       this.networkData.push({
         name: network,
-        chainId: '',
+        chainId: network.toUpperCase(),
       });
     }
 
@@ -79,7 +79,7 @@ export class BlockchainModule implements OnModuleInit {
 
   private createYamlConfigForChain(chain: {
     name: any;
-    chainId?: string;
+    chainId: string;
   }): string {
     const contractAddresses =
       this.configService
