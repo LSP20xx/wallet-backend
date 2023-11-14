@@ -2,6 +2,6 @@
 
 import { Wallet } from '@prisma/client';
 
-export interface IBitcoinWalletService {
+export interface IUtxoWalletService {
   createWallet(userId: string, network: string): Promise<Wallet>;
 }

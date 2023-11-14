@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { IBitcoinWalletService } from '../../interfaces/IBitcoinWalletService';
+import { IUtxoWalletService } from '../../interfaces/IUtxoWalletService';
 import { PrivateKey, Networks } from 'bitcore-lib';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { ChainType, Network, Wallet } from '@prisma/client';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 
 @Injectable()
-export class BitcoinWalletService implements IBitcoinWalletService {
+export class BitcoinWalletService implements IUtxoWalletService {
   constructor(
     private databaseService: DatabaseService,
     private encryptionService: EncryptionsService,
