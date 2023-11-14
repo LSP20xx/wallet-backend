@@ -43,12 +43,12 @@ export class EvmChainModule implements OnModuleInit {
     });
 
     for (const network of this.networkData) {
-      const existingNetwork = await this.databaseService.evmChain.findUnique({
+      const existingNetwork = await this.databaseService.blockchain.findUnique({
         where: { chainId: network.chainId },
       });
 
       if (!existingNetwork) {
-        await this.databaseService.evmChain.create({
+        await this.databaseService.blockchain.create({
           data: {
             name: network.name,
             chainId: network.chainId,

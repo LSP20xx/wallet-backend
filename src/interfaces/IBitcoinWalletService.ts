@@ -1,7 +1,7 @@
 // src/interfaces/IBitcoinWalletService.ts
 
+import { Wallet } from '@prisma/client';
+
 export interface IBitcoinWalletService {
-  createWallet(
-    network: string,
-  ): Promise<{ address: string; privateKey: string }>;
+  createWallet(userId: string, network: string): Promise<Wallet>;
 }

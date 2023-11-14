@@ -51,7 +51,7 @@ export class EvmWalletService {
   }
 
   async createWallet(userId: string, chainId: string): Promise<Wallet> {
-    const chain = await this.databaseService.evmChain.findUnique({
+    const chain = await this.databaseService.blockchain.findUnique({
       where: { chainId: chainId },
     });
 

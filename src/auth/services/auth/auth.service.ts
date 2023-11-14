@@ -45,8 +45,8 @@ export class AuthService {
         await this.evmWalletService.createWallet(user.id, chainId);
       }
 
-      await this.bitcoinWalletService.createWallet('testnet');
-
+      await this.bitcoinWalletService.createWallet(user.id, 'mainnet');
+      await this.bitcoinWalletService.createWallet(user.id, 'testnet');
       return {
         userId: user.id,
         token: await this.signToken({

@@ -7,78 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model EvmChain {
+model Blockchain {
   id           String         @id @default(uuid())
   name         String
   chainId      String         @unique
   wallets      Wallet[]       @relation("WalletChain")
   transactions Transaction[]  @relation("TransactionChain")
-  tokens       EvmToken[]     @relation("TokenChain")
+  tokens       Token[]        @relation("TokenChain")
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  @@map("evm-chains")
+  @@map("blockchains")
 }
 
-model OneTimeToken {
-  id        String   @id @default(uuid())
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("one_time_tokens")
+model Wallet {
+  id                  String        @id @default(uuid())
+  balance             String
+  address             String        @unique
+  encryptedPrivateKey String        @unique
+  user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
+  userId              String
+  chainType           ChainType
+  network             Network
+  additionalData      Json?         
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  blockchain          Blockchain?   @relation(fields: [blockchainId], references: [id], name: "WalletChain")
+  blockchainId        String?
+  transactions        Transaction[] @relation("WalletTransactions")
+  tokens              Token[]       @relation("WalletTokens")
+  @@map("wallets")
 }
 
-model Session {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id], name: "UserSessions")
-  userId    String
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("sessions")
-}
-
-model Sms {
-  id        String   @id @default(uuid())
-  to        String
-  code      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("sms")
-}
-
-model EvmToken {
+model Token {
   id              String         @id @default(uuid())
   symbol          String
-  contractAddress String
+  contractAddress String?
   wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String
-  chain           EvmChain       @relation(fields: [chainId], references: [id], name: "TokenChain")
-  chainId         String
+  chainType       ChainType
+  network         Network
   transactions    Transaction[]  @relation("TokenTransactions")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-
-  @@map("evm_tokens")
-}
-
-model TradeOrder {
-  id           String      @id @default(uuid())
-  seller       User        @relation("UserSellOrders", fields: [sellerId], references: [id])
-  sellerId     String
-  buyer        User        @relation("UserBuyOrders", fields: [buyerId], references: [id])
-  buyerId      String
-  balance      String
-  pricePerUnit String
-  currencyType Currency
-  tradeStatus  TradeStatus
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  @@map("trade_orders")
+  blockchain      Blockchain?    @relation(fields: [blockchainId], references: [id], name: "TokenChain")
+  blockchainId    String?
+  @@map("tokens")
 }
 
 model Transaction {
@@ -89,13 +63,15 @@ model Transaction {
   amount     Float
   wallet     Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
   walletId   String
-  chain      EvmChain   @relation(fields: [chainId], references: [id], name: "TransactionChain")
-  chainId    String
-  evmToken   EvmToken?  @relation(fields: [evmTokenId], references: [id], name: "TokenTransactions")
-  evmTokenId String?
+  chainType  ChainType
+  network    Network
+  status     TransactionStatus
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-
+  blockchain Blockchain? @relation(fields: [blockchainId], references: [id], name: "TransactionChain")
+  blockchainId String?
+  token      Token?     @relation(fields: [tokenId], references: [id], name: "TokenTransactions")
+  tokenId    String?
   @@map("transactions")
 }
 
@@ -115,22 +91,42 @@ model User {
   @@map("users")
 }
 
-model Wallet {
-  id                  String        @id @default(uuid())
-  balance             String
-  address             String        @unique
-  encryptedPrivateKey String        @unique
-  user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
-  userId              String
-  chain               EvmChain?     @relation(fields: [chainId], references: [id], name: "WalletChain")
-  chainId             String?
-  transactions        Transaction[] @relation("WalletTransactions")
-  tokens              EvmToken[]    @relation("WalletTokens")
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  chainType           ChainType       
-  additionalData      Json?         
-  @@map("wallets")
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], name: "UserSessions")
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+
+model Sms {
+  id        String   @id @default(uuid())
+  to        String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sms")
+}
+
+model TradeOrder {
+  id           String      @id @default(uuid())
+  seller       User        @relation("UserSellOrders", fields: [sellerId], references: [id])
+  sellerId     String
+  buyer        User        @relation("UserBuyOrders", fields: [buyerId], references: [id])
+  buyerId      String
+  balance      String
+  pricePerUnit String
+  currencyType Currency
+  tradeStatus  TradeStatus
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("trade_orders")
 }
 
 enum ConnectionStatus {
@@ -175,4 +171,9 @@ enum ChainType {
   BTC
   LTC
   DOGE
+}
+
+enum Network {
+  MAINNET
+  TESTNET
 }
