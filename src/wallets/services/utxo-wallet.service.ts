@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ChainType, Network, Wallet } from '@prisma/client';
-import { networks, payments } from 'bitcoinjs-lib';
-import { ECPairFactory } from 'ecpair';
+import { networks, payments, Psbt } from 'bitcoinjs-lib';
+import { ECPairFactory, ECPairInterface } from 'ecpair';
 import * as tinysecp from 'tiny-secp256k1';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { IUtxoWalletService } from '../../interfaces/IUtxoWalletService';
+import { TransactionsService } from 'src/transactions/services/transaction.service';
 
 @Injectable()
 export class UtxoWalletService implements IUtxoWalletService {
-  ECPair = ECPairFactory(tinysecp);
+  private ECPair = ECPairFactory(tinysecp);
   constructor(
     private databaseService: DatabaseService,
     private encryptionService: EncryptionsService,
+    private transactionsService: TransactionsService,
   ) {}
 
   private getNetworksConfig(coinType: string, networkType: string) {
@@ -122,5 +124,91 @@ export class UtxoWalletService implements IUtxoWalletService {
         network: networkType === 'mainnet' ? Network.MAINNET : Network.TESTNET,
       },
     });
+  }
+
+  async unlockWallet(
+    encryptedPrivateKey: string,
+    netConfig: any,
+  ): Promise<ECPairInterface | null> {
+    try {
+      const decryptedPrivateKey =
+        this.encryptionService.decrypt(encryptedPrivateKey);
+      const keyPair = this.ECPair.fromWIF(decryptedPrivateKey, netConfig);
+      return keyPair;
+    } catch (error) {
+      console.error('Error al desbloquear la wallet:', error);
+      return null;
+    }
+  }
+
+  async sendTransaction(
+    coinType: string,
+    networkType: string,
+    fromAddress: string,
+    toAddress: string,
+    amount: number,
+    encryptedPrivateKey: string,
+    utxos: { txId: string; index: number; value: number }[],
+  ): Promise<string> {
+    const netConfig = this.getNetworksConfig(coinType, networkType);
+
+    if (!netConfig) {
+      throw new Error(
+        `Configuración de red no encontrada para ${coinType} en ${networkType}`,
+      );
+    }
+
+    const decryptedPrivateKey =
+      this.encryptionService.decrypt(encryptedPrivateKey);
+    const keyPair = this.ECPair.fromWIF(decryptedPrivateKey, netConfig);
+
+    const psbt = new Psbt({ network: netConfig });
+    let totalUtxoValue = 0;
+    utxos.forEach((utxo) => {
+      psbt.addInput({
+        hash: utxo.txId,
+        index: utxo.index,
+      });
+      totalUtxoValue += utxo.value;
+    });
+
+    const estimatedTxSize = utxos.length * 180 + 2 * 34 + 10;
+    const fee = await this.getTransactionFee(coinType, estimatedTxSize);
+
+    psbt.addOutput({
+      address: toAddress,
+      value: amount,
+    });
+
+    const change = totalUtxoValue - amount - fee;
+    if (change > 0) {
+      psbt.addOutput({ address: fromAddress, value: change });
+    }
+
+    psbt.signAllInputs(keyPair);
+    psbt.finalizeAllInputs();
+    const txHex = psbt.extractTransaction().toHex();
+
+    const txData = {
+      txHash: txHex,
+      from: fromAddress,
+      to: toAddress,
+      amount: amount,
+    };
+    await this.transactionsService.saveTransaction(txData);
+
+    return txHex;
+  }
+
+  async getTransactionFee(coinType: string, txSizeInBytes: number) {
+    const url = `https://api.blockcypher.com/v1/${coinType}/main`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const feePerKb = data.medium_fee_per_kb;
+    const feePerByte = feePerKb / 1024;
+    const totalFee = feePerByte * txSizeInBytes;
+
+    return totalFee;
   }
 }
