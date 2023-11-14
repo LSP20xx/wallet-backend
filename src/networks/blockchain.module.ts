@@ -14,20 +14,20 @@ import { GraphQueryService } from './services/graph-query.service';
   exports: [EvmChainService, GraphQueryService],
   controllers: [EvmChainController],
 })
-export class EvmChainModule implements OnModuleInit {
+export class BlockchainModule implements OnModuleInit {
   private allowedChains: string[] = [];
-  private networkData: { chainId: string; name: any }[] = [];
+  private networkData: { name: any; chainId?: string }[] = [];
 
   constructor(
     private readonly databaseService: DatabaseService,
     private configService: ConfigService,
   ) {}
   async onModuleInit(): Promise<void> {
-    await this.syncEvmChains();
+    await this.syncBlockchains();
     await this.generateSubgraphConfigs();
   }
 
-  async syncEvmChains(): Promise<void> {
+  async syncBlockchains(): Promise<void> {
     this.allowedChains = this.configService
       .get('ALLOWED_CHAINS_IDS')
       .split(',');
@@ -41,6 +41,14 @@ export class EvmChainModule implements OnModuleInit {
         name: networkName || `Unknown Network for Chain ID ${chainId}`,
       };
     });
+
+    const bitcoinNetworks = ['bitcoin-mainnet', 'bitcoin-testnet'];
+    for (const network of bitcoinNetworks) {
+      this.networkData.push({
+        name: network,
+        chainId: '',
+      });
+    }
 
     for (const network of this.networkData) {
       const existingNetwork = await this.databaseService.blockchain.findUnique({
@@ -70,8 +78,8 @@ export class EvmChainModule implements OnModuleInit {
   }
 
   private createYamlConfigForChain(chain: {
-    chainId: string;
     name: any;
+    chainId?: string;
   }): string {
     const contractAddresses =
       this.configService

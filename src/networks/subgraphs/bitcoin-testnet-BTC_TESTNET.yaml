@@ -1,0 +1,7 @@
+
+      specVersion: 0.0.2
+      description: Subgraph for bitcoin-testnet
+      schema:
+        file: ./schema.graphql
+      dataSources: 
+    

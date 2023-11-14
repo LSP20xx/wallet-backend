@@ -1,15 +1,18 @@
-import { Body, Controller, Get } from '@nestjs/common';
+import { Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { BitcoinWalletService } from '../services/bitcoin-wallet.service';
+import { GetUserIdFromSub } from 'src/users/decorators/get-user-id-from-sub.decorator';
 
 @Controller('bitcoin-wallet')
 export class BitcoinWalletController {
   constructor(private readonly bitcoinWalletService: BitcoinWalletService) {}
 
-  @Get('create')
+  @Post('create/:network')
+  @UseGuards(AuthGuard('jwt'))
   async createWallet(
-    @Body('userId') userId: string,
-    @Body('network') network: string,
+    @Param('network') network: string,
+    @GetUserIdFromSub() userIdFromSub: string,
   ) {
-    return await this.bitcoinWalletService.createWallet(userId, network);
+    return await this.bitcoinWalletService.createWallet(userIdFromSub, network);
   }
 }

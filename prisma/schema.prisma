@@ -10,7 +10,7 @@ datasource db {
 model Blockchain {
   id           String         @id @default(uuid())
   name         String
-  chainId      String         @unique
+  chainId      String?        @unique
   wallets      Wallet[]       @relation("WalletChain")
   transactions Transaction[]  @relation("TransactionChain")
   tokens       Token[]        @relation("TokenChain")

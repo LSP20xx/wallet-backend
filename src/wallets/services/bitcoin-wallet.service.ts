@@ -17,7 +17,6 @@ export class BitcoinWalletService implements IBitcoinWalletService {
     const privateKey = new PrivateKey(null, net);
     const address = privateKey.toAddress();
 
-    // Encrypt the private key
     const encryptedPrivateKeyObject = this.encryptionService.encrypt(
       privateKey.toString(),
     );

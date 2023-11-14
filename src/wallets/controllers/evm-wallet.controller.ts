@@ -36,7 +36,7 @@ export class EvmWalletController {
     return await this.walletService.findOne(id);
   }
 
-  @Post(':chainId')
+  @Post('create/:chainId')
   @UseGuards(AuthGuard('jwt'))
   async createWallet(
     @Param('chainId') chainId: string,
