@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Wallet, ChainType } from '@prisma/client';
+import { Wallet, ChainType, Network } from '@prisma/client';
 import { DatabaseService } from 'src/database/services/database/database.service';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { GraphQueryService } from 'src/networks/services/graph-query.service';
@@ -26,7 +26,7 @@ export class EvmWalletService {
 
   async findAllByChainId(chainId: string): Promise<Wallet[]> {
     return this.databaseService.wallet.findMany({
-      where: { chain: { chainId } },
+      where: { blockchain: { chainId } },
     });
   }
 
@@ -51,9 +51,13 @@ export class EvmWalletService {
   }
 
   async createWallet(userId: string, chainId: string): Promise<Wallet> {
-    const chain = await this.databaseService.blockchain.findUnique({
+    const blockchain = await this.databaseService.blockchain.findUnique({
       where: { chainId: chainId },
     });
+
+    if (!blockchain) {
+      throw new Error('Blockchain not found');
+    }
 
     const account = this.web3Service
       .getWeb3Instance(chainId)
@@ -70,8 +74,9 @@ export class EvmWalletService {
         encryptedPrivateKey: encryptedPrivateKey,
         balance: '0',
         user: { connect: { id: userId } },
-        chain: { connect: { id: chain.id } },
+        blockchain: { connect: { id: blockchain.id } },
         chainType: ChainType.EVM,
+        network: chainId === '1!' ? Network.MAINNET : Network.TESTNET,
       },
     });
   }
