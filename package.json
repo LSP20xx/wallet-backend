@@ -27,6 +27,9 @@
     "db:dev:rm": "docker-compose rm -s -f -v billete_pg",
     "db:dev:up": "docker-compose up -d billete_pg",
     "db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && npm run prisma:dev:deploy",
+    "redis:dev:rm": "docker-compose rm -s -f -v billete_redis",
+    "redis:dev:up": "docker-compose up -d billete_redis",
+    "redis:dev:restart": "npm run redis:dev:rm && npm run redis:dev:up",
     "generate-deploy-scripts": "node src/utils/generateGraphDeployScripts.js",
     "deploy:subgraph:goerli-5": "graph deploy --studio goerli-5 C:\\Users\\lsper\\Desktop\\Backend\\billete\\src\\networks\\subgraphs\\goerli-5.yaml",
     "deploy:subgraph:mainnet-1": "graph deploy --studio mainnet-1 C:\\Users\\lsper\\Desktop\\Backend\\billete\\src\\networks\\subgraphs\\mainnet-1.yaml"

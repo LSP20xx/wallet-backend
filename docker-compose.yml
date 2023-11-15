@@ -13,12 +13,18 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:5432
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
+    networks:
+      - billete
+  billete_redis:
+    image: redis:alpine
+    container_name: billete_redis
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@root.com
-      PGADMIN_DEFAULT_PASSWORD: root
     ports:
-      - 5050:80
+      - 6379:6379
+    volumes:
+      - ./redis/data:/data
+    networks:
+      - billete
+networks:
+  billete:
+    driver: bridge
