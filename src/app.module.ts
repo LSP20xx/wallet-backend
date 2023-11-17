@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq/dist/bull.module';
 import { AuthModule } from './auth/auth.module';
 import { DataSourceConfig } from './config/data.source';
 import { DatabaseModule } from './database/database.module';
@@ -32,6 +33,12 @@ import { Web3Module } from './web3/web3.module';
     }),
     DatabaseModule,
     TypeOrmModule.forRoot({ ...DataSourceConfig }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+      },
+    }),
     UsersModule,
     WalletsModule,
     TradeOrdersModule,

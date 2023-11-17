@@ -6,7 +6,7 @@ const { Web3 } = require('web3');
 require('dotenv').config({ path: `${appRoot}/config/.env` });
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const privateKey = process.env.GENERATOR_PRIVATE_KEY;
+const privateKey = process.env.ETH_GENERATOR_PRIVATE_KEY;
 
 class GeneratorFactory {
   constructor(rpc) {
@@ -18,10 +18,10 @@ class GeneratorFactory {
     );
   }
 
-  async generate() {
+  async generate(address) {
     const contract = await GeneratorFactoryContract(this.web3.currentProvider);
-    return await contract.generate({
-      from: process.env.GENERATOR_ADDRESS,
+    return await contract.generateWallet({
+      from: address,
     });
   }
 }

@@ -14,7 +14,7 @@ contract WalletContract {
       emit Deposited();
     }
   }
-
+  
   receive() external payable {
     forward();
   }

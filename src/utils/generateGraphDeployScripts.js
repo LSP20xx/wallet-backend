@@ -22,12 +22,11 @@ fs.readdir(subgraphsDir, (err, files) => {
 
   const scripts = yamlFiles.reduce((acc, file) => {
     const subgraphName = path.basename(file, '.yaml');
-    acc[
-      `deploy:subgraph:${subgraphName}`
-    ] = `graph deploy --studio 0x2d83—EC0B66/${subgraphName} ${path.join(
-      subgraphsDir,
-      file,
-    )}`;
+    acc[`deploy:subgraph:${subgraphName}`] =
+      `graph deploy --studio 0x2d83—EC0B66/${subgraphName} ${path.join(
+        subgraphsDir,
+        file,
+      )}`;
     return acc;
   }, {});
 

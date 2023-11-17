@@ -11,13 +11,15 @@ const blockchainId = process.argv[3] || '5';
 const chainType = process.argv[4] || 'EVM';
 const network = process.argv[5] || 'TESTNET';
 
-const { rpc } = require(`${appRoot}/config/chains/${blockchainId}`);
-const generatorFactory = new GeneratorFactory(rpc, []);
+const { rpc, g_address, g_address_pk } = require(
+  `${appRoot}/config/chains/${blockchainId}`,
+);
+const generatorFactory = new GeneratorFactory(rpc, [g_address_pk]);
 
 async function generateAndSaveWallets() {
   while (amount > 0) {
     console.log('Generating wallet... ', 'Remain: ', amount - 1);
-    const res = await generatorFactory.generate();
+    const res = await generatorFactory.generate(g_address);
     const result = JSON.parse(
       JSON.stringify(res.logs[0].args).replace('Result', '').trim(),
     );
@@ -33,7 +35,7 @@ async function generateAndSaveWallets() {
     });
 
     amount--;
-    await sleep(3000);
+    await sleep(5000);
   }
 }
 

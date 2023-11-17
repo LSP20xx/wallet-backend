@@ -4,6 +4,9 @@ import { DatabaseService } from 'src/database/services/database/database.service
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { GraphQueryService } from 'src/networks/services/graph-query.service';
 import { Web3Service } from 'src/web3/services/web3.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import QueueType from '../queue/types.queue';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class EvmWalletService {
@@ -12,6 +15,7 @@ export class EvmWalletService {
     private encryptionService: EncryptionsService,
     private databaseService: DatabaseService,
     private graphQueryService: GraphQueryService,
+    @InjectQueue(QueueType.WITHDRAW_REQUEST) private withdrawQueue: Queue,
   ) {}
 
   async findAll(): Promise<Wallet[]> {
@@ -92,5 +96,21 @@ export class EvmWalletService {
     await this.databaseService.wallet.delete({
       where: { id },
     });
+  }
+
+  async withdraw(
+    transactionId: string,
+    walletId: string,
+    amount: string,
+    toAddress: string,
+  ) {
+    const withdrawRequest = await this.withdrawQueue.add('request', {
+      transactionId,
+      walletId,
+      amount,
+      toAddress,
+    });
+
+    return withdrawRequest.asJSON();
   }
 }
