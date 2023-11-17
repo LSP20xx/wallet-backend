@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const appRoot = require('app-root-path');
 const GeneratorFactoryContract = require('../contracts/abis/GeneratorFactoryContract');
-const Web3 = require('web3');
+const { Web3 } = require('web3');
 
 require('dotenv').config({ path: `${appRoot}/config/.env` });
 

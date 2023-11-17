@@ -13,7 +13,7 @@ module.exports = (walletAddress, privateKeys, network_id, url) => {
         providerOrUrl: url,
       }),
     from: walletAddress,
-    gas: 5000000,
+    gas: 500000,
     confirmations: 4,
     timeoutBlocks: 10000,
   };

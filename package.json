@@ -47,6 +47,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/throttler": "^5.0.1",
     "@nestjs/typeorm": "^10.0.0",
+    "@truffle/contract": "^4.6.31",
     "@truffle/hdwallet-provider": "^2.1.15",
     "@types/bitcoinjs-lib": "^5.0.0",
     "app-root-path": "^3.1.0",

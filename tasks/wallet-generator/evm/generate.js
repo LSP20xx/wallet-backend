@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const appRoot = require('app-root-path');
 require('dotenv').config({ path: `${appRoot}/config/.env` });
-const { sleep } = require('../../../utils/lock');
+const { sleep } = require(`${appRoot}/config/utils/lock`);
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const GeneratorFactory = require('./factories/generatorFactory');
@@ -11,7 +11,7 @@ const blockchainId = process.argv[3] || '5';
 const chainType = process.argv[4] || 'EVM';
 const network = process.argv[5] || 'TESTNET';
 
-const { rpc } = require(`${appRoot}/config/chains/${network}`);
+const { rpc } = require(`${appRoot}/config/chains/${blockchainId}`);
 const generatorFactory = new GeneratorFactory(rpc, []);
 
 async function generateAndSaveWallets() {
