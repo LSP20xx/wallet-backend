@@ -1,0 +1,878 @@
+{
+  "contractName": "GeneratorFactoryContract",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "name": "WalletGenerated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "generateWallet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"WalletGenerated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"generateWallet\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/GeneratorFactoryContract.sol\":\"GeneratorFactoryContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/GeneratorFactoryContract.sol\":{\"keccak256\":\"0x577de0304e2e6a4676f8a1e81134182dce0956d51a81df5a9455e1179ed12a39\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b0619b5ffa6b7f9c05cb0a730ff7766ecce162f36f6d9b94ae41df0049caf4e7\",\"dweb:/ipfs/QmSECYfA92826xjC1tn895V5gRb7M4TTdD6LMjumEw8aat\"]},\"project:/contracts/WalletContract.sol\":{\"keccak256\":\"0xbfa0468e0f6fb9aca3b8c4bffcd105bdd9e7cdb90f2032f478fae498094143cb\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e5c98bfccf54c2c719a1422a84561b4b13956e0bcb68accee288c34d8d96639a\",\"dweb:/ipfs/QmUVrGXXxACzVJdZKYV9dGRKAuNPBn5ep6DyoRu981e425\"]}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b50336080526080516102ba61002f6000396000604501526102ba6000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c806339392ec614610030575b600080fd5b61003861003a565b005b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146100c25760405162461bcd60e51b815260206004820152602360248201527f4f6e6c7920746865206f776e65722063616e2067656e65726174652077616c6c60448201526265747360e81b606482015260840160405180910390fd5b60006040516100d090610127565b604051809103906000f0801580156100ec573d6000803e3d6000fd5b506040519091506001600160a01b038216907ffafd07415b3087fafb527aa8504fed621d09005ed8c59e270595d81b99989f4f90600090a250565b610150806101358339019056fe608060405234801561001057600080fd5b50610130806100206000396000f3fe608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fe78c52703146d72c70116227b622aeda4563a85894645e22555019045701d8d990600090a1505b56fea264697066735822122063a0f8597c0d4a84a42fa6f3d0a3755b2d8a4b78faec08ef828773f7147f67bc64736f6c63430008110033a264697066735822122085c264810f81222a97d7227e99c3e42eb4c35999386177f4bface4ebdb63a4d664736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c806339392ec614610030575b600080fd5b61003861003a565b005b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146100c25760405162461bcd60e51b815260206004820152602360248201527f4f6e6c7920746865206f776e65722063616e2067656e65726174652077616c6c60448201526265747360e81b606482015260840160405180910390fd5b60006040516100d090610127565b604051809103906000f0801580156100ec573d6000803e3d6000fd5b506040519091506001600160a01b038216907ffafd07415b3087fafb527aa8504fed621d09005ed8c59e270595d81b99989f4f90600090a250565b610150806101358339019056fe608060405234801561001057600080fd5b50610130806100206000396000f3fe608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fe78c52703146d72c70116227b622aeda4563a85894645e22555019045701d8d990600090a1505b56fea264697066735822122063a0f8597c0d4a84a42fa6f3d0a3755b2d8a4b78faec08ef828773f7147f67bc64736f6c63430008110033a264697066735822122085c264810f81222a97d7227e99c3e42eb4c35999386177f4bface4ebdb63a4d664736f6c63430008110033",
+  "immutableReferences": {
+    "4": [
+      {
+        "length": 32,
+        "start": 69
+      }
+    ]
+  },
+  "generatedSources": [],
+  "deployedGeneratedSources": [
+    {
+      "ast": {
+        "nodeType": "YulBlock",
+        "src": "0:415:4",
+        "statements": [
+          {
+            "nodeType": "YulBlock",
+            "src": "6:3:4",
+            "statements": []
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "188:225:4",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "205:9:4"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "216:2:4",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "198:6:4"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "198:21:4"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "198:21:4"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "239:9:4"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "250:2:4",
+                            "type": "",
+                            "value": "32"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "235:3:4"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "235:18:4"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "255:2:4",
+                        "type": "",
+                        "value": "35"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "228:6:4"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "228:30:4"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "228:30:4"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "278:9:4"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "289:2:4",
+                            "type": "",
+                            "value": "64"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "274:3:4"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "274:18:4"
+                      },
+                      {
+                        "hexValue": "4f6e6c7920746865206f776e65722063616e2067656e65726174652077616c6c",
+                        "kind": "string",
+                        "nodeType": "YulLiteral",
+                        "src": "294:34:4",
+                        "type": "",
+                        "value": "Only the owner can generate wall"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "267:6:4"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "267:62:4"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "267:62:4"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "349:9:4"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "360:2:4",
+                            "type": "",
+                            "value": "96"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "345:3:4"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "345:18:4"
+                      },
+                      {
+                        "hexValue": "657473",
+                        "kind": "string",
+                        "nodeType": "YulLiteral",
+                        "src": "365:5:4",
+                        "type": "",
+                        "value": "ets"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "338:6:4"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "338:33:4"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "338:33:4"
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "380:27:4",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "392:9:4"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "403:3:4",
+                        "type": "",
+                        "value": "128"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "388:3:4"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "388:19:4"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "380:4:4"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_stringliteral_8e3a54a3fbc5aed5f3a8753c9b621504526df85cd4b984a2867443d22702dc3f__to_t_string_memory_ptr__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "165:9:4",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "179:4:4",
+                "type": ""
+              }
+            ],
+            "src": "14:399:4"
+          }
+        ]
+      },
+      "contents": "{\n    { }\n    function abi_encode_tuple_t_stringliteral_8e3a54a3fbc5aed5f3a8753c9b621504526df85cd4b984a2867443d22702dc3f__to_t_string_memory_ptr__fromStack_reversed(headStart) -> tail\n    {\n        mstore(headStart, 32)\n        mstore(add(headStart, 32), 35)\n        mstore(add(headStart, 64), \"Only the owner can generate wall\")\n        mstore(add(headStart, 96), \"ets\")\n        tail := add(headStart, 128)\n    }\n}",
+      "id": 4,
+      "language": "Yul",
+      "name": "#utility.yul"
+    }
+  ],
+  "sourceMap": "95:384:0:-:0;;;222:45;;;;;;;;;-1:-1:-1;251:10:0;243:18;;95:384;;;;;;;;;;;;",
+  "deployedSourceMap": "95:384:0:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;273:203;;;:::i;:::-;;;323:10;-1:-1:-1;;;;;337:5:0;323:19;;315:67;;;;-1:-1:-1;;;315:67:0;;216:2:4;315:67:0;;;198:21:4;255:2;235:18;;;228:30;294:34;274:18;;;267:62;-1:-1:-1;;;345:18:4;;;338:33;388:19;;315:67:0;;;;;;;;389:14;414:20;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;447:23:0;;389:46;;-1:-1:-1;;;;;;447:23:0;;;;;;;;308:168;273:203::o;-1:-1:-1:-;;;;;;;;:::o",
+  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.17;\r\n\r\nimport \"./WalletContract.sol\";\r\n\r\ncontract GeneratorFactoryContract {\r\n  address private immutable owner;\r\n  event WalletGenerated(address indexed wallet);\r\n\r\n  constructor() {\r\n    owner = msg.sender;\r\n  }\r\n\r\n  function generateWallet() external {\r\n    require(msg.sender == owner, \"Only the owner can generate wallets\");\r\n    address wallet = address(new WalletContract());\r\n    emit WalletGenerated(wallet);\r\n  }\r\n}",
+  "sourcePath": "C:\\Users\\lsper\\Desktop\\Backend\\billete\\tasks\\wallet-generator\\evm\\contracts\\GeneratorFactoryContract.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/GeneratorFactoryContract.sol",
+    "exportedSymbols": {
+      "GeneratorFactoryContract": [
+        44
+      ],
+      "WalletContract": [
+        97
+      ]
+    },
+    "id": 45,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "33:24:0"
+      },
+      {
+        "absolutePath": "project:/contracts/WalletContract.sol",
+        "file": "./WalletContract.sol",
+        "id": 2,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 45,
+        "sourceUnit": 98,
+        "src": "61:30:0",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "GeneratorFactoryContract",
+        "contractDependencies": [
+          97
+        ],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 44,
+        "linearizedBaseContracts": [
+          44
+        ],
+        "name": "GeneratorFactoryContract",
+        "nameLocation": "104:24:0",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 4,
+            "mutability": "immutable",
+            "name": "owner",
+            "nameLocation": "160:5:0",
+            "nodeType": "VariableDeclaration",
+            "scope": 44,
+            "src": "134:31:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 3,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "134:7:0",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "anonymous": false,
+            "eventSelector": "fafd07415b3087fafb527aa8504fed621d09005ed8c59e270595d81b99989f4f",
+            "id": 8,
+            "name": "WalletGenerated",
+            "nameLocation": "176:15:0",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 7,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "wallet",
+                  "nameLocation": "208:6:0",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8,
+                  "src": "192:22:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "192:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "191:24:0"
+            },
+            "src": "170:46:0"
+          },
+          {
+            "body": {
+              "id": 16,
+              "nodeType": "Block",
+              "src": "236:31:0",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 14,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 11,
+                      "name": "owner",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4,
+                      "src": "243:5:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "expression": {
+                        "id": 12,
+                        "name": "msg",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967281,
+                        "src": "251:3:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_message",
+                          "typeString": "msg"
+                        }
+                      },
+                      "id": 13,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberLocation": "255:6:0",
+                      "memberName": "sender",
+                      "nodeType": "MemberAccess",
+                      "src": "251:10:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "243:18:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 15,
+                  "nodeType": "ExpressionStatement",
+                  "src": "243:18:0"
+                }
+              ]
+            },
+            "id": 17,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "233:2:0"
+            },
+            "returnParameters": {
+              "id": 10,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "236:0:0"
+            },
+            "scope": 44,
+            "src": "222:45:0",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 42,
+              "nodeType": "Block",
+              "src": "308:168:0",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 24,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "expression": {
+                            "id": 21,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4294967281,
+                            "src": "323:3:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 22,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "327:6:0",
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "src": "323:10:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "id": 23,
+                          "name": "owner",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4,
+                          "src": "337:5:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "323:19:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4f6e6c7920746865206f776e65722063616e2067656e65726174652077616c6c657473",
+                        "id": 25,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "344:37:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_8e3a54a3fbc5aed5f3a8753c9b621504526df85cd4b984a2867443d22702dc3f",
+                          "typeString": "literal_string \"Only the owner can generate wallets\""
+                        },
+                        "value": "Only the owner can generate wallets"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_8e3a54a3fbc5aed5f3a8753c9b621504526df85cd4b984a2867443d22702dc3f",
+                          "typeString": "literal_string \"Only the owner can generate wallets\""
+                        }
+                      ],
+                      "id": 20,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "315:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 26,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "315:67:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 27,
+                  "nodeType": "ExpressionStatement",
+                  "src": "315:67:0"
+                },
+                {
+                  "assignments": [
+                    29
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 29,
+                      "mutability": "mutable",
+                      "name": "wallet",
+                      "nameLocation": "397:6:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 42,
+                      "src": "389:14:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 28,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "389:7:0",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 37,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 34,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "NewExpression",
+                          "src": "414:18:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_creation_nonpayable$__$returns$_t_contract$_WalletContract_$97_$",
+                            "typeString": "function () returns (contract WalletContract)"
+                          },
+                          "typeName": {
+                            "id": 33,
+                            "nodeType": "UserDefinedTypeName",
+                            "pathNode": {
+                              "id": 32,
+                              "name": "WalletContract",
+                              "nameLocations": [
+                                "418:14:0"
+                              ],
+                              "nodeType": "IdentifierPath",
+                              "referencedDeclaration": 97,
+                              "src": "418:14:0"
+                            },
+                            "referencedDeclaration": 97,
+                            "src": "418:14:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_WalletContract_$97",
+                              "typeString": "contract WalletContract"
+                            }
+                          }
+                        },
+                        "id": 35,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "414:20:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_WalletContract_$97",
+                          "typeString": "contract WalletContract"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_contract$_WalletContract_$97",
+                          "typeString": "contract WalletContract"
+                        }
+                      ],
+                      "id": 31,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "406:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": {
+                        "id": 30,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "406:7:0",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 36,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "406:29:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "389:46:0"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "id": 39,
+                        "name": "wallet",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 29,
+                        "src": "463:6:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 38,
+                      "name": "WalletGenerated",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8,
+                      "src": "447:15:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 40,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "447:23:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 41,
+                  "nodeType": "EmitStatement",
+                  "src": "442:28:0"
+                }
+              ]
+            },
+            "functionSelector": "39392ec6",
+            "id": 43,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "generateWallet",
+            "nameLocation": "282:14:0",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 18,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "296:2:0"
+            },
+            "returnParameters": {
+              "id": 19,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "308:0:0"
+            },
+            "scope": 44,
+            "src": "273:203:0",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 45,
+        "src": "95:384:0",
+        "usedErrors": []
+      }
+    ],
+    "src": "33:446:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.17+commit.8df45f5f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.16",
+  "updatedAt": "2023-11-17T09:07:33.180Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
