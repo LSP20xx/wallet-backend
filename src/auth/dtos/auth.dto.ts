@@ -21,6 +21,16 @@ export class AuthDTO {
   phoneNumber?: string;
 
   @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(30)
+  firstName: string;
+
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(30)
+  lastName: string;
+
+  @IsNotEmpty()
   @MinLength(8)
   @MaxLength(20)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {

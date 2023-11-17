@@ -23,19 +23,19 @@ export class AuthService {
     authDto: AuthDTO,
   ): Promise<{ userId: string; token: string }> {
     try {
-      const hashedPassword = await hash(authDto.password);
+      const encryptedPassword = await hash(authDto.password);
 
       const userData = {
         email: authDto.email,
         phoneNumber: authDto.phoneNumber,
-        encryptedPassword: hashedPassword,
+        firstName: authDto.firstName,
+        lastName: authDto.lastName,
+        encryptedPassword: encryptedPassword,
       };
 
       const user = await this.databaseService.user.create({
         data: userData,
       });
-
-      delete user.encryptedPassword;
 
       const allowedChains = this.configService
         .get('ALLOWED_CHAINS_IDS')
@@ -55,8 +55,6 @@ export class AuthService {
         userId: user.id,
         token: await this.signToken({
           userId: user.id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
         }),
       };
     } catch (error) {
@@ -91,14 +89,10 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials.');
     }
 
-    delete user.encryptedPassword;
-
     return {
       userId: user.id,
       token: await this.signToken({
         userId: user.id,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
       }),
     };
   }
@@ -106,10 +100,6 @@ export class AuthService {
   async signToken(signTokenDto: SignTokenDTO): Promise<string> {
     const payload = {
       sub: signTokenDto.userId,
-      ...(signTokenDto.email && { email: signTokenDto.email }),
-      ...(signTokenDto.phoneNumber && {
-        phoneNumber: signTokenDto.phoneNumber,
-      }),
     };
 
     const secret = this.configService.get<string>('JWT_SECRET');

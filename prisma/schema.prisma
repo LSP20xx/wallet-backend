@@ -39,6 +39,16 @@ model Wallet {
   @@map("wallets")
 }
 
+model WalletContract {
+  id                  String        @id @default(uuid())
+  address             String        @unique
+  blockchainId        String?
+  reserved            Boolean       @default(false)
+  chainType           ChainType
+  network             Network
+
+}
+
 model Token {
   id              String         @id @default(uuid())
   symbol          String
@@ -61,11 +71,13 @@ model Transaction {
   from       String
   to         String
   amount     Float
+  transactionType TransactionType
   wallet     Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
   walletId   String
   chainType  ChainType
   network    Network
   status     TransactionStatus
+  confirmations Int
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   blockchain Blockchain? @relation(fields: [blockchainId], references: [id], name: "TransactionChain")
@@ -75,8 +87,11 @@ model Transaction {
   @@map("transactions")
 }
 
+
 model User {
   id                String        @id @default(uuid())
+  firstName         String
+  lastName          String
   email             String?       @unique
   phoneNumber       String?       @unique
   encryptedPassword String
@@ -148,6 +163,12 @@ enum Currency {
   Dogecoin
 }
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+}
+
 enum TradeStatus {
   OPEN 
   IN_PROGRESS 
@@ -156,9 +177,10 @@ enum TradeStatus {
 }
 
 enum TransactionStatus {
-  PENDING
-  CONFIRMED
-  FAILED
+  APPROVED
+  PROCESSED
+  PROCESSING
+  CANCELLED
 }
 
 enum UserRole {
