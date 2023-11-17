@@ -2,6 +2,7 @@
 const fs = require('fs');
 const appRoot = require('app-root-path');
 const Config = require('./networkConfig');
+require('dotenv').config({ path: `${appRoot}/config/.env` });
 
 const buildNetworks = () => {
   const networks = {};

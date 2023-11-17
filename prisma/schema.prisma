@@ -46,7 +46,6 @@ model WalletContract {
   reserved            Boolean       @default(false)
   chainType           ChainType
   network             Network
-
 }
 
 model Token {
