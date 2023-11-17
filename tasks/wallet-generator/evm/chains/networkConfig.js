@@ -7,7 +7,11 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 module.exports = (walletAddress, privateKeys, network_id, url) => {
   return {
     network_id,
-    provider: () => new HDWalletProvider(privateKeys, url),
+    provider: () =>
+      new HDWalletProvider({
+        privateKeys: [privateKeys],
+        providerOrUrl: url,
+      }),
     from: walletAddress,
     gas: 5000000,
     confirmations: 4,

@@ -8,8 +8,6 @@ require('dotenv').config({ path: `${appRoot}/config/.env` });
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const privateKey = process.env.GENERATOR_PRIVATE_KEY;
 
-console.log('privateKey: ', privateKey);
-
 class GeneratorFactory {
   constructor(rpc) {
     this.web3 = new Web3(
