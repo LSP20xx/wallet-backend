@@ -5,10 +5,13 @@ CREATE TYPE "ConnectionStatus" AS ENUM ('CONNECTED', 'DISCONNECTED');
 CREATE TYPE "Currency" AS ENUM ('Ethereum', 'BnbChain', 'Polygon', 'Avalanche', 'Fantom', 'Harmony', 'Elrond', 'Solana', 'Bitcoin', 'Litecoin', 'Dogecoin');
 
 -- CreateEnum
+CREATE TYPE "TransactionType" AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
+
+-- CreateEnum
 CREATE TYPE "TradeStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'CONFIRMED', 'FAILED');
+CREATE TYPE "TransactionStatus" AS ENUM ('APPROVED', 'PROCESSED', 'PROCESSING', 'CANCELLED');
 
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
@@ -48,6 +51,18 @@ CREATE TABLE "wallets" (
 );
 
 -- CreateTable
+CREATE TABLE "WalletContract" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "blockchainId" TEXT,
+    "reserved" BOOLEAN NOT NULL DEFAULT false,
+    "chainType" "ChainType" NOT NULL,
+    "network" "Network" NOT NULL,
+
+    CONSTRAINT "WalletContract_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "tokens" (
     "id" TEXT NOT NULL,
     "symbol" TEXT NOT NULL,
@@ -69,10 +84,12 @@ CREATE TABLE "transactions" (
     "from" TEXT NOT NULL,
     "to" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
+    "transactionType" "TransactionType" NOT NULL,
     "walletId" TEXT NOT NULL,
     "chainType" "ChainType" NOT NULL,
     "network" "Network" NOT NULL,
     "status" "TransactionStatus" NOT NULL,
+    "confirmations" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "blockchainId" TEXT,
@@ -84,6 +101,8 @@ CREATE TABLE "transactions" (
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT,
     "phoneNumber" TEXT,
     "encryptedPassword" TEXT NOT NULL,
@@ -139,6 +158,9 @@ CREATE UNIQUE INDEX "wallets_address_key" ON "wallets"("address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "wallets_encryptedPrivateKey_key" ON "wallets"("encryptedPrivateKey");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WalletContract_address_key" ON "WalletContract"("address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
