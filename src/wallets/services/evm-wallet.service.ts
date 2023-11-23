@@ -28,9 +28,9 @@ export class EvmWalletService {
     });
   }
 
-  async findAllByChainId(chainId: string): Promise<Wallet[]> {
+  async findAllByChainId(blockchainId: string): Promise<Wallet[]> {
     return this.databaseService.wallet.findMany({
-      where: { blockchain: { chainId } },
+      where: { blockchain: { blockchainId } },
     });
   }
 
@@ -54,9 +54,9 @@ export class EvmWalletService {
     return result;
   }
 
-  async createWallet(userId: string, chainId: string): Promise<Wallet> {
+  async createWallet(userId: string, blockchainId: string): Promise<Wallet> {
     const blockchain = await this.databaseService.blockchain.findUnique({
-      where: { chainId: chainId },
+      where: { blockchainId: blockchainId },
     });
 
     if (!blockchain) {
@@ -64,7 +64,7 @@ export class EvmWalletService {
     }
 
     const account = this.web3Service
-      .getWeb3Instance(chainId)
+      .getWeb3Instance(blockchainId)
       .eth.accounts.create();
     const encryptedPrivateKeyObject = this.encryptionService.encrypt(
       account.privateKey,
@@ -80,7 +80,7 @@ export class EvmWalletService {
         user: { connect: { id: userId } },
         blockchain: { connect: { id: blockchain.id } },
         chainType: ChainType.EVM,
-        network: chainId === '5' ? Network.TESTNET : Network.MAINNET,
+        network: blockchainId === '5' ? Network.TESTNET : Network.MAINNET,
       },
     });
   }

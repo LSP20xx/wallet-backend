@@ -19,9 +19,7 @@ export class AuthService {
     private utxoWalletService: UtxoWalletService,
   ) {}
 
-  async signUpUser(
-    authDto: AuthDTO,
-  ): Promise<{ userId: string; token: string }> {
+  async signUpUser(authDto: AuthDTO): Promise<{ userId: string }> {
     try {
       const encryptedPassword = await hash(authDto.password);
 
@@ -53,9 +51,6 @@ export class AuthService {
       await this.utxoWalletService.createWallet(user.id, 'dogecoin', 'testnet');
       return {
         userId: user.id,
-        token: await this.signToken({
-          userId: user.id,
-        }),
       };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -67,14 +62,14 @@ export class AuthService {
     }
   }
 
-  async signInUser(
-    authDto: AuthDTO,
-  ): Promise<{ userId: string; token: string }> {
+  async signInUser(authDto: AuthDTO): Promise<{ userId: string }> {
     const user = await this.databaseService.user.findFirst({
       where: {
         OR: [{ email: authDto.email }, { phoneNumber: authDto.phoneNumber }],
       },
     });
+
+    console.log('user', user);
 
     if (!user) {
       throw new ForbiddenException('Invalid credentials.');
@@ -91,9 +86,6 @@ export class AuthService {
 
     return {
       userId: user.id,
-      token: await this.signToken({
-        userId: user.id,
-      }),
     };
   }
 

@@ -64,14 +64,14 @@ export class BlockchainModule implements OnModuleInit {
 
     for (const network of this.networkData) {
       const existingNetwork = await this.databaseService.blockchain.findUnique({
-        where: { chainId: network.chainId },
+        where: { blockchainId: network.chainId },
       });
 
       if (!existingNetwork) {
         await this.databaseService.blockchain.create({
           data: {
             name: network.name,
-            chainId: network.chainId,
+            blockchainId: network.chainId,
           },
         });
       }

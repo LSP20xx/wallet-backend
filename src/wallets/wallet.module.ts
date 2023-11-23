@@ -1,4 +1,3 @@
-// wallets.module.ts
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { EvmWalletController } from './controllers/evm-wallet.controller';

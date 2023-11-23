@@ -4,7 +4,7 @@
     {
       "anonymous": false,
       "inputs": [],
-      "name": "Deposited",
+      "name": "DepositedOnBillete",
       "type": "event"
     },
     {
@@ -16,9 +16,9 @@
       "type": "receive"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[],\"name\":\"Deposited\",\"type\":\"event\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/WalletContract.sol\":\"WalletContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/WalletContract.sol\":{\"keccak256\":\"0xbfa0468e0f6fb9aca3b8c4bffcd105bdd9e7cdb90f2032f478fae498094143cb\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e5c98bfccf54c2c719a1422a84561b4b13956e0bcb68accee288c34d8d96639a\",\"dweb:/ipfs/QmUVrGXXxACzVJdZKYV9dGRKAuNPBn5ep6DyoRu981e425\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50610130806100206000396000f3fe608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fe78c52703146d72c70116227b622aeda4563a85894645e22555019045701d8d990600090a1505b56fea264697066735822122063a0f8597c0d4a84a42fa6f3d0a3755b2d8a4b78faec08ef828773f7147f67bc64736f6c63430008110033",
-  "deployedBytecode": "0x608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fe78c52703146d72c70116227b622aeda4563a85894645e22555019045701d8d990600090a1505b56fea264697066735822122063a0f8597c0d4a84a42fa6f3d0a3755b2d8a4b78faec08ef828773f7147f67bc64736f6c63430008110033",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[],\"name\":\"DepositedOnBillete\",\"type\":\"event\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/WalletContract.sol\":\"WalletContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/WalletContract.sol\":{\"keccak256\":\"0x6e68c935f48e8a35ec59b096bd3228c7c2824fe85a2ac0422942d4f4f8a350b5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e045b4f087c89336f068e594bb4bbe5575f9cdb29b136d8f3bbe189d35663ef0\",\"dweb:/ipfs/QmPLN8PVUynGzSWK81Dtuie9Ps31ZBQ1p2cp1Yp21Vua9a\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610130806100206000396000f3fe608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fb31df7b863ab35a271121d6c4ccc007d93e1098230db326d0f08a94c8fb76e9190600090a1505b56fea264697066735822122030476dd54a7581e6d8096f395d4d42e2e5a5915911e666cd303c07888f7f4f0f64736f6c63430008110033",
+  "deployedBytecode": "0x608060405236601057600e6013565b005b600e5b66038d7ea4c68000341060f857604051600090732d835f3395c5d7a6f1e743a00efbd88523ec0b669034908381818185875af1925050503d80600081146074576040519150601f19603f3d011682016040523d82523d6000602084013e6079565b606091505b505090508060cd5760405162461bcd60e51b815260206004820152601760248201527f4661696c656420746f20666f72776172642066756e6473000000000000000000604482015260640160405180910390fd5b6040517fb31df7b863ab35a271121d6c4ccc007d93e1098230db326d0f08a94c8fb76e9190600090a1505b56fea264697066735822122030476dd54a7581e6d8096f395d4d42e2e5a5915911e666cd303c07888f7f4f0f64736f6c63430008110033",
   "immutableReferences": {},
   "generatedSources": [],
   "deployedGeneratedSources": [
@@ -262,9 +262,9 @@
       "name": "#utility.yul"
     }
   ],
-  "sourceMap": "61:514:1:-:0;;;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "61:514:1:-:0;;;;;;503:9;:7;:9::i;:::-;61:514;;557:9;253:210;121:16;290:9;:16;287:171;;336:37;;318:12;;180:42;;359:9;;318:12;336:37;318:12;336:37;359:9;180:42;336:37;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;317:56;;;390:7;382:43;;;;-1:-1:-1;;;382:43:1;;426:2:4;382:43:1;;;408:21:4;465:2;445:18;;;438:30;504:25;484:18;;;477:53;547:18;;382:43:1;;;;;;;;439:11;;;;;;;308:150;287:171;253:210::o",
-  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.17;\r\n\r\ncontract WalletContract {\r\n  uint256 private constant MIN = 1000000000000000;\r\n  address private constant HOT_WALLET = 0x2d835f3395c5d7a6f1E743a00EFbd88523EC0B66;\r\n\r\n  event Deposited();\r\n\r\n  function forward() private {\r\n    if(msg.value >= MIN) {\r\n      (bool success, ) = HOT_WALLET.call{value: msg.value}(\"\");\r\n      require(success, \"Failed to forward funds\");\r\n      emit Deposited();\r\n    }\r\n  }\r\n\r\n  receive() external payable {\r\n    forward();\r\n  }\r\n  fallback() external payable {\r\n    forward();\r\n  }\r\n}\r\n",
+  "sourceMap": "61:534:1:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "61:534:1:-:0;;;;;;523:9;:7;:9::i;:::-;61:534;;577:9;262:219;121:16;299:9;:16;296:180;;345:37;;327:12;;180:42;;368:9;;327:12;345:37;327:12;345:37;368:9;180:42;345:37;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;326:56;;;399:7;391:43;;;;-1:-1:-1;;;391:43:1;;426:2:4;391:43:1;;;408:21:4;465:2;445:18;;;438:30;504:25;484:18;;;477:53;547:18;;391:43:1;;;;;;;;448:20;;;;;;;317:159;296:180;262:219::o",
+  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.17;\r\n\r\ncontract WalletContract {\r\n  uint256 private constant MIN = 1000000000000000;\r\n  address private constant HOT_WALLET = 0x2d835f3395c5d7a6f1E743a00EFbd88523EC0B66;\r\n\r\n  event DepositedOnBillete();\r\n\r\n  function forward() private {\r\n    if(msg.value >= MIN) {\r\n      (bool success, ) = HOT_WALLET.call{value: msg.value}(\"\");\r\n      require(success, \"Failed to forward funds\");\r\n      emit DepositedOnBillete();\r\n    }\r\n  }\r\n  \r\n  receive() external payable {\r\n    forward();\r\n  }\r\n  fallback() external payable {\r\n    forward();\r\n  }\r\n}\r\n",
   "sourcePath": "C:\\Users\\lsper\\Desktop\\Backend\\billete\\tasks\\wallet-generator\\evm\\contracts\\WalletContract.sol",
   "ast": {
     "absolutePath": "project:/contracts/WalletContract.sol",
@@ -392,24 +392,24 @@
           },
           {
             "anonymous": false,
-            "eventSelector": "e78c52703146d72c70116227b622aeda4563a85894645e22555019045701d8d9",
+            "eventSelector": "b31df7b863ab35a271121d6c4ccc007d93e1098230db326d0f08a94c8fb76e91",
             "id": 54,
-            "name": "Deposited",
-            "nameLocation": "235:9:1",
+            "name": "DepositedOnBillete",
+            "nameLocation": "235:18:1",
             "nodeType": "EventDefinition",
             "parameters": {
               "id": 53,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "244:2:1"
+              "src": "253:2:1"
             },
-            "src": "229:18:1"
+            "src": "229:27:1"
           },
           {
             "body": {
               "id": 81,
               "nodeType": "Block",
-              "src": "280:183:1",
+              "src": "289:192:1",
               "statements": [
                 {
                   "condition": {
@@ -429,7 +429,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 4294967281,
-                        "src": "290:3:1",
+                        "src": "299:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
                           "typeString": "msg"
@@ -440,10 +440,10 @@
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
-                      "memberLocation": "294:5:1",
+                      "memberLocation": "303:5:1",
                       "memberName": "value",
                       "nodeType": "MemberAccess",
-                      "src": "290:9:1",
+                      "src": "299:9:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -457,13 +457,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 49,
-                      "src": "303:3:1",
+                      "src": "312:3:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "290:16:1",
+                    "src": "299:16:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -471,11 +471,11 @@
                   },
                   "id": 80,
                   "nodeType": "IfStatement",
-                  "src": "287:171:1",
+                  "src": "296:180:1",
                   "trueBody": {
                     "id": 79,
                     "nodeType": "Block",
-                    "src": "308:150:1",
+                    "src": "317:159:1",
                     "statements": [
                       {
                         "assignments": [
@@ -488,10 +488,10 @@
                             "id": 62,
                             "mutability": "mutable",
                             "name": "success",
-                            "nameLocation": "323:7:1",
+                            "nameLocation": "332:7:1",
                             "nodeType": "VariableDeclaration",
                             "scope": 79,
-                            "src": "318:12:1",
+                            "src": "327:12:1",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -502,7 +502,7 @@
                               "id": 61,
                               "name": "bool",
                               "nodeType": "ElementaryTypeName",
-                              "src": "318:4:1",
+                              "src": "327:4:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -524,7 +524,7 @@
                               "kind": "string",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "370:2:1",
+                              "src": "379:2:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_stringliteral_c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
                                 "typeString": "literal_string \"\""
@@ -552,7 +552,7 @@
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 52,
-                                "src": "336:10:1",
+                                "src": "345:10:1",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
                                   "typeString": "address"
@@ -563,10 +563,10 @@
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
-                              "memberLocation": "347:4:1",
+                              "memberLocation": "356:4:1",
                               "memberName": "call",
                               "nodeType": "MemberAccess",
-                              "src": "336:15:1",
+                              "src": "345:15:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_barecall_payable$_t_bytes_memory_ptr_$returns$_t_bool_$_t_bytes_memory_ptr_$",
                                 "typeString": "function (bytes memory) payable returns (bool,bytes memory)"
@@ -589,7 +589,7 @@
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
                                   "referencedDeclaration": 4294967281,
-                                  "src": "359:3:1",
+                                  "src": "368:3:1",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_magic_message",
                                     "typeString": "msg"
@@ -600,17 +600,17 @@
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
-                                "memberLocation": "363:5:1",
+                                "memberLocation": "372:5:1",
                                 "memberName": "value",
                                 "nodeType": "MemberAccess",
-                                "src": "359:9:1",
+                                "src": "368:9:1",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               }
                             ],
-                            "src": "336:33:1",
+                            "src": "345:33:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_barecall_payable$_t_bytes_memory_ptr_$returns$_t_bool_$_t_bytes_memory_ptr_$value",
                               "typeString": "function (bytes memory) payable returns (bool,bytes memory)"
@@ -625,7 +625,7 @@
                           "nameLocations": [],
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "336:37:1",
+                          "src": "345:37:1",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$_t_bool_$_t_bytes_memory_ptr_$",
@@ -633,7 +633,7 @@
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "317:56:1"
+                        "src": "326:56:1"
                       },
                       {
                         "expression": {
@@ -644,7 +644,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 62,
-                              "src": "390:7:1",
+                              "src": "399:7:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -659,7 +659,7 @@
                               "kind": "string",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "399:25:1",
+                              "src": "408:25:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_stringliteral_d5b0a803ea07871d53a29a8143c365eec769234583321071126f222591b48252",
                                 "typeString": "literal_string \"Failed to forward funds\""
@@ -686,7 +686,7 @@
                               4294967278
                             ],
                             "referencedDeclaration": 4294967278,
-                            "src": "382:7:1",
+                            "src": "391:7:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                               "typeString": "function (bool,string memory) pure"
@@ -701,7 +701,7 @@
                           "nameLocations": [],
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "382:43:1",
+                          "src": "391:43:1",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
@@ -710,7 +710,7 @@
                         },
                         "id": 75,
                         "nodeType": "ExpressionStatement",
-                        "src": "382:43:1"
+                        "src": "391:43:1"
                       },
                       {
                         "eventCall": {
@@ -718,11 +718,11 @@
                           "expression": {
                             "argumentTypes": [],
                             "id": 76,
-                            "name": "Deposited",
+                            "name": "DepositedOnBillete",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 54,
-                            "src": "439:9:1",
+                            "src": "448:18:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_event_nonpayable$__$returns$__$",
                               "typeString": "function ()"
@@ -737,7 +737,7 @@
                           "nameLocations": [],
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "439:11:1",
+                          "src": "448:20:1",
                           "tryCall": false,
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
@@ -746,7 +746,7 @@
                         },
                         "id": 78,
                         "nodeType": "EmitStatement",
-                        "src": "434:16:1"
+                        "src": "443:25:1"
                       }
                     ]
                   }
@@ -758,22 +758,22 @@
             "kind": "function",
             "modifiers": [],
             "name": "forward",
-            "nameLocation": "262:7:1",
+            "nameLocation": "271:7:1",
             "nodeType": "FunctionDefinition",
             "parameters": {
               "id": 55,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "269:2:1"
+              "src": "278:2:1"
             },
             "returnParameters": {
               "id": 56,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "280:0:1"
+              "src": "289:0:1"
             },
             "scope": 97,
-            "src": "253:210:1",
+            "src": "262:219:1",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "private"
@@ -782,7 +782,7 @@
             "body": {
               "id": 88,
               "nodeType": "Block",
-              "src": "496:22:1",
+              "src": "516:22:1",
               "statements": [
                 {
                   "expression": {
@@ -794,7 +794,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 82,
-                      "src": "503:7:1",
+                      "src": "523:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
@@ -809,7 +809,7 @@
                     "nameLocations": [],
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "503:9:1",
+                    "src": "523:9:1",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
@@ -818,7 +818,7 @@
                   },
                   "id": 87,
                   "nodeType": "ExpressionStatement",
-                  "src": "503:9:1"
+                  "src": "523:9:1"
                 }
               ]
             },
@@ -833,16 +833,16 @@
               "id": 83,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "476:2:1"
+              "src": "496:2:1"
             },
             "returnParameters": {
               "id": 84,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "496:0:1"
+              "src": "516:0:1"
             },
             "scope": 97,
-            "src": "469:49:1",
+            "src": "489:49:1",
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
@@ -851,7 +851,7 @@
             "body": {
               "id": 95,
               "nodeType": "Block",
-              "src": "550:22:1",
+              "src": "570:22:1",
               "statements": [
                 {
                   "expression": {
@@ -863,7 +863,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 82,
-                      "src": "557:7:1",
+                      "src": "577:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
                         "typeString": "function ()"
@@ -878,7 +878,7 @@
                     "nameLocations": [],
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "557:9:1",
+                    "src": "577:9:1",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
@@ -887,7 +887,7 @@
                   },
                   "id": 94,
                   "nodeType": "ExpressionStatement",
-                  "src": "557:9:1"
+                  "src": "577:9:1"
                 }
               ]
             },
@@ -902,27 +902,27 @@
               "id": 90,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "530:2:1"
+              "src": "550:2:1"
             },
             "returnParameters": {
               "id": 91,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "550:0:1"
+              "src": "570:0:1"
             },
             "scope": 97,
-            "src": "522:50:1",
+            "src": "542:50:1",
             "stateMutability": "payable",
             "virtual": false,
             "visibility": "external"
           }
         ],
         "scope": 98,
-        "src": "61:514:1",
+        "src": "61:534:1",
         "usedErrors": []
       }
     ],
-    "src": "33:544:1"
+    "src": "33:564:1"
   },
   "compiler": {
     "name": "solc",
@@ -930,7 +930,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.16",
-  "updatedAt": "2023-11-17T10:08:06.410Z",
+  "updatedAt": "2023-11-23T10:34:48.455Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
