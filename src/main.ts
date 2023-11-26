@@ -11,6 +11,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { config } from 'dotenv';
 
 async function bootstrap() {
+  config();
+
   const app = await NestFactory.create(AppModule);
 
   const redisClient = new Redis({
@@ -19,7 +21,7 @@ async function bootstrap() {
     password: process.env.REDIS_PASSWORD,
   });
 
-  const redisStore = new RedisStore(redisClient as any);
+  const redisStore = new RedisStore({ client: redisClient });
 
   app.use(morgan('dev'));
 
@@ -54,8 +56,6 @@ async function bootstrap() {
   app.use(passport.session());
 
   await app.listen(configService.get('PORT'));
-
-  config();
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

@@ -1,13 +1,15 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { hash, verify } from 'argon2';
-import { AuthDTO } from 'src/auth/dtos/auth.dto';
 import { SignTokenDTO } from 'src/auth/dtos/sign-token.dto';
+import { SignUpDTO } from 'src/auth/dtos/sign-up.dto';
 import { DatabaseService } from 'src/database/services/database/database.service';
-import { UtxoWalletService } from 'src/wallets/services/utxo-wallet.service';
 import { EvmWalletService } from 'src/wallets/services/evm-wallet.service';
+import { UtxoWalletService } from 'src/wallets/services/utxo-wallet.service';
+import { SignInDTO } from '../dtos/sign-in.dto';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -19,39 +21,81 @@ export class AuthService {
     private utxoWalletService: UtxoWalletService,
   ) {}
 
-  async signUpUser(authDto: AuthDTO): Promise<{ userId: string }> {
+  async signUpUser(signUpDTO: SignUpDTO): Promise<{ userId: string }> {
+    const prisma = new PrismaClient();
+
     try {
-      const encryptedPassword = await hash(authDto.password);
+      const result = await prisma.$transaction(async (transaction) => {
+        const encryptedPassword = await hash(signUpDTO.password);
 
-      const userData = {
-        email: authDto.email,
-        phoneNumber: authDto.phoneNumber,
-        firstName: authDto.firstName,
-        lastName: authDto.lastName,
-        encryptedPassword: encryptedPassword,
-      };
+        const userData = {
+          email: signUpDTO.email,
+          phoneNumber: signUpDTO.phoneNumber,
+          firstName: signUpDTO.firstName,
+          lastName: signUpDTO.lastName,
+          encryptedPassword: encryptedPassword,
+        };
 
-      const user = await this.databaseService.user.create({
-        data: userData,
+        const user = await transaction.user.create({
+          data: userData,
+        });
+
+        const allowedChains = this.configService
+          .get('ALLOWED_CHAINS_IDS')
+          .split(',');
+
+        for (const chainId of allowedChains) {
+          if (chainId === '5')
+            await this.evmWalletService.createWallet(
+              user.id,
+              chainId,
+              transaction,
+            );
+        }
+
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'bitcoin',
+          'mainnet',
+          transaction,
+        );
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'bitcoin',
+          'testnet',
+          transaction,
+        );
+
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'litecoin',
+          'mainnet',
+          transaction,
+        );
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'litecoin',
+          'testnet',
+          transaction,
+        );
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'dogecoin',
+          'mainnet',
+          transaction,
+        );
+        await this.utxoWalletService.createWallet(
+          user.id,
+          'dogecoin',
+          'testnet',
+          transaction,
+        );
+
+        return {
+          userId: user.id,
+        };
       });
-
-      const allowedChains = this.configService
-        .get('ALLOWED_CHAINS_IDS')
-        .split(',');
-
-      for (const chainId of allowedChains) {
-        await this.evmWalletService.createWallet(user.id, chainId);
-      }
-
-      await this.utxoWalletService.createWallet(user.id, 'bitcoin', 'mainnet');
-      await this.utxoWalletService.createWallet(user.id, 'bitcoin', 'testnet');
-      await this.utxoWalletService.createWallet(user.id, 'litecoin', 'mainnet');
-      await this.utxoWalletService.createWallet(user.id, 'litecoin', 'testnet');
-      await this.utxoWalletService.createWallet(user.id, 'dogecoin', 'mainnet');
-      await this.utxoWalletService.createWallet(user.id, 'dogecoin', 'testnet');
-      return {
-        userId: user.id,
-      };
+      return result;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -59,17 +103,17 @@ export class AuthService {
         }
       }
       throw error;
+    } finally {
+      await prisma.$disconnect();
     }
   }
 
-  async signInUser(authDto: AuthDTO): Promise<{ userId: string }> {
+  async signInUser(signInDTO: SignInDTO): Promise<{ userId: string }> {
     const user = await this.databaseService.user.findFirst({
       where: {
-        OR: [{ email: authDto.email }, { phoneNumber: authDto.phoneNumber }],
+        OR: [{ email: signInDTO.login }, { phoneNumber: signInDTO.login }],
       },
     });
-
-    console.log('user', user);
 
     if (!user) {
       throw new ForbiddenException('Invalid credentials.');
@@ -77,7 +121,7 @@ export class AuthService {
 
     const isPasswordValid = await verify(
       user.encryptedPassword,
-      authDto.password,
+      signInDTO.password,
     );
 
     if (!isPasswordValid) {

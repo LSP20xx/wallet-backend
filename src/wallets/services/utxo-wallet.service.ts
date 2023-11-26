@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ChainType, Network, Wallet } from '@prisma/client';
+import { ChainType, Network, Prisma, Wallet } from '@prisma/client';
 import { networks, payments, Psbt } from 'bitcoinjs-lib';
 import { ECPairFactory, ECPairInterface } from 'ecpair';
 import * as tinysecp from 'tiny-secp256k1';
@@ -92,6 +92,7 @@ export class UtxoWalletService implements IUtxoWalletService {
     userId: string,
     coinType: string,
     networkType: string,
+    transaction?: Prisma.TransactionClient,
   ): Promise<Wallet> {
     const netConfig = this.getNetworksConfig(coinType, networkType);
 
@@ -114,7 +115,13 @@ export class UtxoWalletService implements IUtxoWalletService {
 
     const chainTypeEnum = this.getChainTypeEnum(coinType);
 
-    return this.databaseService.wallet.create({
+    const blockchainId = `${coinType.toUpperCase()}-${networkType.toUpperCase()}`;
+
+    const blockchain = await this.databaseService.blockchain.findUnique({
+      where: { blockchainId: blockchainId },
+    });
+
+    const walletData = {
       data: {
         address: address,
         encryptedPrivateKey: encryptedPrivateKey,
@@ -122,8 +129,15 @@ export class UtxoWalletService implements IUtxoWalletService {
         user: { connect: { id: userId } },
         chainType: chainTypeEnum,
         network: networkType === 'mainnet' ? Network.MAINNET : Network.TESTNET,
+        blockchain: { connect: { id: blockchain.id } },
       },
-    });
+    };
+
+    if (transaction) {
+      return transaction.wallet.create(walletData);
+    } else {
+      return this.databaseService.wallet.create(walletData);
+    }
   }
 
   async unlockWallet(

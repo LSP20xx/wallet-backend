@@ -6,6 +6,7 @@ import { AuthService } from './services/auth.service';
 import { WalletsModule } from 'src/wallets/wallet.module';
 import { LocalStrategy } from './strategy/local.strategy';
 import { SessionSerializer } from './strategy/session.serializer';
+import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 
 @Module({
   imports: [
@@ -16,6 +17,12 @@ import { SessionSerializer } from './strategy/session.serializer';
     WalletsModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtService, LocalStrategy, SessionSerializer],
+  providers: [
+    AuthService,
+    JwtService,
+    LocalStrategy,
+    SessionSerializer,
+    EncryptionsService,
+  ],
 })
 export class AuthModule {}

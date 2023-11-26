@@ -1,18 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { Wallet, ChainType, Network } from '@prisma/client';
-import { DatabaseService } from 'src/database/services/database/database.service';
-import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
-import { GraphQueryService } from 'src/networks/services/graph-query.service';
-import { Web3Service } from 'src/web3/services/web3.service';
 import { InjectQueue } from '@nestjs/bullmq';
-import QueueType from '../queue/types.queue';
+import { Injectable } from '@nestjs/common';
+import { ChainType, Network, Prisma, Wallet } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { DatabaseService } from 'src/database/services/database/database.service';
+import { GraphQueryService } from 'src/networks/services/graph-query.service';
+import QueueType from '../queue/types.queue';
+import { WithdrawDto } from '../dto/withdraw.dto';
 
 @Injectable()
 export class EvmWalletService {
   constructor(
-    private web3Service: Web3Service,
-    private encryptionService: EncryptionsService,
     private databaseService: DatabaseService,
     private graphQueryService: GraphQueryService,
     @InjectQueue(QueueType.WITHDRAW_REQUEST) private withdrawQueue: Queue,
@@ -54,28 +51,31 @@ export class EvmWalletService {
     return result;
   }
 
-  async createWallet(userId: string, blockchainId: string): Promise<Wallet> {
+  async createWallet(
+    userId: string,
+    blockchainId: string,
+    transaction?: Prisma.TransactionClient,
+  ): Promise<Wallet> {
+    const walletContract = await this.databaseService.walletContract.findFirst({
+      where: { blockchainId: blockchainId, reserved: false },
+    });
+
     const blockchain = await this.databaseService.blockchain.findUnique({
       where: { blockchainId: blockchainId },
     });
 
-    if (!blockchain) {
-      throw new Error('Blockchain not found');
+    if (!walletContract) {
+      throw new Error('No available wallets');
     }
 
-    const account = this.web3Service
-      .getWeb3Instance(blockchainId)
-      .eth.accounts.create();
-    const encryptedPrivateKeyObject = this.encryptionService.encrypt(
-      account.privateKey,
-    );
+    await transaction.walletContract.update({
+      where: { id: walletContract.id },
+      data: { reserved: true },
+    });
 
-    const encryptedPrivateKey = `${encryptedPrivateKeyObject.encryptedData}:${encryptedPrivateKeyObject.iv}`;
-
-    return this.databaseService.wallet.create({
+    return transaction.wallet.create({
       data: {
-        address: account.address,
-        encryptedPrivateKey: encryptedPrivateKey,
+        address: walletContract.address,
         balance: '0',
         user: { connect: { id: userId } },
         blockchain: { connect: { id: blockchain.id } },
@@ -98,17 +98,9 @@ export class EvmWalletService {
     });
   }
 
-  async withdraw(
-    transactionId: string,
-    walletId: string,
-    amount: string,
-    toAddress: string,
-  ) {
+  async withdraw(withdrawDto: WithdrawDto) {
     const withdrawRequest = await this.withdrawQueue.add('request', {
-      transactionId,
-      walletId,
-      amount,
-      toAddress,
+      withdrawDto,
     });
 
     return withdrawRequest.asJSON();

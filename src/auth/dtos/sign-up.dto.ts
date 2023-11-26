@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { IsEitherPhoneOrEmail } from 'src/validators/is-either-phone-or-email-constraint.validator';
 
-export class AuthDTO {
+export class SignUpDTO {
   @IsOptional()
   @IsEmail()
   email?: string;

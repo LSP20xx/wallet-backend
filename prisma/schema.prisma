@@ -10,7 +10,7 @@ datasource db {
 model Blockchain {
   id           String         @id @default(uuid())
   name         String
-  chainId      String        @unique
+  blockchainId String         @unique
   wallets      Wallet[]       @relation("WalletChain")
   transactions Transaction[]  @relation("TransactionChain")
   tokens       Token[]        @relation("TokenChain")
@@ -24,7 +24,7 @@ model Wallet {
   id                  String        @id @default(uuid())
   balance             String
   address             String        @unique
-  encryptedPrivateKey String        @unique
+  encryptedPrivateKey String?       @unique
   user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
   userId              String
   chainType           ChainType
@@ -33,7 +33,7 @@ model Wallet {
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   blockchain          Blockchain?   @relation(fields: [blockchainId], references: [id], name: "WalletChain")
-  blockchainId        String?
+  blockchainId        String
   transactions        Transaction[] @relation("WalletTransactions")
   tokens              Token[]       @relation("WalletTokens")
   @@map("wallets")

@@ -26,7 +26,7 @@ CREATE TYPE "Network" AS ENUM ('MAINNET', 'TESTNET');
 CREATE TABLE "blockchains" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "chainId" TEXT NOT NULL,
+    "blockchainId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -38,14 +38,14 @@ CREATE TABLE "wallets" (
     "id" TEXT NOT NULL,
     "balance" TEXT NOT NULL,
     "address" TEXT NOT NULL,
-    "encryptedPrivateKey" TEXT NOT NULL,
+    "encryptedPrivateKey" TEXT,
     "userId" TEXT NOT NULL,
     "chainType" "ChainType" NOT NULL,
     "network" "Network" NOT NULL,
     "additionalData" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "blockchainId" TEXT,
+    "blockchainId" TEXT NOT NULL,
 
     CONSTRAINT "wallets_pkey" PRIMARY KEY ("id")
 );
@@ -151,7 +151,7 @@ CREATE TABLE "trade_orders" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "blockchains_chainId_key" ON "blockchains"("chainId");
+CREATE UNIQUE INDEX "blockchains_blockchainId_key" ON "blockchains"("blockchainId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "wallets_address_key" ON "wallets"("address");
@@ -172,7 +172,7 @@ CREATE UNIQUE INDEX "users_phoneNumber_key" ON "users"("phoneNumber");
 ALTER TABLE "wallets" ADD CONSTRAINT "wallets_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "wallets" ADD CONSTRAINT "wallets_blockchainId_fkey" FOREIGN KEY ("blockchainId") REFERENCES "blockchains"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "wallets" ADD CONSTRAINT "wallets_blockchainId_fkey" FOREIGN KEY ("blockchainId") REFERENCES "blockchains"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tokens" ADD CONSTRAINT "tokens_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

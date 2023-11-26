@@ -1,21 +1,19 @@
-import { Controller, Param, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { UtxoWalletService } from '../services/utxo-wallet.service';
-import { GetUserIdFromSub } from 'src/users/decorators/get-user-id-from-sub.decorator';
 
 @Controller('utxo-wallet')
 export class UtxoWalletController {
   constructor(private readonly utxoWalletService: UtxoWalletService) {}
-
   @Post('create/:network/:newtorkType')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthenticatedGuard)
   async createWallet(
+    @Request() req: any,
     @Param('network') network: string,
     @Param('networkType') networkType: string,
-    @GetUserIdFromSub() userIdFromSub: string,
   ) {
     return await this.utxoWalletService.createWallet(
-      userIdFromSub,
+      req.user.id,
       network,
       networkType,
     );
