@@ -1,43 +1,36 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { Queue, prisma, getWeb3WssInstance, uuidv4 } = require('./index');
+const appRoot = require('app-root-path');
+const { wss } = require(`${appRoot}/config/chains/5`);
+const ethers = require('ethers');
+const web3 = require('web3');
 
 const chainType = 'EVM';
 const blockchainId = '5';
 const coin = 'ETH';
 const transactionsQueue = new Queue(`${coin.toLowerCase()}-transactions`);
 
-const web3 = getWeb3WssInstance(process.env.ETHEREUM_WSS);
+const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 
-web3.eth.subscribe(
-  'logs',
+ethersWss.on(
   {
     topics: [web3.utils.sha3('DepositedOnBillete()')],
   },
-  async function (error, result) {
-    console.log('result:', result);
-    if (error) {
-      console.error('Error subscribing to logs:', error);
-      return;
+  async function (log, event) {
+    console.log('log:', log);
+    if (event) {
+      console.error('Event:', event);
     } else {
-      console.log('result:', result);
+      console.log('log:', log);
     }
     try {
-      const transaction = await web3.eth
-        .getTransaction(result.transactionHash)
-        .then((transaction) => {
-          console.log('Transaction details:', transaction);
-        })
-        .catch((err) => {
-          console.error('Error fetching transaction:', err);
-        });
+      const transaction = await ethersWss.getTransaction(log.transactionHash);
 
       console.log('transaction:', transaction);
 
       if (transaction) {
         const wallet = await prisma.wallet.findUnique({
           where: {
-            chainId: chainId.toString(),
-            coin: coin,
             address: transaction.to,
           },
         });
@@ -46,9 +39,10 @@ web3.eth.subscribe(
           console.log('entrando a crear la transaccion');
           await transactionsQueue.add(
             'transaction',
+
             {
               uuid: uuidv4(),
-              transactionHash: result.transactionHash,
+              transactionHash: log.transactionHash,
               amount: web3.utils.fromWei(transaction.value, 'ether'),
               from: transaction.from,
               to: transaction.to,
