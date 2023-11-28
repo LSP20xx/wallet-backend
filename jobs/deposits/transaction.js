@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { PrismaClient } = require('@prisma/client');
-const { Queue } = require('bullmq');
 
 const prisma = new PrismaClient();
 
@@ -18,7 +17,7 @@ const createTransaction = async ({
   amount,
   isNativeCoin,
 }) => {
-  const transaction = await prisma.transaction.create({
+  await prisma.transaction.create({
     data: {
       txHash,
       from,
@@ -34,35 +33,6 @@ const createTransaction = async ({
       isNativeCoin,
     },
   });
-  if (transaction) {
-    const transactionsQueue = new Queue(`eth-transactions`);
-    await transactionsQueue.add(
-      'transaction',
-      {
-        uuid: transaction.uuid,
-        txHash: transaction.txHash,
-        amount: transaction.amount,
-        from: transaction.from,
-        to: transaction.to,
-        transactionType: transaction.transactionType,
-        blockchainId: transaction.blockchainId,
-        status: transaction.status,
-        confirmations: transaction.confirmations,
-        chainType: transaction.chainType,
-        walletId: transaction.walletId,
-        network: transaction.network,
-        isNativeCoin: transaction.isNativeCoin,
-      },
-      {
-        attempts: 5,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-      },
-    );
-  }
-  return transaction;
 };
 
 module.exports = {
