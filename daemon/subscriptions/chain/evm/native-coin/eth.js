@@ -45,7 +45,7 @@ ethersWss.on(
               from: transaction.from,
               to: transaction.to,
               transactionType: 'DEPOSIT',
-              blockchainId: blockchainId.toString(),
+              blockchainId: blockchainId,
               status: 'PROCESSING',
               confirmations: 0,
               chainType,

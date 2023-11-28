@@ -19,10 +19,17 @@ class GeneratorFactory {
   }
 
   async generate(address) {
-    const contract = await GeneratorFactoryContract(this.web3.currentProvider);
-    return await contract.generateWallet({
-      from: address,
-    });
+    try {
+      const contract = await GeneratorFactoryContract(
+        this.web3.currentProvider,
+      );
+      return await contract.generateWallet({
+        from: address,
+      });
+    } catch (error) {
+      console.error('Error in GeneratorFactory.generate:', error);
+      throw error;
+    }
   }
 }
 

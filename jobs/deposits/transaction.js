@@ -13,7 +13,6 @@ const createTransaction = async ({
   status,
   confirmations,
   chainType,
-  coin,
   walletId,
   network,
   amount,
@@ -29,7 +28,6 @@ const createTransaction = async ({
       status,
       confirmations,
       chainType,
-      coin,
       walletId,
       network,
       amount,
@@ -37,12 +35,12 @@ const createTransaction = async ({
     },
   });
   if (transaction) {
-    const transactionsQueue = new Queue(`${coin.toLowerCase()}-transactions`);
+    const transactionsQueue = new Queue(`eth-transactions`);
     await transactionsQueue.add(
       'transaction',
       {
         uuid: transaction.uuid,
-        transactionHash: transaction.txHash,
+        txHash: transaction.txHash,
         amount: transaction.amount,
         from: transaction.from,
         to: transaction.to,

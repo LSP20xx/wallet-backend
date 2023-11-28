@@ -79,7 +79,7 @@ model Transaction {
   confirmations Int
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  blockchain Blockchain? @relation(fields: [blockchainId], references: [id], name: "TransactionChain")
+  blockchain Blockchain? @relation(fields: [blockchainId], references: [blockchainId], name: "TransactionChain")
   blockchainId String?
   token      Token?     @relation(fields: [tokenId], references: [id], name: "TokenTransactions")
   tokenId    String?

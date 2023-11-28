@@ -185,7 +185,7 @@ ALTER TABLE "tokens" ADD CONSTRAINT "tokens_blockchainId_fkey" FOREIGN KEY ("blo
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_blockchainId_fkey" FOREIGN KEY ("blockchainId") REFERENCES "blockchains"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_blockchainId_fkey" FOREIGN KEY ("blockchainId") REFERENCES "blockchains"("blockchainId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "tokens"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -18,21 +18,26 @@ const generatorFactory = new GeneratorFactory(rpc, [g_address_pk]);
 
 async function generateAndSaveWallets() {
   while (amount > 0) {
-    console.log('Generating wallet... ', 'Remain: ', amount - 1);
-    const res = await generatorFactory.generate(g_address);
-    const result = JSON.parse(
-      JSON.stringify(res.logs[0].args).replace('Result', '').trim(),
-    );
+    try {
+      console.log('Generating wallet... ', 'Remain: ', amount - 1);
+      const res = await generatorFactory.generate(g_address);
+      const result = JSON.parse(
+        JSON.stringify(res.logs[0].args).replace('Result', '').trim(),
+      );
 
-    console.log(`Saving wallet: ${result.wallet}`);
-    await prisma.walletContract.create({
-      data: {
-        address: result.wallet,
-        blockchainId: blockchainId,
-        chainType: chainType,
-        network: network,
-      },
-    });
+      console.log(`Saving wallet: ${result.wallet}`);
+      await prisma.walletContract.create({
+        data: {
+          address: result.wallet,
+          blockchainId: blockchainId,
+          chainType: chainType,
+          network: network,
+        },
+      });
+    } catch (e) {
+      console.error('Error during wallet generation or saving:', e);
+      break;
+    }
 
     amount--;
     await sleep(5000);
