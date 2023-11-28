@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { Queue, prisma, getWeb3WssInstance, uuidv4 } = require('./index');
-const appRoot = require('app-root-path');
-const { wss } = require(`${appRoot}/config/chains/5`);
+const { Queue, prisma, uuidv4 } = require('./index');
 const ethers = require('ethers');
 const web3 = require('web3');
 
@@ -42,18 +40,18 @@ ethersWss.on(
 
             {
               uuid: uuidv4(),
-              transactionHash: log.transactionHash,
+              txHash: log.transactionHash,
               amount: web3.utils.fromWei(transaction.value, 'ether'),
               from: transaction.from,
               to: transaction.to,
               transactionType: 'DEPOSIT',
-              blockchainId,
+              blockchainId: blockchainId.toString(),
               status: 'PROCESSING',
               confirmations: 0,
               chainType,
-              coin,
               walletId: wallet.id,
               network: blockchainId === '1' ? 'MAINNET' : 'TESTNET',
+              isNativeCoin: true,
             },
             {
               attempts: 5,

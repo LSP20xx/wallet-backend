@@ -16,20 +16,24 @@ const createTransaction = async ({
   coin,
   walletId,
   network,
+  amount,
+  isNativeCoin,
 }) => {
   const transaction = await prisma.transaction.create({
     data: {
       txHash,
       from,
       to,
-      chainId,
       transactionType,
       blockchainId,
       status,
       confirmations,
       chainType,
+      coin,
       walletId,
       network,
+      amount,
+      isNativeCoin,
     },
   });
   if (transaction) {
@@ -47,9 +51,9 @@ const createTransaction = async ({
         status: transaction.status,
         confirmations: transaction.confirmations,
         chainType: transaction.chainType,
-        coin: transaction.coin,
         walletId: transaction.walletId,
         network: transaction.network,
+        isNativeCoin: transaction.isNativeCoin,
       },
       {
         attempts: 5,
@@ -63,4 +67,6 @@ const createTransaction = async ({
   return transaction;
 };
 
-module.exports = createTransaction;
+module.exports = {
+  createTransaction,
+};

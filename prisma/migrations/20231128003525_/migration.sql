@@ -83,7 +83,7 @@ CREATE TABLE "transactions" (
     "txHash" TEXT NOT NULL,
     "from" TEXT NOT NULL,
     "to" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
+    "amount" TEXT NOT NULL,
     "transactionType" "TransactionType" NOT NULL,
     "walletId" TEXT NOT NULL,
     "chainType" "ChainType" NOT NULL,
@@ -94,6 +94,7 @@ CREATE TABLE "transactions" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "blockchainId" TEXT,
     "tokenId" TEXT,
+    "isNativeCoin" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );

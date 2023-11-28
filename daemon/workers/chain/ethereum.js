@@ -7,6 +7,7 @@ const {
 } = require('./index');
 
 new Worker('eth-transactions', async (job) => {
+  console.log('job:', job);
   return await createTransaction(job.data);
 });
 
