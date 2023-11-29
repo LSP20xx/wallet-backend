@@ -71,7 +71,7 @@ const processWithdraw = async ({
       const { value, blockNumber } = result;
       const confirmations = (await web3.eth.getBlockNumber()) - blockNumber;
       await _updateTransactionState(transactionId, 2, confirmations);
-      if (confirmations >= process.env.MIN_CONFIRMATIONS) {
+      if (confirmations >= 12) {
         return await _checkConfirmation(
           walletAddress,
           transactionHash,

@@ -69,10 +69,12 @@ model Transaction {
   txHash     String
   from       String
   to         String
-  amount     String
+  amount     String?
   transactionType TransactionType
   wallet     Wallet     @relation(fields: [walletId], references: [id], name: "WalletTransactions")
   walletId   String
+  user       User        @relation(fields: [userId], references: [id], name: "UserTransactions")
+  userId     String          
   chainType  ChainType
   network    Network
   status     TransactionStatus
@@ -101,6 +103,7 @@ model User {
   sellOrders        TradeOrder[]  @relation("UserSellOrders")
   buyOrders         TradeOrder[]  @relation("UserBuyOrders")
   sessions          Session[]     @relation("UserSessions")
+  transactions      Transaction[] @relation("UserTransactions")
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 

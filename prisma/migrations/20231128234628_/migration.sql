@@ -83,9 +83,10 @@ CREATE TABLE "transactions" (
     "txHash" TEXT NOT NULL,
     "from" TEXT NOT NULL,
     "to" TEXT NOT NULL,
-    "amount" TEXT NOT NULL,
+    "amount" TEXT,
     "transactionType" "TransactionType" NOT NULL,
     "walletId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "chainType" "ChainType" NOT NULL,
     "network" "Network" NOT NULL,
     "status" "TransactionStatus" NOT NULL,
@@ -183,6 +184,9 @@ ALTER TABLE "tokens" ADD CONSTRAINT "tokens_blockchainId_fkey" FOREIGN KEY ("blo
 
 -- AddForeignKey
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_blockchainId_fkey" FOREIGN KEY ("blockchainId") REFERENCES "blockchains"("blockchainId") ON DELETE SET NULL ON UPDATE CASCADE;
