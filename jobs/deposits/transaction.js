@@ -14,6 +14,7 @@ const createTransaction = async ({
   confirmations,
   chainType,
   blockchainId,
+  blockNumber,
   walletId,
   userId,
   network,
@@ -40,17 +41,15 @@ const createTransaction = async ({
   });
   if (transaction) {
     console.log('transaction:', transaction);
-    console.log('coin:', coin.toLowerCase());
     const depositsQueue = new Queue(`${coin.toLowerCase()}-deposits`);
     depositsQueue.add(
       'deposit',
       {
-        to,
-        txHash,
-        transactionId: transaction.id,
-        blockchainId,
-        coin,
         amount,
+        blockNumber,
+        coin,
+        transactionId: transaction.id,
+        txHash,
         uuid: uuidv4(),
       },
       {

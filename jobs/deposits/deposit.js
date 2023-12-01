@@ -7,103 +7,132 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 
-const reject = () => {
-  console.error('error: not deposited');
-  throw 'err: not deposited';
-};
-
 const _updateTransactionState = async (
   transactionId,
   status,
   amount,
   confirmations,
 ) => {
-  const upsert = {
-    status: status,
-    ...(confirmations && { confirmations: confirmations }),
-    ...(amount && { amount: value }),
-  };
-  await prisma.transaction.update({
-    where: { id: transactionId },
-    data: upsert,
-  });
+  try {
+    const upsert = {
+      status: status,
+      ...(confirmations && { confirmations: confirmations }),
+      ...(amount && { amount: amount }),
+    };
+    await prisma.transaction.update({
+      where: { id: transactionId },
+      data: upsert,
+    });
+  } catch (error) {
+    console.error('Error in _updateTransactionState:', error);
+    throw error;
+  }
 };
 
-const _deposit = async (transactionId, blockchainId, coin, to, amount) => {
-  const wallet = await prisma.wallet.findUnique({
-    where: {
-      to: to,
-      blockchainId: blockchainId,
-    },
-    data: {
-      balance: { increment: amount },
-    },
-  });
-  if (wallet) {
-    await _updateTransactionState(transactionId, 'PROCCESSED', amount);
-    const wallet = await prisma.wallet.findFirst({
-      where: { transactions: { some: { id: transactionId } } },
-    });
-    const user = await prisma.user.findUnique({
-      where: { id: wallet.userId },
-    });
-    sendDepositEmail(amount, coin, user.email);
+const _deposit = async (transactionId, amount, confirmations) => {
+  try {
+    await _updateTransactionState(
+      transactionId,
+      'PROCESSED',
+      amount.toString(),
+      confirmations,
+    );
+    // const user = await prisma.transaction
+    //   .findOne({
+    //     where: { id: transactionId },
+    //   })
+    //   .user();
     return 'deposit';
-  } else {
-    await _updateTransactionState(transactionId, 'CANCELLED');
-    reject();
+  } catch (error) {
+    throw error;
   }
 };
+
 const _checkConfirmation = async (
-  to,
-  txHash,
   amount,
-  coin,
-  blockchainId,
   transactionId,
+  coin,
+  confirmations,
+  txHash,
 ) => {
-  const transaction = await ethersWss.getTransaction(txHash);
-  if (transaction && transaction.status) {
-    return _deposit(
-      transactionId,
-      blockchainId,
-      coin,
-      to,
-      amount / 10 ** coins[coin].decimals,
-    );
+  try {
+    const transactionReceipt = await ethersWss.getTransactionReceipt(txHash);
+    if (transactionReceipt && transactionReceipt.status) {
+      return await _deposit(
+        transactionId,
+        amount / 10 ** coins[coin].decimals,
+        confirmations,
+      );
+    } else {
+      await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
+      throw 'error: not deposited. no transaction receipt.';
+    }
+  } catch (error) {
+    console.error('Error in _checkConfirmation:', error);
+    throw error;
   }
-  reject();
+};
+
+const verifyDeposit = async (
+  amount,
+  blockNumber,
+  currentBlockNumber,
+  coin,
+  transactionId,
+  txHash,
+) => {
+  try {
+    let confirmations = currentBlockNumber - blockNumber;
+
+    while (confirmations < 6) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      currentBlockNumber = await ethersWss.getBlockNumber();
+      confirmations = currentBlockNumber - blockNumber;
+      console.log(
+        'Rechecking - Confirmations:',
+        confirmations,
+        'Current Block:',
+        currentBlockNumber,
+        'Block Number:',
+        blockNumber,
+      );
+    }
+
+    return await _checkConfirmation(
+      amount,
+      transactionId,
+      coin,
+      confirmations,
+      txHash,
+    );
+  } catch (error) {
+    console.error('Error in verifyDeposit:', error);
+    throw error;
+  }
 };
 
 const processDeposit = async ({
-  to,
-  txHash,
-  transactionId,
-  blockchainId,
-  coin,
   amount,
+  blockNumber,
+  coin,
+  transactionId,
+  txHash,
 }) => {
-  const currentBlockNumber = await ethersWss.getBlockNumber();
-  const confirmations = currentBlockNumber - blockNumber;
-
-  await _updateTransactionState(
-    transactionId,
-    'PROCESSED',
-    ethers.utils.formatUnits(amount, coins[coin].decimals),
-    confirmations,
-  );
-
-  if (confirmations >= 12) {
-    return await _checkConfirmation(
-      to,
-      txHash,
-      ethers.utils.formatUnits(amount, coins[coin].decimals),
+  let currentBlockNumber;
+  try {
+    currentBlockNumber = await ethersWss.getBlockNumber();
+    await verifyDeposit(
+      amount,
+      blockNumber,
+      currentBlockNumber,
       coin,
-      blockchainId,
       transactionId,
+      txHash,
     );
+  } catch (error) {
+    await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
+    throw error;
   }
-  reject();
 };
 
 module.exports = {

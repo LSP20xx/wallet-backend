@@ -14,13 +14,7 @@ ethersWss.on(
   {
     topics: [web3.utils.sha3('DepositedOnBillete()')],
   },
-  async function (log, event) {
-    console.log('log:', log);
-    if (event) {
-      console.error('Event:', event);
-    } else {
-      console.log('log:', log);
-    }
+  async function (log) {
     try {
       const transaction = await ethersWss.getTransaction(log.transactionHash);
 
@@ -39,7 +33,6 @@ ethersWss.on(
             'transaction',
 
             {
-              uuid: uuidv4(),
               txHash: log.transactionHash,
               amount: transaction.value.toString(),
               from: transaction.from,
@@ -49,11 +42,13 @@ ethersWss.on(
               confirmations: 0,
               chainType,
               blockchainId: blockchainId,
+              blockNumber: transaction.blockNumber,
               walletId: wallet.id,
               userId: wallet.userId,
               network: blockchainId === '1' ? 'MAINNET' : 'TESTNET',
               coin: coin,
               isNativeCoin: true,
+              uuid: uuidv4(),
             },
             {
               attempts: 5,
