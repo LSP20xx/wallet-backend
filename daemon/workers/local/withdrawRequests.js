@@ -4,7 +4,5 @@ require('dotenv').config({ path: `${appRoot}/config/.env` });
 const { Worker } = require('bullmq');
 
 new Worker('withdraw-requests', async (job) => {
-  console.log('Working on withdraw-requests job');
-  const { withdrawRequest } = job.data;
-  console.log('withdrawRequest', withdrawRequest);
+  return await sendWithdraw(job.data);
 });
