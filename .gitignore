@@ -38,3 +38,6 @@ lerna-debug.log*
 
 #Migrations
 /db/migrations
+
+# Redis data dump
+redis/data/dump.rdb

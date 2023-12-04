@@ -1,92 +1,140 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const appRoot = require('app-root-path');
-const ObjectId = require('mongoose').Types.ObjectId;
-const Transaction = require(`${appRoot}/config/models/Transaction`);
-const Wallet = require(`${appRoot}/config/models/Wallet`);
-const User = require(`${appRoot}/config/models/User`);
+require('dotenv').config({ path: `${appRoot}/config/.env` });
 const coins = require(`${appRoot}/config/coins/info`);
-const Web3 = require('web3');
-const { sendWithdrawEmail } = require('../notifications/mailService');
+const ethers = require('ethers');
+const { PrismaClient } = require('@prisma/client');
+const { Queue } = require('bullmq');
+const prisma = new PrismaClient();
+const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 
-let web3;
+const approveTransactionQueue = new Queue('approve-transactions');
 
-const reject = () => {
-  throw 'error: not withdrawed';
+const _updateTransactionState = async (
+  transactionId,
+  status,
+  amount,
+  confirmations,
+) => {
+  try {
+    const upsert = {
+      status: status,
+      ...(confirmations && { confirmations: confirmations }),
+      ...(amount && { amount: amount }),
+    };
+    await prisma.transaction.update({
+      where: { id: transactionId },
+      data: upsert,
+    });
+  } catch (error) {
+    console.error('Error in _updateTransactionState:', error);
+    throw error;
+  }
 };
 
-const _updateTransactionState = async (tId, status, confirmations) => {
-  const upsert = {
-    status,
-  };
+const _withdraw = async (transactionId, amount, confirmations) => {
+  try {
+    await _updateTransactionState(
+      transactionId,
+      'PROCESSED',
+      amount.toString(),
+      confirmations,
+    );
 
-  if (confirmations) upsert.confirmations = confirmations;
-
-  await Transaction.updateOne(
-    { _id: ObjectId(tId) },
-    {
-      $set: upsert,
-    },
-  );
+    await approveTransactionQueue.add('approve', { transactionId });
+    return 'withdraw';
+  } catch (error) {
+    throw error;
+  }
 };
 
 const _checkConfirmation = async (
-  address,
+  amount,
+  transactionId,
+  coin,
+  confirmations,
   txHash,
-  value,
+) => {
+  try {
+    const transactionReceipt = await ethersWss.getTransactionReceipt(txHash);
+    if (transactionReceipt && transactionReceipt.status) {
+      return await _withdraw(
+        transactionId,
+        amount / 10 ** coins[coin].decimals,
+        confirmations,
+      );
+    } else {
+      await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
+      throw 'error: not withdrawed. no transaction receipt.';
+    }
+  } catch (error) {
+    console.error('Error in _checkConfirmation:', error);
+    throw error;
+  }
+};
+
+const verifyWithdraw = async (
+  amount,
+  blockNumber,
+  currentBlockNumber,
   coin,
   transactionId,
+  txHash,
 ) => {
-  var result = await web3.eth.getTransactionReceipt(txHash);
-  if (result && 'status' in result && result.status) {
-    await _updateTransactionState(transactionId, 3);
-    const wallet = await Wallet.findOne({
-      transactions: ObjectId(transactionId),
-    });
-    const user = await User.findOne({ wallets: ObjectId(wallet._id) });
-    sendWithdrawEmail(
-      value / 10 ** coins[coin.toUpperCase()].decimals,
-      coin,
-      address,
-      txHash,
-      user.email,
-    );
-    return 'withdrawed';
-  }
+  try {
+    let confirmations = currentBlockNumber - blockNumber;
 
-  reject();
+    while (confirmations < 6) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      currentBlockNumber = await ethersWss.getBlockNumber();
+      confirmations = currentBlockNumber - blockNumber;
+      console.log(
+        'Rechecking - Confirmations:',
+        confirmations,
+        'Current Block:',
+        currentBlockNumber,
+        'Block Number:',
+        blockNumber,
+      );
+    }
+
+    return await _checkConfirmation(
+      amount,
+      transactionId,
+      coin,
+      confirmations,
+      txHash,
+    );
+  } catch (error) {
+    console.error('Error in verifyWithdraw:', error);
+    throw error;
+  }
 };
 
 const processWithdraw = async ({
-  walletAddress,
-  transactionHash,
-  transactionId,
-  chainId,
+  amount,
+  blockNumber,
   coin,
+  transactionId,
+  txHash,
 }) => {
-  web3 = new Web3(require(`${appRoot}/config/chains/` + chainId).rpc);
-  var result = await Transaction.findOne({ _id: ObjectId(transactionId) });
-  if (result) {
-    result = await web3.eth.getTransaction(transactionHash);
-    if (result && 'value' in result) {
-      const { value, blockNumber } = result;
-      const confirmations = (await web3.eth.getBlockNumber()) - blockNumber;
-      await _updateTransactionState(transactionId, 2, confirmations);
-      if (confirmations >= 12) {
-        return await _checkConfirmation(
-          walletAddress,
-          transactionHash,
-          value,
-          coin,
-          chainId,
-          transactionId,
-        );
-      }
-
-      reject();
-    }
+  let currentBlockNumber;
+  try {
+    currentBlockNumber = await ethersWss.getBlockNumber();
+    await verifyWithdraw(
+      amount,
+      blockNumber,
+      currentBlockNumber,
+      coin,
+      transactionId,
+      txHash,
+    );
+  } catch (error) {
+    await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
+    throw error;
   }
-
-  reject();
 };
 
-module.exports = processWithdraw;
+module.exports = {
+  processWithdraw,
+};

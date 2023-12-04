@@ -40,7 +40,6 @@ const createTransaction = async ({
     },
   });
   if (transaction) {
-    console.log('transaction:', transaction);
     const depositsQueue = new Queue(`${coin.toLowerCase()}-deposits`);
     depositsQueue.add(
       'deposit',

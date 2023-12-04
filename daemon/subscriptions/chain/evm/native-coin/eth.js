@@ -18,8 +18,6 @@ ethersWss.on(
     try {
       const transaction = await ethersWss.getTransaction(log.transactionHash);
 
-      console.log('transaction:', transaction);
-
       if (transaction) {
         const wallet = await prisma.wallet.findUnique({
           where: {
@@ -28,7 +26,6 @@ ethersWss.on(
         });
 
         if (wallet) {
-          console.log('entrando a crear la transaccion');
           await transactionsQueue.add(
             'transaction',
 

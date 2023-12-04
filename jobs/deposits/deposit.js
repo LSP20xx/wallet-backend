@@ -4,8 +4,11 @@ require('dotenv').config({ path: `${appRoot}/config/.env` });
 const coins = require(`${appRoot}/config/coins/info`);
 const ethers = require('ethers');
 const { PrismaClient } = require('@prisma/client');
+const { Queue } = require('bullmq');
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
+
+const approveTransactionQueue = new Queue('approve-transactions');
 
 const _updateTransactionState = async (
   transactionId,
@@ -42,6 +45,7 @@ const _deposit = async (transactionId, amount, confirmations) => {
     //     where: { id: transactionId },
     //   })
     //   .user();
+    await approveTransactionQueue.add('approve', { transactionId });
     return 'deposit';
   } catch (error) {
     throw error;

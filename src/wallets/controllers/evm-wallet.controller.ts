@@ -22,11 +22,7 @@ import { JobJson } from 'bullmq';
 
 @Controller('evm-wallet')
 export class EvmWalletController {
-  constructor(
-    private readonly walletService: EvmWalletService,
-    // private readonly web3Service: Web3Service,
-    // private readonly transactionsService: TransactionsService,
-  ) {}
+  constructor(private readonly walletService: EvmWalletService) {}
 
   @Get()
   @UseGuards(AuthenticatedGuard)
@@ -57,9 +53,9 @@ export class EvmWalletController {
     @Body() withdrawDto: WithdrawDto,
   ): Promise<JobJson> {
     try {
-      const userId = req.user.id;
-      withdrawDto.userId = userId;
+      withdrawDto.userId = req.user.id;
       withdrawDto.chainId = chainId;
+      console.log(withdrawDto);
       // const isUnlocked = this.web3Service.unlockWallet(
       //   chainId,
       //   sendTransactionDto.from,
