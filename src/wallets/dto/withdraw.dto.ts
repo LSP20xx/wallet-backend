@@ -10,10 +10,13 @@ export class WithdrawDto {
   @IsNotEmpty()
   @IsString()
   amount: string;
+  @IsNotEmpty()
+  @IsString()
+  coin: string;
   @IsOptional()
   @IsString()
   userId: string;
   @IsOptional()
   @IsString()
-  chainId: string;
+  blockchainId: string;
 }

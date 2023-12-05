@@ -5,7 +5,7 @@ const { Queue } = require('bullmq');
 
 const prisma = new PrismaClient();
 
-const createTransaction = async ({
+const createDepositTransaction = async ({
   txHash,
   from,
   to,
@@ -22,48 +22,54 @@ const createTransaction = async ({
   coin,
   isNativeCoin,
 }) => {
-  const transaction = await prisma.transaction.create({
-    data: {
-      txHash,
-      from,
-      to,
-      transactionType,
-      blockchainId,
-      status,
-      confirmations,
-      chainType,
-      blockchainId,
-      walletId,
-      userId,
-      network,
-      isNativeCoin,
-    },
-  });
-  if (transaction) {
-    const depositsQueue = new Queue(`${coin.toLowerCase()}-deposits`);
-    depositsQueue.add(
-      'deposit',
-      {
-        amount,
-        blockNumber,
-        coin,
-        transactionId: transaction.id,
+  try {
+    const transaction = await prisma.transaction.create({
+      data: {
         txHash,
-        uuid: uuidv4(),
+        from,
+        to,
+        transactionType,
+        status,
+        confirmations,
+        chainType,
+        blockchainId,
+        blockNumber,
+        walletId,
+        userId,
+        network,
+        amount,
+        coin,
+        isNativeCoin,
       },
-      {
-        attempts: 20,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
+    });
+    if (transaction) {
+      const depositsQueue = new Queue(`${coin.toLowerCase()}-deposits`);
+      depositsQueue.add(
+        'deposit',
+        {
+          amount,
+          blockNumber,
+          coin,
+          transactionId: transaction.id,
+          txHash,
+          uuid: uuidv4(),
         },
-      },
-    );
-    return 'deposit';
+        {
+          attempts: 20,
+          backoff: {
+            type: 'exponential',
+            delay: 5000,
+          },
+        },
+      );
+      return 'deposit';
+    }
+    throw 'err: not processed';
+  } catch (err) {
+    console.log('err', err);
   }
-  throw 'err: not processed';
 };
 
 module.exports = {
-  createTransaction,
+  createDepositTransaction,
 };

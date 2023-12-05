@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
   Worker,
-  createTransaction,
+  createDepositTransaction,
+  createWithdrawTransaction,
   processDeposit,
   approveTransaction,
   processWithdraw,
 } = require('./index');
 
 new Worker('eth-transactions', async (job) => {
-  return await createTransaction(job.data);
+  if (job.data.transactionType === 'DEPOSIT') {
+    return await createDepositTransaction(job.data);
+  } else if (job.data.transactionType === 'WITHDRAWAL') {
+    return await createWithdrawTransaction(job.data);
+  }
 });
 
 new Worker('eth-deposits', async (job) => {

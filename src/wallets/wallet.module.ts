@@ -14,7 +14,10 @@ import { default as QueueType } from './queue/types.queue';
     EncryptionsModule,
     Web3Module,
     TransactionsModule,
-    BullModule.registerQueue({ name: QueueType.WITHDRAW_REQUEST }),
+    BullModule.registerQueue(
+      { name: QueueType.WITHDRAW_REQUEST },
+      { name: QueueType.ETH_TRANSACTIONS },
+    ),
   ],
   controllers: [EvmWalletController],
   providers: [UtxoWalletService, EvmWalletService, GraphQueryService],

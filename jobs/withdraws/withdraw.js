@@ -3,10 +3,12 @@ const appRoot = require('app-root-path');
 require('dotenv').config({ path: `${appRoot}/config/.env` });
 const coins = require(`${appRoot}/config/coins/info`);
 const ethers = require('ethers');
+const { Web3 } = require('web3');
 const { PrismaClient } = require('@prisma/client');
 const { Queue } = require('bullmq');
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
+const web3 = new Web3(process.env.ETHEREUM_WSS);
 
 const approveTransactionQueue = new Queue('approve-transactions');
 
@@ -111,16 +113,65 @@ const verifyWithdraw = async (
   }
 };
 
+const sendTransaction = async (value, toAddress) => {
+  const signer = ethersWss.getSigner(process.env.WITHDRAW_FROM_WALLET);
+
+  const nonce = await ethersWss.getTransactionCount(
+    process.env.WITHDRAW_FROM_WALLET,
+  );
+
+  const gasPrice = await web3.eth.getGasPrice();
+  console.log('gasPrice', gasPrice);
+
+  const tx = {
+    nonce: nonce,
+    gasPrice: gasPrice,
+    gasLimit: ethersWss.hexlify(3000000),
+    to: toAddress,
+    value: ethersWss.parseEther(value.toString()),
+  };
+
+  // Firmar y enviar la transacción
+  const txResponse = await signer.sendTransaction(tx);
+  await txResponse.wait(); // Esperar a que la transacción sea confirmada
+
+  return txResponse.hash; // Devolver el hash de la transacción
+};
+
 const processWithdraw = async ({
   amount,
-  blockNumber,
-  coin,
+  from,
+  to,
+  transactionType,
+  status,
   transactionId,
-  txHash,
+  chainType,
+  blockchainId,
+  walletId,
+  userId,
+  network,
+  coin,
+  isNativeCoin,
 }) => {
+  console.log('processWithdraw', {
+    amount,
+    from,
+    to,
+    transactionType,
+    status,
+    transactionId,
+    chainType,
+    blockchainId,
+    walletId,
+    userId,
+    network,
+    coin,
+    isNativeCoin,
+  });
   let currentBlockNumber;
   try {
     currentBlockNumber = await ethersWss.getBlockNumber();
+    const txHash = await sendTransaction(amount, to);
     await verifyWithdraw(
       amount,
       blockNumber,

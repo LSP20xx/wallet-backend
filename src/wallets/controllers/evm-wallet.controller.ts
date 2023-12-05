@@ -18,7 +18,6 @@ import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 // import { Web3Service } from '../../web3/services/web3.service';
 import { WithdrawDto } from '../dto/withdraw.dto';
 import { EvmWalletService } from '../services/evm-wallet.service';
-import { JobJson } from 'bullmq';
 
 @Controller('evm-wallet')
 export class EvmWalletController {
@@ -40,62 +39,33 @@ export class EvmWalletController {
   @UseGuards(AuthenticatedGuard)
   async createWallet(
     @Request() req: any,
-    @Param('chainId') chainId: string,
+    @Param('blockchainId') blockchainId: string,
   ): Promise<Wallet> {
-    return await this.walletService.createWallet(req.user.id, chainId);
+    return await this.walletService.createWallet(req.user.id, blockchainId);
   }
 
-  @Post('withdraw/:chainId')
+  @Post('withdraw/:blockchainId')
   @UseGuards(AuthenticatedGuard)
   async withdraw(
     @Request() req: any,
-    @Param('chainId') chainId: string,
+    @Param('blockchainId') blockchainId: string,
     @Body() withdrawDto: WithdrawDto,
-  ): Promise<JobJson> {
+  ): Promise<void> {
     try {
       withdrawDto.userId = req.user.id;
-      withdrawDto.chainId = chainId;
-      console.log(withdrawDto);
-      // const isUnlocked = this.web3Service.unlockWallet(
-      //   chainId,
-      //   sendTransactionDto.from,
-      //   sendTransactionDto.encryptedPrivateKey,
-      // );
-
-      // if (!isUnlocked) {
-      //   throw new HttpException(
-      //     'No se pudo desbloquear la wallet.',
-      //     HttpStatus.UNAUTHORIZED,
-      //   );
-      // }
-
-      // const txHash = await this.web3Service.sendTransaction(
-      //   chainId,
-      //   sendTransactionDto,
-      //   sendTransactionDto.encryptedPrivateKey,
-      // );
-
-      // const txData = {
-      //   txHash,
-      //   from: sendTransactionDto.from,
-      //   to: sendTransactionDto.to,
-      //   amount: sendTransactionDto.amount,
-      // };
-
-      // await this.transactionsService.saveTransaction(txData);
-
-      // return txHash;
+      withdrawDto.blockchainId = blockchainId;
       return await this.walletService.withdraw(withdrawDto);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Get('transfers/:chainId')
+  @Get('transfers/:blockchainId')
   @UseGuards(AuthenticatedGuard)
-  async getTransfersForChain(@Param('chainId') chainId: string) {
+  async getTransfersForChain(@Param('blockchainId') blockchainId: string) {
     try {
-      const transfers = await this.walletService.getTransfersForChain(chainId);
+      const transfers =
+        await this.walletService.getTransfersForChain(blockchainId);
       return transfers;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

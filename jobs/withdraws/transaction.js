@@ -5,66 +5,74 @@ const { Queue } = require('bullmq');
 
 const prisma = new PrismaClient();
 
-const createTransaction = async ({
-  txHash,
+const createWithdrawTransaction = async ({
+  amount,
   from,
   to,
   transactionType,
   status,
-  confirmations,
   chainType,
   blockchainId,
-  blockNumber,
   walletId,
   userId,
   network,
-  amount,
   coin,
   isNativeCoin,
 }) => {
-  const transaction = await prisma.transaction.create({
-    data: {
-      txHash,
-      from,
-      to,
-      transactionType,
-      blockchainId,
-      status,
-      confirmations,
-      chainType,
-      blockchainId,
-      walletId,
-      userId,
-      network,
-      isNativeCoin,
-    },
-  });
-  if (transaction) {
-    console.log('transaction:', transaction);
-    const withdrawQueue = new Queue(`${coin.toLowerCase()}-withdraw`);
-    withdrawQueue.add(
-      'withdraw',
-      {
+  try {
+    const transaction = await prisma.transaction.create({
+      data: {
+        txHash: uuidv4().toString(),
         amount,
-        blockNumber,
-        coin,
-        transactionId: transaction.id,
-        txHash,
-        uuid: uuidv4(),
+        from,
+        to,
+        transactionType,
+        status,
+        confirmations: 0,
+        chainType,
+        blockchainId,
+        walletId,
+        userId,
+        network,
+        isNativeCoin,
       },
-      {
-        attempts: 20,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
+    });
+    if (transaction) {
+      const withdrawQueue = new Queue(`${coin.toLowerCase()}-withdraws`);
+      withdrawQueue.add(
+        'withdraw',
+        {
+          amount,
+          from,
+          to,
+          transactionType,
+          status,
+          transactionId: transaction.id,
+          chainType,
+          blockchainId,
+          walletId,
+          userId,
+          network,
+          coin,
+          isNativeCoin,
+          uuid: uuidv4(),
         },
-      },
-    );
-    return 'withdraw';
+        {
+          attempts: 20,
+          backoff: {
+            type: 'exponential',
+            delay: 5000,
+          },
+        },
+      );
+      return 'withdraw';
+    }
+    throw 'err: not processed';
+  } catch (err) {
+    console.log('err', err);
   }
-  throw 'err: not processed';
 };
 
 module.exports = {
-  createTransaction,
+  createWithdrawTransaction,
 };
