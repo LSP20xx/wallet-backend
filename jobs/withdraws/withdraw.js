@@ -191,6 +191,7 @@ const processWithdraw = async ({
   coin,
   isNativeCoin,
 }) => {
+  console.log('transactionId en processWithdraw', transactionId);
   try {
     if (isNativeCoin) {
       const gasPrice = await web3.eth.getGasPrice();

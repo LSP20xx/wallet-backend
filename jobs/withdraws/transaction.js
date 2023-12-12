@@ -39,6 +39,7 @@ const createWithdrawTransaction = async ({
         isNativeCoin,
       },
     });
+    console.log('transactionId', transaction.id);
     if (transaction) {
       const withdrawQueue = new Queue(`${coin.toLowerCase()}-withdraws`);
       withdrawQueue.add(
