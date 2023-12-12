@@ -9,7 +9,6 @@ const { Queue } = require('bullmq');
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 const web3 = new Web3(process.env.ETHEREUM_WSS);
-const BigNumber = require('bignumber.js');
 
 const approveTransactionQueue = new Queue('approve-transactions');
 
@@ -32,6 +31,12 @@ const _updateTransactionState = async (
   amount,
   confirmations,
 ) => {
+  console.log('Actualizando estado de transacción', {
+    transactionId,
+    status,
+    amount,
+  });
+
   try {
     console.log(
       'datos a actualizar',
@@ -46,6 +51,7 @@ const _updateTransactionState = async (
       ...(confirmations && { confirmations: confirmations }),
       ...(amount && { amount: amount }),
     };
+
     await prisma.transaction.update({
       where: { id: transactionId },
       data: upsert,
@@ -57,6 +63,8 @@ const _updateTransactionState = async (
 };
 
 const _withdraw = async (transactionId, amount, confirmations) => {
+  console.log('Llamada a _withdraw', { transactionId, amount });
+
   try {
     await _updateTransactionState(
       transactionId,
@@ -189,6 +197,7 @@ const processWithdraw = async ({
   coin,
   isNativeCoin,
 }) => {
+  console.log('Inicio de processWithdraw', { transactionId, amount, coin });
   try {
     if (isNativeCoin) {
       const gasPrice = await web3.eth.getGasPrice();
@@ -241,6 +250,7 @@ const processWithdraw = async ({
     await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
     throw error;
   }
+  console.log('Fin de processWithdraw', { transactionId });
 };
 
 module.exports = {

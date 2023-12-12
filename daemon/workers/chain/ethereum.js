@@ -9,6 +9,8 @@ const {
 } = require('./index');
 
 new Worker('eth-transactions', async (job) => {
+  console.log('Trabajador eth-transactions activado', job.data);
+
   if (job.data.transactionType === 'DEPOSIT') {
     return await createDepositTransaction(job.data);
   } else if (job.data.transactionType === 'WITHDRAWAL') {
