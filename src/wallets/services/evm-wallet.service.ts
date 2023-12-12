@@ -110,7 +110,7 @@ export class EvmWalletService {
     });
   }
 
-  async withdraw(withdrawDto: WithdrawDto): Promise<void> {
+  async withdraw(withdrawDto: WithdrawDto): Promise<{ message: string }> {
     const wallet = await this.databaseService.wallet.findUnique({
       where: { address: withdrawDto.from },
     });
@@ -144,5 +144,6 @@ export class EvmWalletService {
         },
       },
     );
+    return { message: 'Withdrawal request received and is being processed' };
   }
 }

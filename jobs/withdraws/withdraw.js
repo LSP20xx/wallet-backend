@@ -9,6 +9,7 @@ const { Queue } = require('bullmq');
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 const web3 = new Web3(process.env.ETHEREUM_WSS);
+const BigNumber = require('bignumber.js');
 
 const approveTransactionQueue = new Queue('approve-transactions');
 
@@ -39,6 +40,7 @@ const _updateTransactionState = async (
       amount,
       confirmations,
     );
+
     const upsert = {
       status: status,
       ...(confirmations && { confirmations: confirmations }),
@@ -59,7 +61,7 @@ const _withdraw = async (transactionId, amount, confirmations) => {
     await _updateTransactionState(
       transactionId,
       'PROCESSED',
-      amount.toString(),
+      amount,
       confirmations,
     );
 
@@ -80,11 +82,7 @@ const _checkConfirmation = async (
   try {
     const transactionReceipt = await ethersWss.getTransactionReceipt(txHash);
     if (transactionReceipt && transactionReceipt.status) {
-      return await _withdraw(
-        transactionId,
-        amount / 10 ** coins[coin].decimals,
-        confirmations,
-      );
+      return await _withdraw(transactionId, amount.toString(), confirmations);
     } else {
       await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
       throw 'error: not withdrawed. no transaction receipt.';
@@ -191,7 +189,6 @@ const processWithdraw = async ({
   coin,
   isNativeCoin,
 }) => {
-  console.log('transactionId en processWithdraw', transactionId);
   try {
     if (isNativeCoin) {
       const gasPrice = await web3.eth.getGasPrice();
@@ -200,8 +197,10 @@ const processWithdraw = async ({
       if (txHash) {
         const blockNumber = await ethersWss.getBlockNumber();
         const currentBlockNumber = await ethersWss.getBlockNumber();
+
         console.log('blockNumber', blockNumber);
         console.log('currentBlockNumber', currentBlockNumber);
+
         return await verifyWithdraw(
           amount,
           blockNumber,

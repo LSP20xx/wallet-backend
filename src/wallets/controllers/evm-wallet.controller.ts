@@ -50,7 +50,7 @@ export class EvmWalletController {
     @Request() req: any,
     @Param('blockchainId') blockchainId: string,
     @Body() withdrawDto: WithdrawDto,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     try {
       withdrawDto.userId = req.user.id;
       withdrawDto.blockchainId = blockchainId;
