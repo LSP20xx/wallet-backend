@@ -3,7 +3,6 @@ import { IsNotEmpty, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class SignInDTO {
   @IsNotEmpty()
-  @MaxLength(20)
   login: string;
 
   @IsNotEmpty()

@@ -1,32 +1,27 @@
 import {
   registerDecorator,
   ValidationOptions,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
+  ValidationArguments,
 } from 'class-validator';
-
-@ValidatorConstraint({ async: false })
-export class IsEitherPhoneOrEmailConstraint
-  implements ValidatorConstraintInterface
-{
-  validate(value: any) {
-    const { email, phoneNumber } = value;
-    return Boolean(email || phoneNumber);
-  }
-
-  defaultMessage(): string {
-    return 'You must provide either an email address or a phone number.';
-  }
-}
+import { SignUpDTO } from 'src/auth/dtos/sign-up.dto';
 
 export function IsEitherPhoneOrEmail(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
+      name: 'isEitherPhoneOrEmail',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: IsEitherPhoneOrEmailConstraint,
+      validator: {
+        validate(_value: any, args: ValidationArguments) {
+          const object = args.object as SignUpDTO;
+          return Boolean(object.email || object.phoneNumber);
+        },
+        defaultMessage() {
+          return 'You must provide either an email address or a phone number.';
+        },
+      },
     });
   };
 }

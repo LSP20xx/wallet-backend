@@ -61,6 +61,13 @@ const _checkConfirmation = async (
 ) => {
   try {
     const transactionReceipt = await ethersWss.getTransactionReceipt(txHash);
+    console.log(
+      'checkConfirmation:',
+      amount,
+      transactionId,
+      coin,
+      confirmations,
+    );
     if (transactionReceipt && transactionReceipt.status) {
       return await _deposit(
         transactionId,

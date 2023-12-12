@@ -2,6 +2,7 @@
 const { Queue, prisma, uuidv4 } = require('./index');
 const ethers = require('ethers');
 const web3 = require('web3');
+const coinsConfig = require('../../../../../config/coins/info');
 
 const chainType = 'EVM';
 const blockchainId = '5';
@@ -9,6 +10,10 @@ const coin = 'ETH';
 const transactionsQueue = new Queue(`${coin.toLowerCase()}-transactions`);
 
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
+
+const isNativeCoin = (coin) => {
+  return coin in coinsConfig;
+};
 
 ethersWss.on(
   {
@@ -44,7 +49,7 @@ ethersWss.on(
               userId: wallet.userId,
               network: blockchainId === '1' ? 'MAINNET' : 'TESTNET',
               coin: coin,
-              isNativeCoin: true,
+              isNativeCoin: isNativeCoin(coin),
               uuid: uuidv4(),
             },
             {

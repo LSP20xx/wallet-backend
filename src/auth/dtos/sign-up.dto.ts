@@ -38,8 +38,8 @@ export class SignUpDTO {
   })
   password: string;
 
-  @Validate(IsEitherPhoneOrEmail, {
+  @IsEitherPhoneOrEmail({
     message: 'You must provide either an email address or a phone number.',
   })
-  isEitherPhoneOrEmail: boolean;
+  eitherPhoneOrEmail: boolean = true;
 }

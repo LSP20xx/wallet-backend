@@ -33,12 +33,10 @@ const createDepositTransaction = async ({
         confirmations,
         chainType,
         blockchainId,
-        blockNumber,
         walletId,
         userId,
         network,
         amount,
-        coin,
         isNativeCoin,
       },
     });

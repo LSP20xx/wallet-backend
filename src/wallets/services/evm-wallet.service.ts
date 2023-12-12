@@ -8,6 +8,16 @@ import QueueType from '../queue/types.queue';
 import { WithdrawDto } from '../dto/withdraw.dto';
 import { v4 as uuidv4 } from 'uuid';
 
+const coinsConfig = {
+  ETH: {
+    decimals: 18,
+  },
+};
+
+const isNativeCoin = (coin: any) => {
+  return coin in coinsConfig;
+};
+
 @Injectable()
 export class EvmWalletService {
   constructor(
@@ -111,6 +121,8 @@ export class EvmWalletService {
       'transaction',
       {
         amount: withdrawDto.amount.toString(),
+        fee: withdrawDto.fee.toString(),
+        feePrice: withdrawDto.feePrice.toString(),
         from: withdrawDto.from,
         to: withdrawDto.to,
         transactionType: 'WITHDRAWAL',
@@ -121,7 +133,7 @@ export class EvmWalletService {
         userId: withdrawDto.userId,
         network: withdrawDto.blockchainId === '1' ? 'MAINNET' : 'TESTNET',
         coin: withdrawDto.coin,
-        isNativeCoin: withdrawDto.coin === 'ETH' ? true : false,
+        isNativeCoin: isNativeCoin(withdrawDto.coin),
         uuid: uuidv4(),
       },
       {

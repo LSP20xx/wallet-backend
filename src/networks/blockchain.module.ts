@@ -7,6 +7,12 @@ import { Web3Module } from '../web3/web3.module';
 import { EvmChainController } from './controllers/evm-chain.controller';
 import { EvmChainService } from './services/evm-chain.service';
 import { GraphQueryService } from './services/graph-query.service';
+import { existsSync, mkdirSync } from 'fs';
+
+const basePath = resolve(__dirname, '../../src/networks/subgraphs');
+if (!existsSync(basePath)) {
+  mkdirSync(basePath, { recursive: true });
+}
 
 @Module({
   imports: [Web3Module],

@@ -14,40 +14,42 @@ export class Web3Service {
     private readonly encryptionService: EncryptionsService,
   ) {}
 
-  getWeb3Instance(chainId: string): Web3 {
-    let web3 = this.web3Instances.get(chainId);
+  getWeb3Instance(blockchainId: string): Web3 {
+    let web3 = this.web3Instances.get(blockchainId);
 
     if (!web3) {
-      const rpcUrl = this.configService.get<string>(`RPC_URL_${chainId}`);
+      const rpcUrl = this.configService.get<string>(`RPC_URL_${blockchainId}`);
       if (!rpcUrl) {
-        throw new Error(`RPC URL for chainId ${chainId} is not configured.`);
+        throw new Error(
+          `RPC URL for blockchainId ${blockchainId} is not configured.`,
+        );
       }
       web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
-      this.web3Instances.set(chainId, web3);
+      this.web3Instances.set(blockchainId, web3);
     }
 
     return web3;
   }
 
-  getBalance(chainId: string, address: string): Promise<bigint> {
-    return this.getWeb3Instance(chainId).eth.getBalance(address);
+  getBalance(blockchainId: string, address: string): Promise<bigint> {
+    return this.getWeb3Instance(blockchainId).eth.getBalance(address);
   }
 
-  getTransaction(chainId: string, txHash: string): Promise<any> {
-    return this.getWeb3Instance(chainId).eth.getTransaction(txHash);
+  getTransaction(blockchainId: string, txHash: string): Promise<any> {
+    return this.getWeb3Instance(blockchainId).eth.getTransaction(txHash);
   }
 
   async sendTransaction(
-    chainId: string,
+    blockchainId: string,
     details: TransactionDetails,
     encryptedPrivateKey: string,
   ): Promise<string> {
-    const web3 = this.getWeb3Instance(chainId);
+    const web3 = this.getWeb3Instance(blockchainId);
     const privateKey = this.encryptionService.decrypt(encryptedPrivateKey);
-    const gasPrice = await this.getGasPrice(chainId);
+    const gasPrice = await this.getGasPrice(blockchainId);
 
     const gas = await this.estimateGas(
-      chainId,
+      blockchainId,
       details.from,
       details.to,
       details.amount.toString(),
@@ -74,17 +76,17 @@ export class Web3Service {
     return txHash;
   }
 
-  async getGasPrice(chainId: string): Promise<bigint> {
-    return await this.getWeb3Instance(chainId).eth.getGasPrice();
+  async getGasPrice(blockchainId: string): Promise<bigint> {
+    return await this.getWeb3Instance(blockchainId).eth.getGasPrice();
   }
 
   async estimateGas(
-    chainId: string,
+    blockchainId: string,
     from: string,
     to: string,
     value: string,
   ): Promise<bigint> {
-    const web3 = this.getWeb3Instance(chainId);
+    const web3 = this.getWeb3Instance(blockchainId);
     const gasEstimate = await web3.eth.estimateGas({
       from,
       to,
@@ -93,41 +95,46 @@ export class Web3Service {
     return gasEstimate;
   }
 
-  async getTransactionCount(chainId: string, address: string): Promise<bigint> {
-    return await this.getWeb3Instance(chainId).eth.getTransactionCount(address);
+  async getTransactionCount(
+    blockchainId: string,
+    address: string,
+  ): Promise<bigint> {
+    return await this.getWeb3Instance(blockchainId).eth.getTransactionCount(
+      address,
+    );
   }
 
   async getTransactionReceipt(
-    chainId: string,
+    blockchainId: string,
     txHash: string,
   ): Promise<TransactionReceipt> {
-    return await this.getWeb3Instance(chainId).eth.getTransactionReceipt(
+    return await this.getWeb3Instance(blockchainId).eth.getTransactionReceipt(
       txHash,
     );
   }
 
-  createWallet(chainId: string): {
+  createWallet(blockchainId: string): {
     address: string;
     encryptedPrivateKey: string;
   } {
-    const account = this.getWeb3Instance(chainId).eth.accounts.create();
+    const account = this.getWeb3Instance(blockchainId).eth.accounts.create();
     const { encryptedData, iv } = this.encryptionService.encrypt(
       account.privateKey,
     );
 
     return {
       address: account.address,
-      encryptedPrivateKey: `${iv}:${encryptedData}`, // Concatenar IV y datos cifrados
+      encryptedPrivateKey: `${iv}:${encryptedData}`,
     };
   }
   unlockWallet(
-    chainId: string,
+    blockchainId: string,
     address: string,
     encryptedPrivateKey: string,
   ): boolean {
     try {
       const privateKey = this.encryptionService.decrypt(encryptedPrivateKey);
-      const web3 = this.getWeb3Instance(chainId);
+      const web3 = this.getWeb3Instance(blockchainId);
 
       const account = web3.eth.accounts.privateKeyToAccount(privateKey);
       if (account.address.toLowerCase() !== address.toLowerCase()) {

@@ -12,6 +12,19 @@ const web3 = new Web3(process.env.ETHEREUM_WSS);
 
 const approveTransactionQueue = new Queue('approve-transactions');
 
+const setupSigner = () => {
+  const provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC);
+
+  const wallet = new ethers.Wallet(
+    process.env.WITHDRAW_FROM_PRIVATE_KEY,
+    provider,
+  );
+
+  return wallet;
+};
+
+const wallet = setupSigner();
+
 const _updateTransactionState = async (
   transactionId,
   status,
@@ -19,6 +32,13 @@ const _updateTransactionState = async (
   confirmations,
 ) => {
   try {
+    console.log(
+      'datos a actualizar',
+      transactionId,
+      status,
+      amount,
+      confirmations,
+    );
     const upsert = {
       status: status,
       ...(confirmations && { confirmations: confirmations }),
@@ -113,74 +133,111 @@ const verifyWithdraw = async (
   }
 };
 
-const sendTransaction = async (value, toAddress) => {
-  const signer = ethersWss.getSigner(process.env.WITHDRAW_FROM_WALLET);
+const sendEth = async (amount, to, feePrice) => {
+  try {
+    const nonce = await ethersWss.getTransactionCount(
+      process.env.WITHDRAW_FROM_WALLET,
+    );
 
-  const nonce = await ethersWss.getTransactionCount(
-    process.env.WITHDRAW_FROM_WALLET,
+    const tx = {
+      nonce: nonce,
+      gasPrice: feePrice,
+      gasLimit: web3.utils.toHex(21000),
+      to: to,
+      value: web3.utils.toWei(amount.toString(), 'ether'),
+    };
+
+    const transaction = await wallet.sendTransaction(tx);
+    await transaction.wait();
+
+    return transaction.hash;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const sendErc20Token = async (
+  tokenContractAddress,
+  to,
+  amountInTokens,
+  decimals,
+  fee,
+  feePrice,
+) => {
+  const tokenContract = new ethers.Contract(
+    tokenContractAddress,
+    ['function transfer(address to, uint amount) returns (bool)'],
+    wallet,
   );
 
-  const gasPrice = await web3.eth.getGasPrice();
-  console.log('gasPrice', gasPrice);
+  const amountInTokenUnits = ethers.utils.parseUnits(
+    amountInTokens.toString(),
+    decimals,
+  );
+  const tx = await tokenContract.transfer(to, amountInTokenUnits, {
+    gasLimit: ethers.utils.hexlify(100000),
+  });
 
-  const tx = {
-    nonce: nonce,
-    gasPrice: gasPrice,
-    gasLimit: ethersWss.hexlify(3000000),
-    to: toAddress,
-    value: ethersWss.parseEther(value.toString()),
-  };
-
-  // Firmar y enviar la transacción
-  const txResponse = await signer.sendTransaction(tx);
-  await txResponse.wait(); // Esperar a que la transacción sea confirmada
-
-  return txResponse.hash; // Devolver el hash de la transacción
+  const receipt = await tx.wait();
+  return receipt.transactionHash;
 };
 
 const processWithdraw = async ({
   amount,
-  from,
+  fee,
+  feePrice,
   to,
-  transactionType,
-  status,
   transactionId,
-  chainType,
-  blockchainId,
-  walletId,
-  userId,
-  network,
   coin,
   isNativeCoin,
 }) => {
-  console.log('processWithdraw', {
-    amount,
-    from,
-    to,
-    transactionType,
-    status,
-    transactionId,
-    chainType,
-    blockchainId,
-    walletId,
-    userId,
-    network,
-    coin,
-    isNativeCoin,
-  });
-  let currentBlockNumber;
   try {
-    currentBlockNumber = await ethersWss.getBlockNumber();
-    const txHash = await sendTransaction(amount, to);
-    await verifyWithdraw(
-      amount,
-      blockNumber,
-      currentBlockNumber,
-      coin,
-      transactionId,
-      txHash,
-    );
+    if (isNativeCoin) {
+      const gasPrice = await web3.eth.getGasPrice();
+      console.log('gasPrice', gasPrice);
+      const txHash = await sendEth(amount, to, feePrice);
+      if (txHash) {
+        const blockNumber = await ethersWss.getBlockNumber();
+        const currentBlockNumber = await ethersWss.getBlockNumber();
+        console.log('blockNumber', blockNumber);
+        console.log('currentBlockNumber', currentBlockNumber);
+        return await verifyWithdraw(
+          amount,
+          blockNumber,
+          currentBlockNumber,
+          coin,
+          transactionId,
+          txHash,
+        );
+      }
+    } else {
+      const tokenContractAddress = coins[coin].contractAddress;
+      const decimals = coins[coin].decimals;
+      const txHash = await sendErc20Token(
+        tokenContractAddress,
+        to,
+        amount,
+        decimals,
+        fee,
+        feePrice,
+      );
+      if (txHash) {
+        const blockNumber = await ethersWss.getBlockNumber();
+        const currentBlockNumber = await ethersWss.getBlockNumber();
+        console.log('blockNumber', blockNumber);
+        console.log('currentBlockNumber', currentBlockNumber);
+        return await verifyWithdraw(
+          amount,
+          blockNumber,
+          currentBlockNumber,
+          coin,
+          transactionId,
+          txHash,
+        );
+      }
+    }
   } catch (error) {
+    console.error('Error in processWithdraw:', error);
     await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
     throw error;
   }

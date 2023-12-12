@@ -7,6 +7,8 @@ const prisma = new PrismaClient();
 
 const createWithdrawTransaction = async ({
   amount,
+  fee,
+  feePrice,
   from,
   to,
   transactionType,
@@ -43,6 +45,8 @@ const createWithdrawTransaction = async ({
         'withdraw',
         {
           amount,
+          fee,
+          feePrice,
           from,
           to,
           transactionType,
