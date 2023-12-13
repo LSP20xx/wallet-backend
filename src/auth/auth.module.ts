@@ -7,6 +7,7 @@ import { WalletsModule } from 'src/wallets/wallet.module';
 import { LocalStrategy } from './strategy/local.strategy';
 import { SessionSerializer } from './strategy/session.serializer';
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
+//import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EncryptionsService } from 'src/encryptions/services/encryptions.service
     AuthService,
     JwtService,
     LocalStrategy,
+    //GoogleStrategy,
     SessionSerializer,
     EncryptionsService,
   ],

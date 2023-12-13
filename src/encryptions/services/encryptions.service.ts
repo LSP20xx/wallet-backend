@@ -14,7 +14,7 @@ export class EncryptionsService {
     return randomBytes(16);
   }
 
-  encrypt(code: string): { encryptedData: string; iv: string } {
+  encrypt(code: string): string {
     const iv = this.generateIv();
     const cipher = createCipheriv(
       this.algorithm,
@@ -23,7 +23,7 @@ export class EncryptionsService {
     );
     let encrypted = cipher.update(code, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return { encryptedData: encrypted, iv: iv.toString('hex') };
+    return `${encrypted}:${iv.toString('hex')}`;
   }
 
   decrypt(encryptedCode: string): string {

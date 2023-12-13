@@ -107,11 +107,6 @@ export class UtxoWalletService implements IUtxoWalletService {
       pubkey: keyPair.publicKey,
       network: netConfig,
     }).address;
-    const privateKey = keyPair.toWIF();
-
-    const encryptedPrivateKeyObject =
-      this.encryptionService.encrypt(privateKey);
-    const encryptedPrivateKey = `${encryptedPrivateKeyObject.encryptedData}:${encryptedPrivateKeyObject.iv}`;
 
     const chainTypeEnum = this.getChainTypeEnum(coinType);
 
@@ -120,6 +115,10 @@ export class UtxoWalletService implements IUtxoWalletService {
     const blockchain = await this.databaseService.blockchain.findUnique({
       where: { blockchainId: blockchainId },
     });
+
+    const privateKey = keyPair.toWIF();
+
+    const encryptedPrivateKey = this.encryptionService.encrypt(privateKey);
 
     const walletData = {
       data: {

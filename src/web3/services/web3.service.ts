@@ -118,13 +118,11 @@ export class Web3Service {
     encryptedPrivateKey: string;
   } {
     const account = this.getWeb3Instance(blockchainId).eth.accounts.create();
-    const { encryptedData, iv } = this.encryptionService.encrypt(
-      account.privateKey,
-    );
+    const encryptedData = this.encryptionService.encrypt(account.privateKey);
 
     return {
       address: account.address,
-      encryptedPrivateKey: `${iv}:${encryptedData}`,
+      encryptedPrivateKey: encryptedData,
     };
   }
   unlockWallet(

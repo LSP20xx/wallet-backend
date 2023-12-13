@@ -1,8 +1,9 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { SignUpDTO } from 'src/auth/dtos/sign-up.dto';
 import { AuthService } from 'src/auth/services/auth.service';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { SignInDTO } from '../dtos/sign-in.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +18,17 @@ export class AuthController {
   @Post('sign-in')
   async signIn(@Body() signInDTO: SignInDTO) {
     return this.authService.signInUser(signInDTO);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async googleAuth(@Req() _req) {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req);
   }
 
   // @UseGuards(LocalAuthGuard)

@@ -16,6 +16,7 @@ import { UsersModule } from './users/users.module';
 import { VerificationsModule } from './verifications/verifications.module';
 import { WalletsModule } from './wallets/wallet.module';
 import { Web3Module } from './web3/web3.module';
+import { LambdaModule } from './lambda/lambda.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { Web3Module } from './web3/web3.module';
     Web3Module,
     TransactionsModule,
     AuthModule,
+    LambdaModule,
   ],
 })
 export class AppModule {}

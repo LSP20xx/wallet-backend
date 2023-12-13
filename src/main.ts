@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as morgan from 'morgan';
+import * as fs from 'fs';
+import * as path from 'path';
 import RedisStore from 'connect-redis';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
@@ -22,8 +24,17 @@ async function bootstrap() {
   });
 
   const redisStore = new RedisStore({ client: redisClient });
+  const logDirectory = path.join(__dirname, '..', '..', 'access.log');
 
-  app.use(morgan('dev'));
+  console.log('logDirectory', logDirectory);
+
+  if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory, { recursive: true });
+  }
+
+  const accessLogStream = fs.createWriteStream(logDirectory, { flags: 'a' });
+
+  app.use(morgan('combined', { stream: accessLogStream }));
 
   app.use(
     session({
