@@ -10,13 +10,11 @@ import { EvmWalletService } from 'src/wallets/services/evm-wallet.service';
 import { UtxoWalletService } from 'src/wallets/services/utxo-wallet.service';
 import { SignInDTO } from '../dtos/sign-in.dto';
 import { PrismaClient } from '@prisma/client';
-import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private databaseService: DatabaseService,
-    private encryptionsService: EncryptionsService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private evmWalletService: EvmWalletService,
@@ -31,10 +29,10 @@ export class AuthService {
         const encryptedPassword = await hash(signUpDTO.password);
 
         const userData = {
-          email: this.encryptionsService.encrypt(signUpDTO.email),
-          phoneNumber: this.encryptionsService.encrypt(signUpDTO.phoneNumber),
-          firstName: this.encryptionsService.encrypt(signUpDTO.firstName),
-          lastName: this.encryptionsService.encrypt(signUpDTO.lastName),
+          email: signUpDTO.email,
+          phoneNumber: signUpDTO.phoneNumber,
+          firstName: signUpDTO.firstName,
+          lastName: signUpDTO.lastName,
           encryptedPassword: encryptedPassword,
         };
 
