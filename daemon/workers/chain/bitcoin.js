@@ -8,8 +8,8 @@ const {
   processWithdraw,
 } = require('./index');
 
-new Worker('eth-transactions', async (job) => {
-  console.log('Trabajador eth-transactions activado', job.data);
+new Worker('btc-transactions', async (job) => {
+  console.log('Trabajador btc-transactions activado', job.data);
 
   if (job.data.transactionType === 'DEPOSIT') {
     return await createDepositTransaction(job.data);
@@ -18,14 +18,14 @@ new Worker('eth-transactions', async (job) => {
   }
 });
 
-new Worker('eth-deposits', async (job) => {
+new Worker('btc-deposits', async (job) => {
   return await processDeposit(job.data);
 });
 
-new Worker('eth-approve-transactions', async (job) => {
+new Worker('btc-approve-transactions', async (job) => {
   return await approveTransaction(job.data);
 });
 
-new Worker('eth-withdraws', async (job) => {
+new Worker('btc-withdraws', async (job) => {
   return await processWithdraw(job.data);
 });

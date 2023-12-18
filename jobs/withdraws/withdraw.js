@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const appRoot = require('app-root-path');
 require('dotenv').config({ path: `${appRoot}/config/.env` });
@@ -11,7 +10,7 @@ const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 const web3 = new Web3(process.env.ETHEREUM_WSS);
 
-const approveTransactionQueue = new Queue('approve-transactions');
+const approveTransactionQueue = new Queue('eth-approve-transactions');
 
 const setupSigner = () => {
   const provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC);

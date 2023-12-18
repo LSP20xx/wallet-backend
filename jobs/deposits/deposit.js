@@ -6,9 +6,11 @@ const ethers = require('ethers');
 const { PrismaClient } = require('@prisma/client');
 const { Queue } = require('bullmq');
 const prisma = new PrismaClient();
-const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
+const ethereumWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 
-const approveTransactionQueue = new Queue('approve-transactions');
+// Crea colas para BTC y ETH
+const btcApproveTransactionQueue = new Queue('btc-approve-transactions');
+const ethApproveTransactionQueue = new Queue('eth-approve-transactions');
 
 const _updateTransactionState = async (
   transactionId,
@@ -32,7 +34,7 @@ const _updateTransactionState = async (
   }
 };
 
-const _deposit = async (transactionId, amount, confirmations) => {
+const _depositEth = async (transactionId, amount, confirmations, coin) => {
   try {
     await _updateTransactionState(
       transactionId,
@@ -45,14 +47,18 @@ const _deposit = async (transactionId, amount, confirmations) => {
     //     where: { id: transactionId },
     //   })
     //   .user();
-    await approveTransactionQueue.add('approve', { transactionId });
+    const queue =
+      coin.toLowerCase() === 'btc'
+        ? btcApproveTransactionQueue
+        : ethApproveTransactionQueue;
+    await queue.add('approve', { transactionId });
     return 'deposit';
   } catch (error) {
     throw error;
   }
 };
 
-const _checkConfirmation = async (
+const _checkEthConfirmation = async (
   amount,
   transactionId,
   coin,
@@ -60,7 +66,7 @@ const _checkConfirmation = async (
   txHash,
 ) => {
   try {
-    const transactionReceipt = await ethersWss.getTransactionReceipt(txHash);
+    const transactionReceipt = await ethereumWss.getTransactionReceipt(txHash);
     console.log(
       'checkConfirmation:',
       amount,
@@ -69,35 +75,35 @@ const _checkConfirmation = async (
       confirmations,
     );
     if (transactionReceipt && transactionReceipt.status) {
-      return await _deposit(
+      return await _depositEth(
         transactionId,
         amount / 10 ** coins[coin].decimals,
         confirmations,
+        coin,
       );
     } else {
       await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
       throw 'error: not deposited. no transaction receipt.';
     }
   } catch (error) {
-    console.error('Error in _checkConfirmation:', error);
+    console.error('Error in _checkEthConfirmation:', error);
     throw error;
   }
 };
 
-const verifyDeposit = async (
+const verifyEthDeposit = async (
   amount,
   blockNumber,
-  currentBlockNumber,
   coin,
   transactionId,
   txHash,
 ) => {
   try {
-    let confirmations = currentBlockNumber - blockNumber;
-
+    let confirmations;
+    let currentBlockNumber = 0;
     while (confirmations < 6) {
       await new Promise((resolve) => setTimeout(resolve, 10000));
-      currentBlockNumber = await ethersWss.getBlockNumber();
+      currentBlockNumber = await ethereumWss.getBlockNumber();
       confirmations = currentBlockNumber - blockNumber;
       console.log(
         'Rechecking - Confirmations:',
@@ -109,7 +115,7 @@ const verifyDeposit = async (
       );
     }
 
-    return await _checkConfirmation(
+    return await _checkEthConfirmation(
       amount,
       transactionId,
       coin,
@@ -117,7 +123,7 @@ const verifyDeposit = async (
       txHash,
     );
   } catch (error) {
-    console.error('Error in verifyDeposit:', error);
+    console.error('Error in verifyEthDeposit:', error);
     throw error;
   }
 };
@@ -129,17 +135,12 @@ const processDeposit = async ({
   transactionId,
   txHash,
 }) => {
-  let currentBlockNumber;
   try {
-    currentBlockNumber = await ethersWss.getBlockNumber();
-    await verifyDeposit(
-      amount,
-      blockNumber,
-      currentBlockNumber,
-      coin,
-      transactionId,
-      txHash,
-    );
+    if (coin.toLowerCase() === 'eth') {
+      await verifyEthDeposit(amount, blockNumber, coin, transactionId, txHash);
+    } else {
+      throw new Error('Coin not supported');
+    }
   } catch (error) {
     await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
     throw error;
