@@ -74,23 +74,25 @@ class DepositBtcOnBillete {
         params: [txid, true],
       });
       const transaction = response.data.result;
-      console.log('transaction', transaction);
       if (transaction && transaction.vout) {
         for (const vout of transaction.vout) {
           if (vout.scriptPubKey && vout.scriptPubKey.address) {
-            console.log('vout', vout);
+            console.log('address', vout.scriptPubKey.address);
             const wallet = await prisma.wallet.findUnique({
               where: {
                 address: vout.scriptPubKey.address,
               },
             });
             if (wallet) {
+              console.log('wallet', wallet);
+              console.log('scriptSig', transaction.vin[0].scriptSigs);
+              console.log('vout', transaction.vout[1].scriptPubKey);
               await transactionsQueue.add(
                 'transaction',
                 {
                   txHash: txid,
                   amount: vout.value,
-                  from: transaction.vin[0].addr,
+                  from: '',
                   to: vout.scriptPubKey.address,
                   transactionType: 'DEPOSIT',
                   status: 'PROCESSING',
@@ -100,9 +102,9 @@ class DepositBtcOnBillete {
                   blockNumber: transaction.blockheight,
                   walletId: wallet.id,
                   userId: wallet.userId,
-                  network: blockchainId === '1' ? 'MAINNET' : 'TESTNET',
+                  network: blockchainId === 'MAINNET' ? 'MAINNET' : 'TESTNET',
                   coin: coin,
-                  isNativeCoin: isNativeCoin(coin),
+                  isNativeCoin: true,
                   uuid: uuidv4(),
                 },
                 {

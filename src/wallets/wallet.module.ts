@@ -17,6 +17,7 @@ import { default as QueueType } from './queue/types.queue';
     BullModule.registerQueue(
       { name: QueueType.WITHDRAW_REQUEST },
       { name: QueueType.ETH_TRANSACTIONS },
+      { name: QueueType.BTC_TRANSACTIONS },
     ),
   ],
   controllers: [EvmWalletController],

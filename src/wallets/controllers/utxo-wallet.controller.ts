@@ -1,6 +1,16 @@
-import { Controller, Param, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { UtxoWalletService } from '../services/utxo-wallet.service';
+import { WithdrawDto } from '../dto/withdraw.dto';
 
 @Controller('utxo-wallet')
 export class UtxoWalletController {
@@ -17,5 +27,21 @@ export class UtxoWalletController {
       network,
       networkType,
     );
+  }
+
+  @Post('withdraw/:blockchainId')
+  @UseGuards(AuthenticatedGuard)
+  async withdraw(
+    @Request() req: any,
+    @Param('blockchainId') blockchainId: string,
+    @Body() withdrawDto: WithdrawDto,
+  ): Promise<{ message: string }> {
+    try {
+      withdrawDto.userId = req.user.id;
+      withdrawDto.blockchainId = blockchainId;
+      return await this.utxoWalletService.withdraw(withdrawDto);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

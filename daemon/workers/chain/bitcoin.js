@@ -12,6 +12,7 @@ new Worker('btc-transactions', async (job) => {
   console.log('Trabajador btc-transactions activado', job.data);
 
   if (job.data.transactionType === 'DEPOSIT') {
+    console.log('DEPOSIT');
     return await createDepositTransaction(job.data);
   } else if (job.data.transactionType === 'WITHDRAWAL') {
     return await createWithdrawTransaction(job.data);

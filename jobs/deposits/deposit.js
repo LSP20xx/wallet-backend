@@ -5,10 +5,18 @@ const coins = require(`${appRoot}/config/coins/info`);
 const ethers = require('ethers');
 const { PrismaClient } = require('@prisma/client');
 const { Queue } = require('bullmq');
+const axios = require('axios');
 const prisma = new PrismaClient();
 const ethereumWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 
-// Crea colas para BTC y ETH
+const bitcoinClient = axios.create({
+  baseURL: 'https://go.getblock.io/d3997a11804641bda19e595364934897',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'd3997a11804641bda19e595364934897',
+  },
+});
+
 const btcApproveTransactionQueue = new Queue('btc-approve-transactions');
 const ethApproveTransactionQueue = new Queue('eth-approve-transactions');
 
@@ -34,7 +42,7 @@ const _updateTransactionState = async (
   }
 };
 
-const _depositEth = async (transactionId, amount, confirmations, coin) => {
+const _depositEth = async (transactionId, amount, confirmations) => {
   try {
     await _updateTransactionState(
       transactionId,
@@ -47,11 +55,8 @@ const _depositEth = async (transactionId, amount, confirmations, coin) => {
     //     where: { id: transactionId },
     //   })
     //   .user();
-    const queue =
-      coin.toLowerCase() === 'btc'
-        ? btcApproveTransactionQueue
-        : ethApproveTransactionQueue;
-    await queue.add('approve', { transactionId });
+
+    await ethApproveTransactionQueue.add('approve', { transactionId });
     return 'deposit';
   } catch (error) {
     throw error;
@@ -79,7 +84,6 @@ const _checkEthConfirmation = async (
         transactionId,
         amount / 10 ** coins[coin].decimals,
         confirmations,
-        coin,
       );
     } else {
       await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
@@ -99,7 +103,7 @@ const verifyEthDeposit = async (
   txHash,
 ) => {
   try {
-    let confirmations;
+    let confirmations = 0;
     let currentBlockNumber = 0;
     while (confirmations < 6) {
       await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -128,6 +132,111 @@ const verifyEthDeposit = async (
   }
 };
 
+const _depositBtc = async (transactionId, amount, confirmations) => {
+  try {
+    await _updateTransactionState(
+      transactionId,
+      'PROCESSED',
+      amount.toString(),
+      confirmations,
+    );
+    // const user = await prisma.transaction
+    //   .findOne({
+    //     where: { id: transactionId },
+    //   })
+    //   .user();
+
+    await btcApproveTransactionQueue.add('approve', { transactionId });
+    return 'deposit';
+  } catch (error) {
+    throw error;
+  }
+};
+
+const _checkBtcConfirmation = async (
+  amount,
+  transactionId,
+  coin,
+  confirmations,
+  txHash,
+) => {
+  try {
+    const response = await bitcoinClient.post('/', {
+      jsonrpc: '2.0',
+      id: 'getblock.io',
+      method: 'getrawtransaction',
+      params: [txHash, true],
+    });
+    const transaction = response.data.result;
+
+    console.log(
+      'checkConfirmation:',
+      amount,
+      transactionId,
+      coin,
+      confirmations,
+    );
+
+    if (transaction && transaction.confirmations >= confirmations) {
+      return await _depositBtc(
+        transactionId,
+        amount,
+        transaction.confirmations,
+      );
+    } else {
+      await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);
+      throw 'error: not deposited. no transaction confirmation.';
+    }
+  } catch (error) {
+    console.error('Error in _checkBtcConfirmation:', error);
+    throw error;
+  }
+};
+
+const verifyBtcDeposit = async (
+  amount,
+  blockNumber,
+  coin,
+  transactionId,
+  txHash,
+) => {
+  try {
+    let confirmations = 0;
+    let currentBlockNumber = 0;
+    while (confirmations < 6) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      const latestBlock = await bitcoinClient.post('/', {
+        jsonrpc: '2.0',
+        id: 'getblock.io',
+        method: 'getblockcount',
+        params: [],
+      });
+
+      currentBlockNumber = latestBlock.data.result;
+      confirmations = currentBlockNumber - blockNumber;
+      console.log(
+        'Rechecking - Confirmations:',
+        confirmations,
+        'Current Block:',
+        currentBlockNumber,
+        'Block Number:',
+        blockNumber,
+      );
+    }
+
+    return await _checkBtcConfirmation(
+      amount,
+      transactionId,
+      coin,
+      confirmations,
+      txHash,
+    );
+  } catch (error) {
+    console.error('Error in verifyEthDeposit:', error);
+    throw error;
+  }
+};
+
 const processDeposit = async ({
   amount,
   blockNumber,
@@ -138,8 +247,8 @@ const processDeposit = async ({
   try {
     if (coin.toLowerCase() === 'eth') {
       await verifyEthDeposit(amount, blockNumber, coin, transactionId, txHash);
-    } else {
-      throw new Error('Coin not supported');
+    } else if (coin.toLowerCase() === 'btc') {
+      await verifyBtcDeposit(amount, blockNumber, coin, transactionId, txHash);
     }
   } catch (error) {
     await _updateTransactionState(transactionId, 'CANCELLED', 0, 0);

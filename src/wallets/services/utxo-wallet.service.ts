@@ -7,6 +7,10 @@ import { DatabaseService } from 'src/database/services/database/database.service
 import { EncryptionsService } from 'src/encryptions/services/encryptions.service';
 import { IUtxoWalletService } from '../../interfaces/IUtxoWalletService';
 import { TransactionsService } from 'src/transactions/services/transaction.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { v4 as uuidv4 } from 'uuid';
+import QueueType from '../queue/types.queue';
 
 @Injectable()
 export class UtxoWalletService implements IUtxoWalletService {
@@ -15,6 +19,7 @@ export class UtxoWalletService implements IUtxoWalletService {
     private databaseService: DatabaseService,
     private encryptionService: EncryptionsService,
     private transactionsService: TransactionsService,
+    @InjectQueue(QueueType.BTC_TRANSACTIONS) private transactionQueue: Queue,
   ) {}
 
   private getNetworksConfig(coinType: string, networkType: string) {
@@ -137,6 +142,43 @@ export class UtxoWalletService implements IUtxoWalletService {
     } else {
       return this.databaseService.wallet.create(walletData);
     }
+  }
+
+  async withdraw(withdrawDto: any): Promise<{ message: string }> {
+    const wallet = await this.databaseService.wallet.findUnique({
+      where: { address: withdrawDto.from },
+    });
+    if (!wallet || wallet.userId !== withdrawDto.userId) {
+      throw new Error('Wallet not found');
+    }
+    await this.transactionQueue.add(
+      'transaction',
+      {
+        amount: withdrawDto.amount.toString(),
+        fee: withdrawDto.fee.toString(),
+        feePrice: withdrawDto.feePrice.toString(),
+        from: withdrawDto.from,
+        to: withdrawDto.to,
+        transactionType: 'WITHDRAWAL',
+        status: 'PROCESSING',
+        chainType: 'BTC',
+        blockchainId: withdrawDto.blockchainId,
+        walletId: wallet.id,
+        userId: withdrawDto.userId,
+        network: withdrawDto.blockchainId === 'MAINNET' ? 'MAINNET' : 'TESTNET',
+        coin: withdrawDto.coin,
+        isNativeCoin: true,
+        uuid: uuidv4(),
+      },
+      {
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    );
+    return { message: 'Withdrawal request received and is being processed' };
   }
 
   async unlockWallet(

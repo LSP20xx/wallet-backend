@@ -22,6 +22,23 @@ const createDepositTransaction = async ({
   coin,
   isNativeCoin,
 }) => {
+  console.log('createDepositTransaction BTC', {
+    txHash,
+    from,
+    to,
+    transactionType,
+    status,
+    confirmations,
+    chainType,
+    blockchainId,
+    blockNumber,
+    walletId,
+    userId,
+    network,
+    amount,
+    coin,
+    isNativeCoin,
+  });
   try {
     const transaction = await prisma.transaction.create({
       data: {

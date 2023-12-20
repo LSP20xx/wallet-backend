@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/bitcoin/bitcoin.controller.ts
 import { Controller, Post, Param } from '@nestjs/common';
 import { UxtoChainService } from '../services/utxo-chain.service';
@@ -8,6 +9,6 @@ export class UxtoChainController {
 
   @Post(':txid')
   handleTransaction(@Param('txid') txid: string) {
-    this.uxtoChainService.handleTransaction(txid);
+    //this.uxtoChainService.handleTransaction(txid);
   }
 }

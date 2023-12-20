@@ -3,14 +3,43 @@ const appRoot = require('app-root-path');
 require('dotenv').config({ path: `${appRoot}/config/.env` });
 const coins = require(`${appRoot}/config/coins/info`);
 const ethers = require('ethers');
+const axios = require('axios');
 const { Web3 } = require('web3');
 const { PrismaClient } = require('@prisma/client');
 const { Queue } = require('bullmq');
+const { createDecipheriv } = require('crypto');
+const bitcoin = require('bitcoinjs-lib');
+
+const bitcoinClient = axios.create({
+  baseURL: 'https://go.getblock.io/d3997a11804641bda19e595364934897',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'd3997a11804641bda19e595364934897',
+  },
+});
+
 const prisma = new PrismaClient();
 const ethersWss = new ethers.WebSocketProvider(process.env.ETHEREUM_WSS);
 const web3 = new Web3(process.env.ETHEREUM_WSS);
 
 const approveTransactionQueue = new Queue('eth-approve-transactions');
+
+const encryptionKey = process.env.VERIFICATION_ENCRYPTION_KEY;
+const algorithm = 'aes-256-cbc';
+
+const decrypt = (encryptedCode) => {
+  const [encrypted, ivHex] = encryptedCode.split(':');
+
+  const iv = Buffer.from(ivHex, 'hex');
+
+  const keyBuffer = Buffer.from(encryptionKey, 'hex');
+
+  const decipher = createDecipheriv(algorithm, keyBuffer, iv);
+
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+};
 
 const setupSigner = () => {
   const provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC);
@@ -104,17 +133,16 @@ const _checkConfirmation = async (
 const verifyWithdraw = async (
   amount,
   blockNumber,
-  currentBlockNumber,
   coin,
   transactionId,
   txHash,
 ) => {
   try {
-    let confirmations = currentBlockNumber - blockNumber;
+    let confirmations = 0;
 
     while (confirmations < 6) {
       await new Promise((resolve) => setTimeout(resolve, 10000));
-      currentBlockNumber = await ethersWss.getBlockNumber();
+      const currentBlockNumber = await ethersWss.getBlockNumber();
       confirmations = currentBlockNumber - blockNumber;
       console.log(
         'Rechecking - Confirmations:',
@@ -188,49 +216,144 @@ const sendErc20Token = async (
   return receipt.transactionHash;
 };
 
+async function getUtxos(address) {
+  const apiUrl = `https://api.blockcypher.com/v1/btc/test3/addrs/${address}?unspentOnly=true`;
+
+  try {
+    const response = await axios.get(apiUrl);
+
+    const utxos = response.data.map((utxo) => ({
+      txid: utxo.tx_hash,
+      vout: utxo.tx_output_n,
+      amount: utxo.value,
+    }));
+
+    return utxos;
+  } catch (error) {
+    console.error('Error al obtener UTXOs:', error);
+    throw error;
+  }
+}
+
+async function broadcastTx(txHex) {
+  const response = await bitcoinClient.post('/', {
+    jsonrpc: '2.0',
+    id: 'getblock.io',
+    method: 'sendrawtransaction',
+    params: [txHex],
+  });
+  return response.data.result;
+}
+
+const sendBtc = async (amount, from, to, fee) => {
+  try {
+    const wallet = await prisma.wallet.findUnique({
+      where: {
+        address: from,
+      },
+    });
+
+    if (!wallet || !wallet.encryptedPrivateKey) {
+      throw new Error('Wallet not found or private key is missing');
+    }
+
+    const decryptedPrivateKey = decrypt(wallet.encryptedPrivateKey);
+    const keyPair = bitcoin.ECPair.fromWIF(decryptedPrivateKey);
+
+    const utxos = await getUtxos(from);
+
+    const txb = new bitcoin.TransactionBuilder();
+
+    let totalAmountAvailable = 0;
+    utxos.forEach((utxo) => {
+      totalAmountAvailable += utxo.amount;
+      txb.addInput(utxo.txid, utxo.vout);
+    });
+
+    if (totalAmountAvailable < amount + fee) {
+      throw new Error('Insufficient funds');
+    }
+
+    txb.addOutput(to, amount);
+
+    const changeAmount = totalAmountAvailable - amount - fee;
+    if (changeAmount > 0) {
+      txb.addOutput(from, changeAmount);
+    }
+
+    for (let i = 0; i < txb.__inputs.length; i++) {
+      txb.sign(i, keyPair);
+    }
+
+    const tx = txb.build();
+    const txHex = tx.toHex();
+
+    const broadcastResult = await broadcastTx(txHex);
+
+    return broadcastResult;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const processWithdraw = async ({
   amount,
   fee,
-  feePrice,
+  from,
   to,
   transactionId,
   coin,
   isNativeCoin,
+  chainType,
 }) => {
   console.log('Inicio de processWithdraw', { transactionId, amount, coin });
   try {
-    if (isNativeCoin) {
-      const gasPrice = await web3.eth.getGasPrice();
-      console.log('gasPrice', gasPrice);
-      const txHash = await sendEth(amount, to, feePrice);
-      if (txHash) {
-        const blockNumber = await ethersWss.getBlockNumber();
-        const currentBlockNumber = await ethersWss.getBlockNumber();
+    if (chainType === 'EVM') {
+      if (isNativeCoin) {
+        const gasPrice = await web3.eth.getGasPrice();
+        console.log('gasPrice', gasPrice);
+        const txHash = await sendEth(amount, to, feePrice);
+        if (txHash) {
+          const blockNumber = await ethersWss.getBlockNumber();
 
-        console.log('blockNumber', blockNumber);
-        console.log('currentBlockNumber', currentBlockNumber);
+          console.log('blockNumber', blockNumber);
+          console.log('currentBlockNumber', currentBlockNumber);
 
-        return await verifyWithdraw(
+          return await verifyWithdraw(
+            amount,
+            blockNumber,
+            coin,
+            transactionId,
+            txHash,
+          );
+        }
+      } else {
+        const tokenContractAddress = coins[coin].contractAddress;
+        const decimals = coins[coin].decimals;
+        const txHash = await sendErc20Token(
+          tokenContractAddress,
+          to,
           amount,
-          blockNumber,
-          currentBlockNumber,
-          coin,
-          transactionId,
-          txHash,
+          decimals,
+          fee,
+          feePrice,
         );
+        if (txHash) {
+          const blockNumber = await ethersWss.getBlockNumber();
+          console.log('blockNumber', blockNumber);
+          console.log('currentBlockNumber', currentBlockNumber);
+          return await verifyWithdraw(
+            amount,
+            blockNumber,
+            coin,
+            transactionId,
+            txHash,
+          );
+        }
       }
-    } else {
-      const tokenContractAddress = coins[coin].contractAddress;
-      const decimals = coins[coin].decimals;
-      const txHash = await sendErc20Token(
-        tokenContractAddress,
-        to,
-        amount,
-        decimals,
-        fee,
-        feePrice,
-      );
-      if (txHash) {
+    } else if (chainType === 'BTC') {
+      const broadcastResult = await sendBtc(amount, from, to, fee);
+      if (broadcastResult) {
         const blockNumber = await ethersWss.getBlockNumber();
         const currentBlockNumber = await ethersWss.getBlockNumber();
         console.log('blockNumber', blockNumber);
@@ -241,7 +364,7 @@ const processWithdraw = async ({
           currentBlockNumber,
           coin,
           transactionId,
-          txHash,
+          broadcastResult,
         );
       }
     }
