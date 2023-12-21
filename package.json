@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.470.0",
-    "@graphprotocol/graph-ts": "^0.31.0",
     "@nestjs/bull": "^10.0.1",
     "@nestjs/bullmq": "^10.0.1",
     "@nestjs/common": "^10.0.0",

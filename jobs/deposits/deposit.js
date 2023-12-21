@@ -232,7 +232,7 @@ const verifyBtcDeposit = async (
       txHash,
     );
   } catch (error) {
-    console.error('Error in verifyEthDeposit:', error);
+    console.error('Error in verifyBtcDeposit:', error);
     throw error;
   }
 };

@@ -130,7 +130,7 @@ const _checkConfirmation = async (
   }
 };
 
-const verifyWithdraw = async (
+const verifyEthWithdraw = async (
   amount,
   blockNumber,
   coin,
@@ -162,7 +162,7 @@ const verifyWithdraw = async (
       txHash,
     );
   } catch (error) {
-    console.error('Error in verifyWithdraw:', error);
+    console.error('Error in verifyEthWithdraw:', error);
     throw error;
   }
 };
@@ -287,11 +287,95 @@ const sendBtc = async (amount, from, to, fee) => {
 
     const tx = txb.build();
     const txHex = tx.toHex();
+    const txId = tx.getId(); // Get the transaction ID
 
     const broadcastResult = await broadcastTx(txHex);
 
-    return broadcastResult;
+    return { txId, broadcastResult };
   } catch (error) {
+    throw error;
+  }
+};
+
+async function getBlockhashFromTxId(txId) {
+  try {
+    let blockhash = null;
+    let attempts = 0;
+    const maxAttempts = 10;
+    s;
+
+    while (!blockhash && attempts < maxAttempts) {
+      attempts++;
+      const txInfo = await getTransactionInfo(txId);
+      if (txInfo && txInfo.blockhash) {
+        blockhash = txInfo.blockhash;
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // Espera 10 segundos, por ejemplo
+      }
+    }
+
+    return blockhash;
+  } catch (error) {
+    console.error('Error al obtener el blockhash:', error);
+    return null;
+  }
+}
+
+const getBlockDetails = async (blockhash) => {
+  try {
+    const blockDetailsResponse = await this.bitcoinClient.post('/', {
+      jsonrpc: '2.0',
+      id: 'getblock.io',
+      method: 'getblock',
+      params: [blockhash, true],
+    });
+    const blockDetails = blockDetailsResponse.data.result;
+    return blockDetails;
+  } catch (error) {
+    console.error('Error al obtener los detalles del bloque:', error);
+  }
+};
+
+const verifyBtcWithdraw = async (amount, blockNumber, transactionId) => {
+  try {
+    let confirmations = 0;
+    let currentBlockNumber = 0;
+    while (confirmations < 6) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      const latestBlock = await bitcoinClient.post('/', {
+        jsonrpc: '2.0',
+        id: 'getblock.io',
+        method: 'getblockcount',
+        params: [],
+      });
+
+      currentBlockNumber = latestBlock.data.result;
+      confirmations = currentBlockNumber - blockNumber;
+
+      console.log(
+        'Rechecking - Confirmations:',
+        confirmations,
+        'Current Block:',
+        currentBlockNumber,
+        'Block Number:',
+        blockNumber,
+      );
+    }
+
+    if (confirmations >= 6) {
+      return await _withdraw(transactionId, amount, confirmations);
+    } else {
+      console.log('Transaction not yet confirmed');
+      await _updateTransactionState(
+        transactionId,
+        'PENDING',
+        amount,
+        confirmations,
+      );
+    }
+  } catch (error) {
+    console.error('Error in verifyBtcWithdraw:', error);
+    await _updateTransactionState(transactionId, 'FAILED', 0, 0);
     throw error;
   }
 };
@@ -319,7 +403,7 @@ const processWithdraw = async ({
           console.log('blockNumber', blockNumber);
           console.log('currentBlockNumber', currentBlockNumber);
 
-          return await verifyWithdraw(
+          return await verifyEthWithdraw(
             amount,
             blockNumber,
             coin,
@@ -342,7 +426,7 @@ const processWithdraw = async ({
           const blockNumber = await ethersWss.getBlockNumber();
           console.log('blockNumber', blockNumber);
           console.log('currentBlockNumber', currentBlockNumber);
-          return await verifyWithdraw(
+          return await verifyEthWithdraw(
             amount,
             blockNumber,
             coin,
@@ -352,20 +436,16 @@ const processWithdraw = async ({
         }
       }
     } else if (chainType === 'BTC') {
-      const broadcastResult = await sendBtc(amount, from, to, fee);
+      const { txId, broadcastResult } = await sendBtc(amount, from, to, fee);
       if (broadcastResult) {
-        const blockNumber = await ethersWss.getBlockNumber();
-        const currentBlockNumber = await ethersWss.getBlockNumber();
-        console.log('blockNumber', blockNumber);
-        console.log('currentBlockNumber', currentBlockNumber);
-        return await verifyWithdraw(
-          amount,
-          blockNumber,
-          currentBlockNumber,
-          coin,
-          transactionId,
-          broadcastResult,
-        );
+        const blockhash = await getBlockhashFromTxId(txId);
+        if (blockhash) {
+          const blockNumber = await getBlockDetails(blockhash);
+          if (blockNumber) {
+            console.log('blockNumber', blockNumber);
+            return await verifyBtcWithdraw(amount, blockNumber, transactionId);
+          }
+        }
       }
     }
   } catch (error) {

@@ -7,6 +7,7 @@ import { GraphQueryService } from 'src/networks/services/graph-query.service';
 import QueueType from '../queue/types.queue';
 import { WithdrawDto } from '../dto/withdraw.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { Web3Service } from 'src/web3/services/web3.service';
 
 const coinsConfig = {
   ETH: {
@@ -23,6 +24,8 @@ export class EvmWalletService {
   constructor(
     private databaseService: DatabaseService,
     private graphQueryService: GraphQueryService,
+    private web3Service: Web3Service,
+
     @InjectQueue(QueueType.WITHDRAW_REQUEST) private withdrawQueue: Queue,
     @InjectQueue(QueueType.ETH_TRANSACTIONS) private transactionQueue: Queue,
   ) {}
@@ -44,23 +47,42 @@ export class EvmWalletService {
   }
 
   async getTransfersForChain(chainId: string) {
+    const currentBlock = await this.web3Service
+      .getWeb3Instance(chainId)
+      .eth.getBlockNumber();
+    const previousBlock = currentBlock - BigInt(1);
     const wallets = await this.findAllByChainId(chainId);
-
     const addresses = wallets.map((wallet) => wallet.address);
 
-    const graphqlQuery = `{
-      transfers(where: {from_in: ${JSON.stringify(
-        addresses,
-      )}, to_in: ${JSON.stringify(addresses)}}) {
-        id
-        from
-        to
-        value
-      }
-    }`;
-    const result = await this.graphQueryService.querySubgraph(graphqlQuery);
+    const batchSize = 50;
+    const batches = [];
 
-    return result;
+    for (let i = 0; i < addresses.length; i += batchSize) {
+      batches.push(addresses.slice(i, i + batchSize));
+    }
+
+    const transfers = [];
+
+    for (const batch of batches) {
+      const formattedAddresses = batch
+        .map((address: any) => `"${address}"`)
+        .join(', ');
+      //          transfers(where: {to_in: [${formattedAddresses}], blockNumber_gt: "${previousBlock}"}) {
+
+      const graphqlQuery = `{
+          transfers(where: {to_in: [${formattedAddresses}]}) {
+            id
+            from
+            to
+            value
+            blockNumber
+          }
+        }`;
+      const result = await this.graphQueryService.querySubgraph(graphqlQuery);
+      transfers.push(...(result.data.transfers || []));
+    }
+
+    return transfers;
   }
 
   async createWallet(
