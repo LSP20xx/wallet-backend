@@ -7,7 +7,7 @@ dataSources:
     name: ERC20Token
     network: goerli
     source:
-      address: "0x52C3f2eFF1A67dBB7097C3DCb3dF844be486b65d"
+      address: '0xcFBa2EdFb93C775F42E9bD007D29dd2E88E37cD6'
       abi: ERC20
     mapping:
       kind: ethereum/events

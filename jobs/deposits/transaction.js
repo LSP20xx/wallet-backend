@@ -53,7 +53,7 @@ const createDepositTransaction = async ({
         walletId,
         userId,
         network,
-        amount,
+        amount: amount.toString(),
         isNativeCoin,
       },
     });

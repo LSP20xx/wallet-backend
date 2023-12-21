@@ -1,7 +1,5 @@
-
-      specVersion: 0.0.2
-      description: Subgraph for ethereum-goerli
-      schema:
-        file: ./schema.graphql
-      dataSources: 
-    
+specVersion: 0.0.2
+description: Subgraph for ethereum-goerli
+schema:
+  file: ./schema.graphql
+dataSources:

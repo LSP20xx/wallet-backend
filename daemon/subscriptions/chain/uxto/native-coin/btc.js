@@ -3,7 +3,7 @@
 const axios = require('axios');
 const { Queue, prisma, uuidv4 } = require('./index');
 
-const chainType = 'UTXO';
+const chainType = 'BTC';
 const blockchainId = 'BITCOIN-TESTNET';
 const coin = 'BTC';
 const transactionsQueue = new Queue(`${coin.toLowerCase()}-transactions`);
@@ -65,6 +65,21 @@ class DepositBtcOnBillete {
     }
   }
 
+  async getBlockDetails(blockhash) {
+    try {
+      const blockDetailsResponse = await this.bitcoinClient.post('/', {
+        jsonrpc: '2.0',
+        id: 'getblock.io',
+        method: 'getblock',
+        params: [blockhash, true],
+      });
+      const blockDetails = blockDetailsResponse.data.result;
+      return blockDetails;
+    } catch (error) {
+      console.error('Error al obtener los detalles del bloque:', error);
+    }
+  }
+
   async handleTransaction(txid) {
     try {
       const response = await this.bitcoinClient.post('/', {
@@ -83,38 +98,43 @@ class DepositBtcOnBillete {
                 address: vout.scriptPubKey.address,
               },
             });
+
             if (wallet) {
-              console.log('wallet', wallet);
-              console.log('scriptSig', transaction.vin[0].scriptSigs);
-              console.log('vout', transaction.vout[1].scriptPubKey);
-              await transactionsQueue.add(
-                'transaction',
-                {
-                  txHash: txid,
-                  amount: vout.value,
-                  from: '',
-                  to: vout.scriptPubKey.address,
-                  transactionType: 'DEPOSIT',
-                  status: 'PROCESSING',
-                  confirmations: transaction.confirmations,
-                  chainType,
-                  blockchainId: blockchainId,
-                  blockNumber: transaction.blockheight,
-                  walletId: wallet.id,
-                  userId: wallet.userId,
-                  network: blockchainId === 'MAINNET' ? 'MAINNET' : 'TESTNET',
-                  coin: coin,
-                  isNativeCoin: true,
-                  uuid: uuidv4(),
-                },
-                {
-                  attempts: 5,
-                  backoff: {
-                    type: 'exponential',
-                    delay: 5000,
-                  },
-                },
+              const blockDetails = await this.getBlockDetails(
+                transaction.blockhash,
               );
+              const blockNumber = blockDetails ? blockDetails.height : null;
+
+              if (blockNumber) {
+                await transactionsQueue.add(
+                  'transaction',
+                  {
+                    txHash: txid,
+                    amount: vout.value,
+                    from: '',
+                    to: vout.scriptPubKey.address,
+                    transactionType: 'DEPOSIT',
+                    status: 'PROCESSING',
+                    confirmations: transaction.confirmations,
+                    chainType,
+                    blockchainId: blockchainId,
+                    blockNumber: blockNumber,
+                    walletId: wallet.id,
+                    userId: wallet.userId,
+                    network: blockchainId === 'MAINNET' ? 'MAINNET' : 'TESTNET',
+                    coin: coin,
+                    isNativeCoin: true,
+                    uuid: uuidv4(),
+                  },
+                  {
+                    attempts: 5,
+                    backoff: {
+                      type: 'exponential',
+                      delay: 5000,
+                    },
+                  },
+                );
+              }
             }
           }
         }
