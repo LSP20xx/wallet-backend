@@ -1,6 +1,7 @@
 module.exports = {
-  ETH: {
-    TokenA: '0xDireccionContratoTokenAEnEthereum',
-    TokenB: '0xDireccionContratoTokenBEnEthereum',
+  data: {
+    name: 'Ethereum',
+    symbol: 'ETH',
+    contractAddress: '0x0000000',
   },
 };

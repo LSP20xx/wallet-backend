@@ -383,6 +383,7 @@ const verifyBtcWithdraw = async (amount, blockNumber, transactionId) => {
 const processWithdraw = async ({
   amount,
   fee,
+  feePrice,
   from,
   to,
   transactionId,
@@ -401,7 +402,6 @@ const processWithdraw = async ({
           const blockNumber = await ethersWss.getBlockNumber();
 
           console.log('blockNumber', blockNumber);
-          console.log('currentBlockNumber', currentBlockNumber);
 
           return await verifyEthWithdraw(
             amount,
