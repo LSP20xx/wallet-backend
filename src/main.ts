@@ -26,8 +26,6 @@ async function bootstrap() {
   const redisStore = new RedisStore({ client: redisClient });
   const logDirectory = path.join(__dirname, '..', '..', 'access.log');
 
-  console.log('logDirectory', logDirectory);
-
   if (!fs.existsSync(logDirectory)) {
     fs.mkdirSync(logDirectory, { recursive: true });
   }

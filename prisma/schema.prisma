@@ -20,6 +20,17 @@ model Blockchain {
   @@map("blockchains")
 }
 
+model WalletToken {
+  id        String   @id @default(uuid())
+  walletId  String
+  tokenId   String
+  balance   String   
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  token     Token    @relation(fields: [tokenId], references: [id])
+
+  @@unique([walletId, tokenId])
+}
+
 model Wallet {
   id                  String        @id @default(uuid())
   balance             String
@@ -36,6 +47,7 @@ model Wallet {
   blockchainId        String
   transactions        Transaction[] @relation("WalletTransactions")
   tokens              Token[]       @relation("WalletTokens")
+  walletTokens        WalletToken[]
   @@map("wallets")
 }
 
@@ -52,15 +64,16 @@ model Token {
   id              String         @id @default(uuid())
   symbol          String
   contractAddress String?
-  wallet          Wallet         @relation(fields: [walletId], references: [id], name: "WalletTokens")
-  walletId        String
+  wallet          Wallet?         @relation(fields: [walletId], references: [id], name: "WalletTokens")
+  walletId        String?
   chainType       ChainType
   network         Network
   transactions    Transaction[]  @relation("TokenTransactions")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  blockchain      Blockchain?    @relation(fields: [blockchainId], references: [id], name: "TokenChain")
+  blockchain      Blockchain?    @relation(fields: [blockchainId], references: [blockchainId], name: "TokenChain")
   blockchainId    String?
+  walletTokens    WalletToken[]
   @@map("tokens")
 }
 

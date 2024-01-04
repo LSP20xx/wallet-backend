@@ -17,6 +17,7 @@ import { VerificationsModule } from './verifications/verifications.module';
 import { WalletsModule } from './wallets/wallet.module';
 import { Web3Module } from './web3/web3.module';
 import { LambdaModule } from './lambda/lambda.module';
+import { KrakenGateway } from 'gateways/kraken.gateway';
 
 @Module({
   imports: [
@@ -53,5 +54,6 @@ import { LambdaModule } from './lambda/lambda.module';
     AuthModule,
     LambdaModule,
   ],
+  providers: [KrakenGateway],
 })
 export class AppModule {}
