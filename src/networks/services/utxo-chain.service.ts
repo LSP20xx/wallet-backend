@@ -2,4 +2,4 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class UxtoChainService {}
+export class UtxoChainService {}

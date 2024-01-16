@@ -83,11 +83,11 @@ export class UtxoWalletService implements IUtxoWalletService {
   private getChainTypeEnum(coinType: string): ChainType {
     switch (coinType.toLowerCase()) {
       case 'bitcoin':
-        return ChainType.BTC;
+        return ChainType.UTXO;
       case 'litecoin':
-        return ChainType.LTC;
+        return ChainType.UTXO;
       case 'dogecoin':
-        return ChainType.DOGE;
+        return ChainType.UTXO;
       default:
         throw new Error(`Tipo de moneda no soportado: ${coinType}`);
     }
@@ -161,7 +161,7 @@ export class UtxoWalletService implements IUtxoWalletService {
         to: withdrawDto.to,
         transactionType: 'WITHDRAWAL',
         status: 'PROCESSING',
-        chainType: 'BTC',
+        chainType: 'UTXO',
         blockchainId: withdrawDto.blockchainId,
         walletId: wallet.id,
         userId: withdrawDto.userId,

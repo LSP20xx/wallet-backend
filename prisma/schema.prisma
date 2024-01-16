@@ -74,7 +74,22 @@ model Token {
   blockchain      Blockchain?    @relation(fields: [blockchainId], references: [blockchainId], name: "TokenChain")
   blockchainId    String?
   walletTokens    WalletToken[]
+  cryptocurrencyDataId String? @map("cryptocurrency_data_id")
+  cryptocurrencyData CryptocurrencyData? @relation(fields: [cryptocurrencyDataId], references: [id])
+
   @@map("tokens")
+}
+
+model CryptocurrencyData {
+  id            String    @id @default(uuid())
+  tokenId       String
+  price         Float
+  marketCap     Float?
+  volume24h     Float?
+  change24h     Float?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  tokens Token[] 
 }
 
 model Transaction {
@@ -153,7 +168,7 @@ model TradeOrder {
   buyerId      String
   balance      String
   pricePerUnit String
-  currencyType Currency
+  blockchainName BlockchainName
   tradeStatus  TradeStatus
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -166,14 +181,12 @@ enum ConnectionStatus {
   DISCONNECTED
 }
 
-enum Currency {
+enum BlockchainName {
   Ethereum
   BnbChain
   Polygon
   Avalanche
   Fantom
-  Harmony
-  Elrond
   Solana 
   Bitcoin
   Litecoin
@@ -207,9 +220,7 @@ enum UserRole {
 
 enum ChainType {
   EVM
-  BTC
-  LTC
-  DOGE
+  UTXO
 }
 
 enum Network {

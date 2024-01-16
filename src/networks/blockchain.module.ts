@@ -8,8 +8,8 @@ import { EvmChainController } from './controllers/evm-chain.controller';
 import { EvmChainService } from './services/evm-chain.service';
 import { GraphQueryService } from './services/graph-query.service';
 import { existsSync, mkdirSync } from 'fs';
-import { UxtoChainService } from './services/utxo-chain.service';
-import { UxtoChainController } from './controllers/utxo-chain.controller';
+import { UtxoChainService } from './services/utxo-chain.service';
+import { UtxoChainController } from './controllers/utxo-chain.controller';
 
 const basePath = resolve(__dirname, '../../src/networks/subgraphs');
 if (!existsSync(basePath)) {
@@ -18,9 +18,9 @@ if (!existsSync(basePath)) {
 
 @Module({
   imports: [Web3Module],
-  providers: [EvmChainService, UxtoChainService, GraphQueryService],
-  exports: [EvmChainService, UxtoChainService, GraphQueryService],
-  controllers: [EvmChainController, UxtoChainController],
+  providers: [EvmChainService, UtxoChainService, GraphQueryService],
+  exports: [EvmChainService, UtxoChainService, GraphQueryService],
+  controllers: [EvmChainController, UtxoChainController],
 })
 export class BlockchainModule implements OnModuleInit {
   private allowedChains: string[] = [];

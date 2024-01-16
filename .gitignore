@@ -40,4 +40,6 @@ lerna-debug.log*
 /db/migrations
 
 # Redis data dump
-/redis/data/dump.rdb
+/redis/data/*.rdb
+
+prisma/migrations/**/*.sql
