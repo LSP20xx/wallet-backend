@@ -1,8 +1,32 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/billete/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/billete/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/billete",
+  "projects": {
+    "billete": {
+      "type": "application",
+      "root": "apps/billete",
+      "entryFile": "main",
+      "sourceRoot": "apps/billete/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/billete/tsconfig.app.json"
+      }
+    },
+    "crypto-data": {
+      "type": "application",
+      "root": "apps/crypto-data",
+      "entryFile": "main",
+      "sourceRoot": "apps/crypto-data/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/crypto-data/tsconfig.app.json"
+      }
+    }
   }
 }
