@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { OnModuleInit } from '@nestjs/common';
-import { tokensConfig } from 'config/coins/erc20-tokens';
 import { DatabaseService } from '../../database/services/database/database.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { ChainType, Network } from '@prisma/client';
+import { tokensConfig } from 'config/coins/coins';
 
 @Injectable()
 export class EvmTokensService implements OnModuleInit {
@@ -14,6 +15,7 @@ export class EvmTokensService implements OnModuleInit {
   async onModuleInit() {
     await this.initializeTokens();
     await this.initializeTokensForAllWallets();
+    await this.initializeCryptocurrencyData();
   }
 
   async getCryptoData() {
@@ -21,18 +23,57 @@ export class EvmTokensService implements OnModuleInit {
   }
 
   private async initializeTokens() {
-    for (const tokenConfig of Object.values(tokensConfig)) {
-      const existingToken = await this.databaseService.token.findFirst({
-        where: { contractAddress: tokenConfig.contractAddress },
-      });
-
-      if (!existingToken) {
-        await this.databaseService.token.create({
-          data: {
-            ...tokenConfig,
-          },
-        });
+    console.log(tokensConfig);
+    for (const [, networkTypes] of Object.entries(tokensConfig)) {
+      for (const [, tokens] of Object.entries(networkTypes)) {
+        for (const [, tokenData] of Object.entries(tokens)) {
+          if (tokenData.contractAddress) {
+            const existingToken = await this.databaseService.token.findFirst({
+              where: { contractAddress: tokenData.contractAddress },
+            });
+            if (!existingToken) {
+              await this.databaseService.token.create({
+                data: {
+                  symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
+                    tokenData.symbol
+                  }`,
+                  contractAddress: tokenData.contractAddress,
+                  chainType: tokenData.chainType as ChainType,
+                  network: tokenData.network as Network,
+                  blockchainId: tokenData.blockchainId,
+                },
+              });
+            }
+          } else {
+            const existingToken = await this.databaseService.token.findFirst({
+              where: { symbol: tokenData.symbol },
+            });
+            if (!existingToken) {
+              await this.databaseService.token.create({
+                data: {
+                  symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
+                    tokenData.symbol
+                  }`,
+                  contractAddress: tokenData.contractAddress,
+                  chainType: tokenData.chainType as ChainType,
+                  network: tokenData.network as Network,
+                  blockchainId: tokenData.blockchainId,
+                },
+              });
+            }
+          }
+        }
       }
+    }
+  }
+
+  async initializeCryptocurrencyData() {
+    const cryptocurrencyData =
+      await this.databaseService.cryptocurrencyData.findMany();
+    console.log(cryptocurrencyData);
+    if (cryptocurrencyData.length === 0) {
+      /*       const cryptoData = await this.getCryptoData();
+       */
     }
   }
 

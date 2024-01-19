@@ -25,10 +25,8 @@ async function bootstrap() {
 
   const redisStore = new RedisStore({ client: redisClient });
   const logDirectory = path.join(__dirname, '..', '..', 'access.log');
-
-  if (!fs.existsSync(logDirectory)) {
-    fs.mkdirSync(logDirectory, { recursive: true });
-  }
+  console.log('__dirname', __dirname);
+  console.log('logDirectory', logDirectory);
 
   const accessLogStream = fs.createWriteStream(logDirectory, { flags: 'a' });
 
