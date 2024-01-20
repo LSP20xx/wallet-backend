@@ -1,0 +1,34 @@
+{
+  "ethereum": [
+    {
+      "symbol": "ETH",
+      "contractAddress": "0xMainAddressEthereum",
+      "chainType": "EVM",
+      "network": "MAINNET",
+      "blockchainId": "1"
+    },
+    {
+      "symbol": "MKT",
+      "contractAddress": "0xcFBa2EdFb93C775F42E9bD007D29dd2E88E37cD6",
+      "chainType": "EVM",
+      "network": "TESTNET",
+      "blockchainId": "5"
+    }
+  ],
+  "bitcoin": [
+    {
+      "symbol": "BTC",
+      "contractAddress": "BITCOIN-MAINNET",
+      "chainType": "UTXO",
+      "network": "MAINNET",
+      "blockchainId": "BITCOIN-MAINNET"
+    },
+    {
+      "symbol": "BTC",
+      "contractAddress": "BITCOIN-TESTNET",
+      "chainType": "UTXO",
+      "network": "TESTNET",
+      "blockchainId": "BITCOIN-TESTNET"
+    }
+  ]
+}

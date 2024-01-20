@@ -7,8 +7,9 @@ export class CryptoDataController {
   constructor(private readonly cryptoDataService: CryptoDataService) {}
 
   @EventPattern('get_crypto_data')
-  async getData() {
-    const result = this.cryptoDataService.getHello();
+  async getData(data: { coinId: string; days: number }) {
+    const { coinId, days } = data;
+    const result = this.cryptoDataService.getCoinGeckoData(coinId, days);
     return result;
   }
 }

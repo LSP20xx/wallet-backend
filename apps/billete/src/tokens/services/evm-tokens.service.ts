@@ -18,8 +18,10 @@ export class EvmTokensService implements OnModuleInit {
     await this.initializeCryptocurrencyData();
   }
 
-  async getCryptoData() {
-    return this.client.send('get_crypto_data', {});
+  async getCryptoData(coinId: string, days: number) {
+    const eventPayload = { coinId, days };
+
+    return this.client.send('get_crypto_data', eventPayload);
   }
 
   private async initializeTokens() {
@@ -37,6 +39,7 @@ export class EvmTokensService implements OnModuleInit {
                   symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
                     tokenData.symbol
                   }`,
+                  name: tokenData.name,
                   contractAddress: tokenData.contractAddress,
                   chainType: tokenData.chainType as ChainType,
                   network: tokenData.network as Network,
@@ -54,6 +57,7 @@ export class EvmTokensService implements OnModuleInit {
                   symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
                     tokenData.symbol
                   }`,
+                  name: tokenData.name,
                   contractAddress: tokenData.contractAddress,
                   chainType: tokenData.chainType as ChainType,
                   network: tokenData.network as Network,
@@ -72,8 +76,10 @@ export class EvmTokensService implements OnModuleInit {
       await this.databaseService.cryptocurrencyData.findMany();
     console.log(cryptocurrencyData);
     if (cryptocurrencyData.length === 0) {
-      /*       const cryptoData = await this.getCryptoData();
-       */
+      const tokens = await this.databaseService.token.findMany();
+      const tokenNames = tokens.map((token) => token.name.toLowerCase());
+      const cryptoData = await this.getCryptoData(tokenNames.join(','), 30);
+      console.log(cryptoData);
     }
   }
 

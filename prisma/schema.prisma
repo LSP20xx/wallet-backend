@@ -63,6 +63,7 @@ model WalletContract {
 model Token {
   id              String         @id @default(uuid())
   symbol          String
+  name            String
   contractAddress String?
   wallet          Wallet?         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String?
@@ -83,7 +84,12 @@ model Token {
 model CryptocurrencyData {
   id            String    @id @default(uuid())
   tokenId       String
+  date         DateTime
   price         Float
+  open          Float?
+  high          Float?
+  low           Float?
+  close         Float?
   marketCap     Float?
   volume24h     Float?
   change24h     Float?

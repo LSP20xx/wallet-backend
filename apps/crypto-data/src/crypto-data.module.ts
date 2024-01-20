@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CryptoDataController } from './crypto-data.controller';
 import { CryptoDataService } from './crypto-data.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from '../../billete/src/database/database.module';
 
 @Module({
+  imports: [HttpModule, ConfigModule, DatabaseModule],
   controllers: [CryptoDataController],
   providers: [CryptoDataService],
 })
