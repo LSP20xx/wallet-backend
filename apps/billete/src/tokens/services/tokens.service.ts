@@ -86,7 +86,6 @@ export class TokensService implements OnModuleInit {
     const tickers = mainnetTokens.map(
       (token) => `${token.symbol.toUpperCase()}-USD`,
     );
-    console.log('llega acá=====================================');
     for (const ticker of tickers) {
       from(this.getYahooFinanceData(ticker, 1400000))
         .pipe(
