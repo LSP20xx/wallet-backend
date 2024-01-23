@@ -6,6 +6,7 @@ import { catchError, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DatabaseService } from 'apps/billete/src/database/services/database/database.service';
 import * as fs from 'fs';
+import * as path from 'path';
 @Injectable()
 export class CryptoDataService {
   private readonly logger = new Logger(CryptoDataService.name);
@@ -66,7 +67,56 @@ export class CryptoDataService {
     return url;
   }
 
-  public async getYahooFinanceData(ticker: string, days: number) {
+  private validateHeaders(headers: string[]): boolean {
+    const expectedHeaders = [
+      'Date',
+      'Open',
+      'High',
+      'Low',
+      'Close',
+      'Adj Close',
+      'Volume',
+    ];
+    return (
+      headers.length === expectedHeaders.length &&
+      headers.every((header, index) => header === expectedHeaders[index])
+    );
+  }
+
+  private saveCsv = async (csv: string, ticker: string, interval: string) => {
+    const lines = csv.split('\n');
+    const headers = lines[0].split(',');
+
+    if (!this.validateHeaders(headers)) {
+      throw new Error('Invalid CSV headers');
+    }
+
+    const csvFilePath = path.join(
+      __dirname,
+      '../../../data',
+      `${ticker}_${interval}.csv`,
+    );
+    const csvData = lines.join('\n');
+    const directory = path.dirname(csvFilePath);
+
+    try {
+      // Crear el directorio si no existe
+      await fs.promises.mkdir(directory, { recursive: true });
+
+      // Escribir los datos en el archivo CSV
+      await fs.promises.writeFile(csvFilePath, csvData);
+      return lines;
+    } catch (error) {
+      // Proporciona un mensaje de error más específico
+      throw new Error(`Error saving CSV: ${error.message}`);
+    }
+  };
+
+  public async getYahooFinanceData(
+    ticker: string,
+    days: number,
+    interval: string = '1d',
+  ) {
     const currentDate = moment().format('YYYY-MM-DD');
     const previousDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
 
@@ -80,9 +130,16 @@ export class CryptoDataService {
     return this.httpService.get(url, { responseType: 'text' }).pipe(
       map((response) => {
         const csv = response.data;
+        this.saveCsv(csv, ticker, interval);
         const lines = csv.split('\n');
         const result = [];
         const headers = lines[0].split(',');
+
+        if (!this.validateHeaders(headers)) {
+          throw new Error('Encabezados del CSV no válidos');
+        }
+
+        result.push(headers);
         for (let i = 1; i < lines.length; i++) {
           const obj = {};
           const currentline = lines[i].split(',');
@@ -91,11 +148,20 @@ export class CryptoDataService {
           }
           result.push(obj);
         }
-        console.log(result);
-        const csvFilePath = `../../../data/${ticker}.csv`;
+
+        const csvFilePath = path.join(
+          __dirname,
+          '../../../data',
+          `${ticker}_1d.csv`,
+        );
+
         const csvData = result
           .map((obj) => Object.values(obj).join(','))
           .join('\n');
+        const directory = path.dirname(csvFilePath);
+        if (!fs.existsSync(directory)) {
+          fs.mkdirSync(directory, { recursive: true });
+        }
         fs.writeFileSync(csvFilePath, csvData);
         return result;
       }),

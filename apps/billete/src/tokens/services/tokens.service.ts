@@ -4,6 +4,8 @@ import { DatabaseService } from '../../database/services/database/database.servi
 import { ClientProxy } from '@nestjs/microservices';
 import { ChainType, Network } from '@prisma/client';
 import { tokensConfig } from 'config/coins/coins';
+import { map } from 'rxjs/operators';
+import { from } from 'rxjs';
 
 @Injectable()
 export class TokensService implements OnModuleInit {
@@ -76,21 +78,30 @@ export class TokensService implements OnModuleInit {
   }
 
   async initializeCryptocurrencyData() {
-    const cryptocurrencyData =
-      await this.databaseService.cryptocurrencyData.findMany();
-    if (cryptocurrencyData.length === 0) {
-      const mainnetTokens = await this.databaseService.token.findMany({
-        where: {
-          network: 'MAINNET',
-        },
-      });
-      const tickers = mainnetTokens.map(
-        (token) => `${token.symbol.toUpperCase()}-USD`,
-      );
-      tickers.forEach((ticker) => {
-        const cryptoData = this.getYahooFinanceData(ticker, 30);
-        console.log(cryptoData);
-      });
+    const mainnetTokens = await this.databaseService.token.findMany({
+      where: {
+        network: 'MAINNET',
+      },
+    });
+    const tickers = mainnetTokens.map(
+      (token) => `${token.symbol.toUpperCase()}-USD`,
+    );
+    console.log('llega acá=====================================');
+    for (const ticker of tickers) {
+      from(this.getYahooFinanceData(ticker, 1400000))
+        .pipe(
+          map((data) => {
+            console.log(data);
+          }),
+        )
+        .subscribe({
+          next: (processedData) => {
+            console.log(processedData);
+          },
+          error: (error) => {
+            console.error('Error processing data:', error);
+          },
+        });
     }
   }
 
