@@ -6,7 +6,7 @@ import { ChainType, Network } from '@prisma/client';
 import { tokensConfig } from 'config/coins/coins';
 
 @Injectable()
-export class EvmTokensService implements OnModuleInit {
+export class TokensService implements OnModuleInit {
   constructor(
     private databaseService: DatabaseService,
     @Inject('CRYPTO_DATA_SERVICE') private client: ClientProxy,
@@ -18,10 +18,14 @@ export class EvmTokensService implements OnModuleInit {
     await this.initializeCryptocurrencyData();
   }
 
-  async getCryptoData(coinId: string, days: number) {
+  async getYahooFinanceData(coinId: string, days: number) {
     const eventPayload = { coinId, days };
+    return this.client.send('get_yahoo_finance_data', eventPayload);
+  }
 
-    return this.client.send('get_crypto_data', eventPayload);
+  async getCoinGeckoData(coinId: string, days: number) {
+    const eventPayload = { coinId, days };
+    return this.client.send('get_coin_gecko_data', eventPayload);
   }
 
   private async initializeTokens() {
@@ -74,12 +78,19 @@ export class EvmTokensService implements OnModuleInit {
   async initializeCryptocurrencyData() {
     const cryptocurrencyData =
       await this.databaseService.cryptocurrencyData.findMany();
-    console.log(cryptocurrencyData);
     if (cryptocurrencyData.length === 0) {
-      const tokens = await this.databaseService.token.findMany();
-      const tokenNames = tokens.map((token) => token.name.toLowerCase());
-      const cryptoData = await this.getCryptoData(tokenNames.join(','), 30);
-      console.log(cryptoData);
+      const mainnetTokens = await this.databaseService.token.findMany({
+        where: {
+          network: 'MAINNET',
+        },
+      });
+      const tickers = mainnetTokens.map(
+        (token) => `${token.symbol.toUpperCase()}-USD`,
+      );
+      tickers.forEach((ticker) => {
+        const cryptoData = this.getYahooFinanceData(ticker, 30);
+        console.log(cryptoData);
+      });
     }
   }
 

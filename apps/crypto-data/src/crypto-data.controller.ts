@@ -6,8 +6,15 @@ import { CryptoDataService } from './crypto-data.service';
 export class CryptoDataController {
   constructor(private readonly cryptoDataService: CryptoDataService) {}
 
-  @EventPattern('get_crypto_data')
-  async getData(data: { coinId: string; days: number }) {
+  @EventPattern('get_yahoo_finance_data')
+  async getYahooFinanceData(data: { coinId: string; days: number }) {
+    const { coinId, days } = data;
+    const result = this.cryptoDataService.getYahooFinanceData(coinId, days);
+    return result;
+  }
+
+  @EventPattern('get_coin_gecko_data')
+  async getCoinGeckoData(data: { coinId: string; days: number }) {
     const { coinId, days } = data;
     const result = this.cryptoDataService.getCoinGeckoData(coinId, days);
     return result;

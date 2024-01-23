@@ -6,7 +6,14 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../../billete/src/database/database.module';
 
 @Module({
-  imports: [HttpModule, ConfigModule, DatabaseModule],
+  imports: [
+    HttpModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+    DatabaseModule,
+  ],
   controllers: [CryptoDataController],
   providers: [CryptoDataService],
 })

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { EvmTokensService } from './services/evm-tokens.service';
-import { EvmTokensController } from './evm-tokens.controller';
+import { TokensService } from './services/tokens.service';
+import { TokensController } from './tokens.controller';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { EvmTokensController } from './evm-tokens.controller';
       },
     ]),
   ],
-  providers: [EvmTokensService],
-  controllers: [EvmTokensController],
+  providers: [TokensService],
+  controllers: [TokensController],
 })
 export class TokensModule {}
