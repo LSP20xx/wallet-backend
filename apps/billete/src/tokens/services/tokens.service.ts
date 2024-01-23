@@ -91,11 +91,14 @@ export class TokensService implements OnModuleInit {
         .pipe(
           map((data) => {
             console.log(data);
+            return data;
           }),
         )
         .subscribe({
-          next: (processedData) => {
+          next: async (processedData) => {
             console.log(processedData);
+            // const dataString = JSON.stringify(processedData);
+            // await this.redisClient.set(ticker, dataString);
           },
           error: (error) => {
             console.error('Error processing data:', error);
