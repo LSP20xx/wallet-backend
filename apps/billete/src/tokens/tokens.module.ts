@@ -15,6 +15,16 @@ import { TokensController } from './tokens.controller';
         },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'REDIS_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3003,
+        },
+      },
+    ]),
   ],
   providers: [TokensService],
   controllers: [TokensController],

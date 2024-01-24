@@ -12,14 +12,19 @@ export class TokensService implements OnModuleInit {
   constructor(
     private databaseService: DatabaseService,
     @Inject('CRYPTO_DATA_SERVICE') private client: ClientProxy,
+    @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
   ) {}
 
   async onModuleInit() {
     await this.initializeTokens();
     await this.initializeTokensForAllWallets();
     await this.initializeCryptocurrencyData();
+    await this.checkRedis();
   }
 
+  async checkRedis() {
+    await this.getKey('BTC-USD_1d');
+  }
   async getYahooFinanceData(coinId: string, days: number) {
     const eventPayload = { coinId, days };
     return this.client.send('get_yahoo_finance_data', eventPayload);
@@ -30,6 +35,18 @@ export class TokensService implements OnModuleInit {
     return this.client.send('get_coin_gecko_data', eventPayload);
   }
 
+  async setKey(key: string, value: string) {
+    return this.redisClient.send('set', {
+      key,
+      value,
+    });
+  }
+
+  async getKey(key: string) {
+    return this.redisClient.send('get', {
+      key,
+    });
+  }
   private async initializeTokens() {
     console.log(tokensConfig);
     for (const [, networkTypes] of Object.entries(tokensConfig)) {
@@ -90,15 +107,17 @@ export class TokensService implements OnModuleInit {
       from(this.getYahooFinanceData(ticker, 1400000))
         .pipe(
           map((data) => {
-            console.log(data);
-            return data;
+            data.subscribe((data) => {
+              this.setKey(`${ticker}_1d`, JSON.stringify(data));
+
+              return data;
+            });
           }),
         )
         .subscribe({
           next: async (processedData) => {
-            console.log(processedData);
-            // const dataString = JSON.stringify(processedData);
-            // await this.redisClient.set(ticker, dataString);
+            const dataString = JSON.stringify(processedData);
+            this.setKey(`${ticker}_1d`, dataString);
           },
           error: (error) => {
             console.error('Error processing data:', error);

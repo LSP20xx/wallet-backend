@@ -12,7 +12,7 @@ export class TokensController {
   ) {
     return this.tokensService.getYahooFinanceData(coinId, days);
   }
-  @Get('coingecko-data')
+  @Get('coin-gecko-data')
   async getCoinGeckoData(
     @Query('coinId') coinId: string,
     @Query('days') days: number,
