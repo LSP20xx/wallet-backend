@@ -37,19 +37,30 @@ export class CryptoDataService {
 
     this.logger.log(`Requesting CoinGecko for ${coinId}`);
 
-    return this.httpService.get(url, { headers, params }).pipe(
-      map((response) => response.data),
-      catchError((error) => {
-        this.logger.error(`Error status: ${error.response?.status}`);
-        this.logger.error(
-          `Error message: ${error.response?.data?.message || error.message}`,
-        );
-        return throwError(
-          () =>
-            new Error(`Error fetching data from CoinGecko: ${error.message}`),
-        );
-      }),
-    );
+    return this.httpService
+      .get(url, { headers, params, responseType: 'text' })
+      .pipe(
+        map((response) => {
+          if (typeof response.data === 'string') {
+            const interval = days > 1 ? '90d' : '1d';
+            const jsonData = JSON.parse(response.data).prices;
+            const csvData = this.convertToCsv(jsonData);
+            return this.saveCsv(csvData, coinId, interval);
+          } else {
+            throw new Error('Received non-CSV response');
+          }
+        }),
+        catchError((error) => {
+          this.logger.error(`Error status: ${error.response?.status}`);
+          this.logger.error(
+            `Error message: ${error.response?.data?.message || error.message}`,
+          );
+          return throwError(
+            () =>
+              new Error(`Error fetching data from CoinGecko: ${error.message}`),
+          );
+        }),
+      );
   }
   private constructDownloadUrl(
     ticker: string,
@@ -67,34 +78,31 @@ export class CryptoDataService {
     return url;
   }
 
-  private validateHeaders(headers: string[]): boolean {
-    const expectedHeaders = [
-      'Date',
-      'Open',
-      'High',
-      'Low',
-      'Close',
-      'Adj Close',
-      'Volume',
-    ];
-    return (
-      headers.length === expectedHeaders.length &&
-      headers.every((header, index) => header === expectedHeaders[index])
-    );
+  private convertToCsv(data: any[]): string {
+    let csvContent = 'Date,Close\n';
+    data.forEach((item) => {
+      const localTimestamp = new Date(item[0]);
+      const utcTimestamp = new Date(localTimestamp.getTime());
+      const year = utcTimestamp.getUTCFullYear();
+      const month = (utcTimestamp.getUTCMonth() + 1)
+        .toString()
+        .padStart(2, '0');
+      const day = utcTimestamp.getUTCDate().toString().padStart(2, '0');
+      const hours = utcTimestamp.getUTCHours().toString().padStart(2, '0');
+      const minutes = utcTimestamp.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = utcTimestamp.getUTCSeconds().toString().padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      csvContent += `${formattedDate},${item[1]}\n`;
+    });
+    return csvContent;
   }
 
-  private saveCsv = async (csv: string, ticker: string, interval: string) => {
+  private saveCsv = async (csv: string, name: string, interval: string) => {
     const lines = csv.split('\n');
-    const headers = lines[0].split(',');
-
-    if (!this.validateHeaders(headers)) {
-      throw new Error('Invalid CSV headers');
-    }
-
     const csvFilePath = path.join(
       __dirname,
       '../../../data',
-      `${ticker}_${interval}.csv`,
+      `${name}_${interval}.csv`,
     );
     const csvData = lines.join('\n');
     const directory = path.dirname(csvFilePath);
@@ -107,16 +115,11 @@ export class CryptoDataService {
       await fs.promises.writeFile(csvFilePath, csvData);
       return lines;
     } catch (error) {
-      // Proporciona un mensaje de error más específico
       throw new Error(`Error saving CSV: ${error.message}`);
     }
   };
 
-  public async getYahooFinanceData(
-    ticker: string,
-    days: number,
-    interval: string = '1d',
-  ) {
+  public async getYahooFinanceData(ticker: string, days: number) {
     const currentDate = moment().format('YYYY-MM-DD');
     const previousDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
 
@@ -129,41 +132,21 @@ export class CryptoDataService {
 
     return this.httpService.get(url, { responseType: 'text' }).pipe(
       map((response) => {
-        const csv = response.data;
-        this.saveCsv(csv, ticker, interval);
-        const lines = csv.split('\n');
-        const result = [];
-        const headers = lines[0].split(',');
-
-        if (!this.validateHeaders(headers)) {
-          throw new Error('Encabezados del CSV no válidos');
+        if (typeof response.data === 'string') {
+          return this.saveCsv(response.data, ticker, 'ALL');
+        } else {
+          throw new Error('Received non-CSV response');
         }
-
-        result.push(headers);
-        for (let i = 1; i < lines.length; i++) {
-          const obj = {};
-          const currentline = lines[i].split(',');
-          for (let j = 0; j < headers.length; j++) {
-            obj[headers[j]] = currentline[j];
-          }
-          result.push(obj);
-        }
-
-        const csvFilePath = path.join(
-          __dirname,
-          '../../../data',
-          `${ticker}_1d.csv`,
+      }),
+      catchError((error) => {
+        this.logger.error(`Error status: ${error.response?.status}`);
+        this.logger.error(
+          `Error message: ${error.response?.data?.message || error.message}`,
         );
-
-        const csvData = result
-          .map((obj) => Object.values(obj).join(','))
-          .join('\n');
-        const directory = path.dirname(csvFilePath);
-        if (!fs.existsSync(directory)) {
-          fs.mkdirSync(directory, { recursive: true });
-        }
-        fs.writeFileSync(csvFilePath, csvData);
-        return result;
+        return throwError(
+          () =>
+            new Error(`Error fetching data from CoinGecko: ${error.message}`),
+        );
       }),
     );
   }
