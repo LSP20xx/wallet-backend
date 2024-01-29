@@ -23,15 +23,20 @@ export class TokensService implements OnModuleInit {
   }
 
   async checkRedis() {
-    await this.getKey('BTC-USD_1d');
+    try {
+      const data = await this.getKey('BTC-USD_1d');
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
   }
   async getYahooFinanceData(coinId: string, days: number) {
     const eventPayload = { coinId, days };
     return this.client.send('get_yahoo_finance_data', eventPayload);
   }
 
-  async getCoinGeckoData(coinId: string, days: number) {
-    const eventPayload = { coinId, days };
+  async getCoinGeckoData(coinId: string, days: number, ticker: string) {
+    const eventPayload = { coinId, days, ticker };
     return this.client.send('get_coin_gecko_data', eventPayload);
   }
 
@@ -43,10 +48,13 @@ export class TokensService implements OnModuleInit {
   }
 
   async getKey(key: string) {
-    return this.redisClient.send('get', {
-      key,
-    });
+    return this.redisClient
+      .send('get', {
+        key,
+      })
+      .toPromise();
   }
+
   private async initializeTokens() {
     console.log(tokensConfig);
     for (const [, networkTypes] of Object.entries(tokensConfig)) {
@@ -100,15 +108,20 @@ export class TokensService implements OnModuleInit {
         network: 'MAINNET',
       },
     });
+
     const tickers = mainnetTokens.map(
       (token) => `${token.symbol.toUpperCase()}-USD`,
     );
+
     const names = mainnetTokens.map((token) => token.name.toLowerCase());
-    for (const ticker of tickers) {
+
+    for (let i = 0; i < mainnetTokens.length; i++) {
+      const ticker = tickers[i];
       from(this.getYahooFinanceData(ticker, 1400000))
         .pipe(
           map((data) => {
             data.subscribe((data) => {
+              console.log(data);
               this.setKey(`${ticker}_ALL`, JSON.stringify(data));
               return data;
             });
@@ -124,12 +137,15 @@ export class TokensService implements OnModuleInit {
           },
         });
     }
-    for (const name of names) {
-      from(this.getCoinGeckoData(name, 1))
+
+    for (let i = 0; i < mainnetTokens.length; i++) {
+      const ticker = tickers[i];
+      const name = names[i];
+      from(this.getCoinGeckoData(name, 1, ticker))
         .pipe(
           map((data) => {
             data.subscribe((data) => {
-              this.setKey(`${name}_1d`, JSON.stringify(data));
+              this.setKey(`${ticker}_1d`, JSON.stringify(data));
               return data;
             });
           }),
@@ -137,19 +153,22 @@ export class TokensService implements OnModuleInit {
         .subscribe({
           next: async (processedData) => {
             const dataString = JSON.stringify(processedData);
-            this.setKey(`${name}_1d`, dataString);
+            this.setKey(`${ticker}_1d`, dataString);
           },
           error: (error) => {
             console.error('Error processing data:', error);
           },
         });
     }
-    for (const name of names) {
-      from(this.getCoinGeckoData(name, 90))
+
+    for (let i = 0; i < mainnetTokens.length; i++) {
+      const ticker = tickers[i];
+      const name = names[i];
+      from(this.getCoinGeckoData(name, 90, ticker))
         .pipe(
           map((data) => {
             data.subscribe((data) => {
-              this.setKey(`${name}_90d`, JSON.stringify(data));
+              this.setKey(`${ticker}_90d`, JSON.stringify(data));
               return data;
             });
           }),
@@ -157,7 +176,7 @@ export class TokensService implements OnModuleInit {
         .subscribe({
           next: async (processedData) => {
             const dataString = JSON.stringify(processedData);
-            this.setKey(`${name}_90d`, dataString);
+            this.setKey(`${ticker}_90d`, dataString);
           },
           error: (error) => {
             console.error('Error processing data:', error);

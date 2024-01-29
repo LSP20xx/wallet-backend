@@ -127,8 +127,8 @@ model Transaction {
 
 model User {
   id                String        @id @default(uuid())
-  firstName         String
-  lastName          String
+  firstName         String?
+  lastName          String?
   email             String?       @unique
   phoneNumber       String?       @unique
   encryptedPassword String
@@ -138,6 +138,7 @@ model User {
   buyOrders         TradeOrder[]  @relation("UserBuyOrders")
   sessions          Session[]     @relation("UserSessions")
   transactions      Transaction[] @relation("UserTransactions")
+  verified          Boolean       @default(false)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 

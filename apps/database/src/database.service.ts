@@ -3,9 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class DatabaseService extends PrismaClient {
+export class DatabaseService {
+  private prisma: PrismaClient;
+
   constructor(configService: ConfigService) {
-    super({
+    this.prisma = new PrismaClient({
       datasources: {
         db: {
           url: configService.get('DATABASE_URL'),

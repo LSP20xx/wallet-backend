@@ -14,9 +14,17 @@ export class CryptoDataController {
   }
 
   @EventPattern('get_coin_gecko_data')
-  async getCoinGeckoData(data: { coinId: string; days: number }) {
-    const { coinId, days } = data;
-    const result = this.cryptoDataService.getCoinGeckoData(coinId, days);
+  async getCoinGeckoData(data: {
+    coinId: string;
+    days: number;
+    ticker: string;
+  }) {
+    const { coinId, days, ticker } = data;
+    const result = this.cryptoDataService.getCoinGeckoData(
+      coinId,
+      days,
+      ticker,
+    );
     return result;
   }
 }

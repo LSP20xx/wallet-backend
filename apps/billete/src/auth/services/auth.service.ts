@@ -31,15 +31,14 @@ export class AuthService {
         const userData = {
           email: signUpDTO.email,
           phoneNumber: signUpDTO.phoneNumber,
-          firstName: signUpDTO.firstName,
-          lastName: signUpDTO.lastName,
           encryptedPassword: encryptedPassword,
+          verified: false,
         };
 
         const user = await transaction.user.create({
           data: userData,
         });
-
+        /* 
         const allowedChains = this.configService
           .get('ALLOWED_CHAINS_IDS')
           .split(',');
@@ -89,7 +88,7 @@ export class AuthService {
           'dogecoin',
           'testnet',
           transaction,
-        );
+        ); */
 
         return {
           userId: user.id,
@@ -108,7 +107,9 @@ export class AuthService {
     }
   }
 
-  async signInUser(signInDTO: SignInDTO): Promise<{ userId: string }> {
+  async signInUser(signInDTO: SignInDTO): Promise<{
+    userId: string;
+  }> {
     const user = await this.databaseService.user.findFirst({
       where: {
         OR: [{ email: signInDTO.login }, { phoneNumber: signInDTO.login }],

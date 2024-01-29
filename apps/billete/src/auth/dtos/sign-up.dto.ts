@@ -19,12 +19,12 @@ export class SignUpDTO {
   @Length(7, 20)
   phoneNumber?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(3)
   @MaxLength(30)
   firstName: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(3)
   @MaxLength(30)
   lastName: string;

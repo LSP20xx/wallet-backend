@@ -23,7 +23,6 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       throw new UnauthorizedException('Credenciales no válidas');
     }
     const isPasswordValid = await verify(user.encryptedPassword, password);
-
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales no válidas');
     }

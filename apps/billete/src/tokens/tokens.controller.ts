@@ -10,13 +10,25 @@ export class TokensController {
     @Query('coinId') coinId: string,
     @Query('days') days: number,
   ) {
-    return this.tokensService.getYahooFinanceData(coinId, days);
+    const value = await this.tokensService.getYahooFinanceData(coinId, days);
+    return value;
   }
   @Get('coin-gecko-data')
   async getCoinGeckoData(
     @Query('coinId') coinId: string,
     @Query('days') days: number,
+    @Query('ticker') ticker: string,
   ) {
-    return this.tokensService.getCoinGeckoData(coinId, days);
+    const value = await this.tokensService.getCoinGeckoData(
+      coinId,
+      days,
+      ticker,
+    );
+    return value;
+  }
+  @Get('redis-data')
+  async getRedisData(@Query('key') key: string) {
+    const value = await this.tokensService.getKey(key);
+    return value;
   }
 }
