@@ -134,6 +134,93 @@ export class AuthService {
     };
   }
 
+  generatePreVerificationToken(authData: {
+    email?: string;
+    phoneNumber?: string;
+  }) {
+    const payload = {};
+    if (authData.email) {
+      payload['email'] = authData.email;
+    }
+    if (authData.phoneNumber) {
+      payload['phoneNumber'] = authData.phoneNumber;
+    }
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '5m',
+      secret: this.configService.get<string>('JWT_SECRET'),
+    });
+  }
+
+  async checkAuthData(authData: {
+    email?: string;
+    phoneNumber?: string;
+    password: string;
+    isLogin: boolean;
+  }) {
+    const whereClause = {};
+
+    if (authData.email) {
+      whereClause['email'] = authData.email;
+    }
+    if (authData.phoneNumber) {
+      whereClause['phoneNumber'] = authData.phoneNumber;
+    }
+
+    if (!authData.email && !authData.phoneNumber) {
+      throw new Error('Email or phone number must be provided');
+    }
+
+    const user = await this.databaseService.user.findFirst({
+      where: { OR: [whereClause] },
+    });
+
+    if (!user) {
+      if (authData.isLogin) {
+        throw new ForbiddenException('Invalid credentials.');
+      } else {
+        const preRegistrationToken = this.generatePreVerificationToken({
+          email: authData.email,
+          phoneNumber: authData.phoneNumber,
+        });
+
+        return {
+          token: preRegistrationToken,
+          message: 'Verification required',
+          verificationMethods: authData.email ? ['EMAIL'] : ['SMS'],
+          email: authData.email,
+          phoneNumber: authData.phoneNumber,
+        };
+      }
+    } else {
+      if (authData.isLogin) {
+        const isPasswordValid = await verify(
+          user.encryptedPassword,
+          authData.password,
+        );
+
+        if (!isPasswordValid) {
+          throw new ForbiddenException('Invalid credentials.');
+        }
+      } else {
+        console.log('User already exists.');
+        throw new ForbiddenException('User already exists.');
+      }
+
+      const preRegistrationToken = this.generatePreVerificationToken({
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      });
+      return {
+        token: preRegistrationToken,
+        message: 'Verification required',
+        verificationMethods: user.verificationMethods,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      };
+    }
+  }
+
   async signToken(signTokenDto: SignTokenDTO): Promise<string> {
     const payload = {
       sub: signTokenDto.userId,

@@ -139,6 +139,7 @@ model User {
   sessions          Session[]     @relation("UserSessions")
   transactions      Transaction[] @relation("UserTransactions")
   verified          Boolean       @default(false)
+  verificationMethods VerificationMethod[]
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -233,4 +234,12 @@ enum ChainType {
 enum Network {
   MAINNET
   TESTNET
+}
+
+enum VerificationMethod {
+  EMAIL
+  SMS
+  GOOGLE_AUTHENTICATOR
+  SIGN_IN_AND_SIGN_UP_WITH_GOOGLE
+  SIGN_IN_AND_SIGN_UP_WITH_FACEBOOK
 }

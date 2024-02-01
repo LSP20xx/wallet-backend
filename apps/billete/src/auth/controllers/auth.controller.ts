@@ -4,6 +4,7 @@ import { AuthService } from 'apps/billete/src/auth/services/auth.service';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { SignInDTO } from '../dtos/sign-in.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { CheckAuthDataDTO } from '../dtos/check-auth-data.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +13,11 @@ export class AuthController {
   @Post('sign-up')
   async signUp(@Body() signUpDTO: SignUpDTO) {
     return this.authService.signUpUser(signUpDTO);
+  }
+
+  @Post('check-auth-data')
+  async checkAuthData(@Body() authData: CheckAuthDataDTO) {
+    return this.authService.checkAuthData(authData);
   }
 
   @UseGuards(LocalAuthGuard)
