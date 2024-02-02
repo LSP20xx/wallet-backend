@@ -184,6 +184,30 @@ export class AuthService {
           phoneNumber: authData.phoneNumber,
         });
 
+        const encryptedPassword = await hash(authData.password);
+
+        if (authData.email) {
+          await this.databaseService.user.create({
+            data: {
+              email: authData.email,
+              encryptedPassword: encryptedPassword,
+              verified: false,
+              verificationMethods: ['EMAIL'],
+            },
+          });
+        }
+
+        if (authData.phoneNumber) {
+          await this.databaseService.user.create({
+            data: {
+              phoneNumber: authData.phoneNumber,
+              encryptedPassword: encryptedPassword,
+              verified: false,
+              verificationMethods: ['SMS'],
+            },
+          });
+        }
+
         return {
           token: preRegistrationToken,
           message: 'Verification required',
