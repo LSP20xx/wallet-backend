@@ -18,6 +18,7 @@ import { WalletsModule } from './wallets/wallet.module';
 import { Web3Module } from './web3/web3.module';
 import { LambdaModule } from './lambda/lambda.module';
 import { KrakenGateway } from 'gateways/kraken.gateway';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -44,8 +45,9 @@ import { KrakenGateway } from 'gateways/kraken.gateway';
     UsersModule,
     WalletsModule,
     TradeOrdersModule,
-    SmsModule,
     VerificationsModule,
+    SmsModule,
+    EmailModule,
     EncryptionsModule,
     BlockchainModule,
     TokensModule,

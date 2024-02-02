@@ -158,14 +158,14 @@ model Session {
 }
 
 
-model Sms {
+model VerificationToken {
   id        String   @id @default(uuid())
   to        String
   code      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("sms")
+  @@map("verification_tokens")
 }
 
 model TradeOrder {
