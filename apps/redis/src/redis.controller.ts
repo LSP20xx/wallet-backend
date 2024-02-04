@@ -6,24 +6,24 @@ import { RedisService } from './redis.service';
 export class RedisController {
   constructor(private readonly redisService: RedisService) {}
 
-  @EventPattern('set')
+  @EventPattern({ cmd: 'set' })
   async setKey(@Body() body: { key: string; value: string }) {
     await this.redisService.set(body.key, body.value);
     return { message: 'Value set successfully' };
   }
 
-  @EventPattern('get')
+  @EventPattern({ cmd: 'get' })
   async getKey(data: { key: string }) {
-    console.log(`Key: ${data.key}`);
+    console.log(`Key GET: ${data.key}`);
     const value = await this.redisService.get(data.key);
     if (value === null) {
       return { message: 'Key not found' };
     }
-    console.log(`Value: ${value}`);
+    console.log(`Value GET: ${value}`);
     return { key: data.key, value };
   }
 
-  @EventPattern('del/:key')
+  @EventPattern({ cmd: 'del' })
   async delKey(@Param('key') key: string) {
     await this.redisService.del(key);
     return { message: 'Key deleted successfully' };

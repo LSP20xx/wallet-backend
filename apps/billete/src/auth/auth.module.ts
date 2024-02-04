@@ -7,6 +7,7 @@ import { WalletsModule } from 'apps/billete/src/wallets/wallet.module';
 import { LocalStrategy } from './strategy/local.strategy';
 import { SessionSerializer } from './strategy/session.serializer';
 import { EncryptionsService } from 'apps/billete/src/encryptions/services/encryptions.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 //import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
@@ -16,6 +17,16 @@ import { EncryptionsService } from 'apps/billete/src/encryptions/services/encryp
       session: true,
     }),
     WalletsModule,
+    ClientsModule.register([
+      {
+        name: 'REDIS_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3003,
+        },
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [

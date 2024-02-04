@@ -1,24 +1,32 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { hash, verify } from 'argon2';
 import { SignTokenDTO } from 'apps/billete/src/auth/dtos/sign-token.dto';
 import { SignUpDTO } from 'apps/billete/src/auth/dtos/sign-up.dto';
 import { DatabaseService } from 'apps/billete/src/database/services/database/database.service';
 import { EvmWalletService } from 'apps/billete/src/wallets/services/evm-wallet.service';
 import { UtxoWalletService } from 'apps/billete/src/wallets/services/utxo-wallet.service';
+import { hash, verify } from 'argon2';
+import { v4 as uuidv4 } from 'uuid';
 import { SignInDTO } from '../dtos/sign-in.dto';
-import { PrismaClient } from '@prisma/client';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   constructor(
     private databaseService: DatabaseService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private evmWalletService: EvmWalletService,
     private utxoWalletService: UtxoWalletService,
+    @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
   ) {}
 
   async signUpUser(signUpDTO: SignUpDTO): Promise<{ userId: string }> {
@@ -26,18 +34,27 @@ export class AuthService {
 
     try {
       const result = await prisma.$transaction(async (transaction) => {
-        const encryptedPassword = await hash(signUpDTO.password);
+        const tempPasswordResponse = await this.getTempPassword(
+          signUpDTO.tempId,
+        );
+
+        if (!tempPasswordResponse || !tempPasswordResponse.encryptedPassword) {
+          throw new ForbiddenException(
+            'Session expired or invalid, or key not found.',
+          );
+        }
 
         const userData = {
           email: signUpDTO.email,
           phoneNumber: signUpDTO.phoneNumber,
-          encryptedPassword: encryptedPassword,
+          encryptedPassword: tempPasswordResponse.encryptedPassword,
           verified: false,
         };
 
         const user = await transaction.user.create({
           data: userData,
         });
+
         /* 
         const allowedChains = this.configService
           .get('ALLOWED_CHAINS_IDS')
@@ -110,6 +127,12 @@ export class AuthService {
   async signInUser(signInDTO: SignInDTO): Promise<{
     userId: string;
   }> {
+    const tempPasswordResponse = await this.getTempPassword(signInDTO.tempId);
+
+    if (!tempPasswordResponse || !tempPasswordResponse.encryptedPassword) {
+      throw new ForbiddenException('Session expired or invalid.');
+    }
+
     const user = await this.databaseService.user.findFirst({
       where: {
         OR: [{ email: signInDTO.login }, { phoneNumber: signInDTO.login }],
@@ -120,12 +143,7 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials.');
     }
 
-    const isPasswordValid = await verify(
-      user.encryptedPassword,
-      signInDTO.password,
-    );
-
-    if (!isPasswordValid) {
+    if (user.encryptedPassword !== tempPasswordResponse.encryptedPassword) {
       throw new ForbiddenException('Invalid credentials.');
     }
 
@@ -179,36 +197,18 @@ export class AuthService {
       if (authData.isLogin) {
         throw new ForbiddenException('Invalid credentials.');
       } else {
+        const tempId = await this.storeTempPassword(
+          authData.email ?? authData.phoneNumber,
+          authData.password,
+        );
+
         const preRegistrationToken = this.generatePreVerificationToken({
           email: authData.email,
           phoneNumber: authData.phoneNumber,
         });
 
-        const encryptedPassword = await hash(authData.password);
-
-        if (authData.email) {
-          await this.databaseService.user.create({
-            data: {
-              email: authData.email,
-              encryptedPassword: encryptedPassword,
-              verified: false,
-              verificationMethods: ['EMAIL'],
-            },
-          });
-        }
-
-        if (authData.phoneNumber) {
-          await this.databaseService.user.create({
-            data: {
-              phoneNumber: authData.phoneNumber,
-              encryptedPassword: encryptedPassword,
-              verified: false,
-              verificationMethods: ['SMS'],
-            },
-          });
-        }
-
         return {
+          tempId: tempId,
           token: preRegistrationToken,
           message: 'Verification required',
           verificationMethods: authData.email ? ['EMAIL'] : ['SMS'],
@@ -235,13 +235,22 @@ export class AuthService {
         email: user.email,
         phoneNumber: user.phoneNumber,
       });
-      return {
-        token: preRegistrationToken,
-        message: 'Verification required',
-        verificationMethods: user.verificationMethods,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-      };
+
+      const tempId = await this.storeTempPassword(
+        user.email ?? user.phoneNumber,
+        authData.password,
+      );
+
+      if (tempId) {
+        return {
+          tempId: tempId,
+          token: preRegistrationToken,
+          message: 'Verification required',
+          verificationMethods: user.verificationMethods,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+        };
+      }
     }
   }
 
@@ -266,5 +275,50 @@ export class AuthService {
       message: 'User information from Google',
       user: req.user,
     };
+  }
+
+  async onModuleInit() {
+    await this.redisClient.connect();
+  }
+
+  async storeTempPassword(
+    emailOrPhone: string,
+    password: string,
+  ): Promise<string> {
+    const tempId = uuidv4();
+    const encryptedPassword = await hash(password);
+
+    this.redisClient
+      .send(
+        { cmd: 'set' },
+        {
+          key: tempId,
+          value: JSON.stringify({ emailOrPhone, encryptedPassword }),
+          expire: 300,
+        },
+      )
+      .toPromise();
+
+    return tempId;
+  }
+  async getTempPassword(
+    tempId: string,
+  ): Promise<{ emailOrPhone: string; encryptedPassword: string }> {
+    const data = await this.redisClient
+      .send({ cmd: 'get' }, { key: tempId })
+      .toPromise();
+
+    if (!data) {
+      throw new Error('Temporal data not found or expired');
+    }
+
+    console.log('temp data', data);
+    if (data.value && typeof data.value === 'string') {
+      const parsedValue = JSON.parse(data.value);
+      console.log('parsedValue', parsedValue);
+      return parsedValue;
+    } else {
+      throw new Error('Invalid data format from Redis');
+    }
   }
 }

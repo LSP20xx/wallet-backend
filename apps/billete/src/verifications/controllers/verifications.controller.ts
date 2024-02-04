@@ -1,18 +1,16 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
   HttpException,
   HttpStatus,
-  UseGuards,
+  Post,
 } from '@nestjs/common';
-import { SendVerificationDto } from '../dtos/send-sms-code.dto';
-import { SmsService } from '../../sms/services/sms.service';
-import { EncryptionsService } from '../../encryptions/services/encryptions.service';
-import { VerificationsService } from '../services/verifications.service';
-import { VerifySmsCodeDto } from '../dtos/verify-sms-code.dto';
 import { DatabaseService } from '../../database/services/database/database.service';
-import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
+import { EncryptionsService } from '../../encryptions/services/encryptions.service';
+import { SmsService } from '../../sms/services/sms.service';
+import { SendVerificationDto } from '../dtos/send-sms-code.dto';
+import { VerifySmsCodeDto } from '../dtos/verify-sms-code.dto';
+import { VerificationsService } from '../services/verifications.service';
 
 @Controller('verification')
 export class VerificationController {
@@ -30,14 +28,10 @@ export class VerificationController {
 
     const { smsMessage } = this.smsService.createSMSMessage(code);
 
-    console.log('smsMessage', smsMessage);
-
     const smsResult = await this.smsService.sendSMS(
       sendVerificationDto.to,
       smsMessage,
     );
-
-    console.log('smsResult', smsResult);
 
     const encryptedCode = this.encryptionsService.encrypt(code);
 
@@ -51,7 +45,6 @@ export class VerificationController {
     };
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('verify-sms-code')
   async verifySmsCode(@Body() verifySmsCodeDto: VerifySmsCodeDto) {
     const { to, code } = verifySmsCodeDto;
@@ -77,17 +70,6 @@ export class VerificationController {
       throw new HttpException('Invalid code', HttpStatus.BAD_REQUEST);
     }
 
-    const user = await this.databaseService.user.findFirst({
-      where: { phoneNumber: to },
-    });
-
-    // if (user) {
-    //   userId = await this.authService.signInUser(user.phoneNumber, user.encryptedPassword);
-    // } else {
-    //   const newUser = await this.userService.createUser({ phoneNumber: to });
-    //   token = await this.authService.signIn(newUser);
-    // }
-
-    return { userId: user.id };
+    return { isVerified: true };
   }
 }
