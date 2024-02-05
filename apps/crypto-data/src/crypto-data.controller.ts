@@ -8,8 +8,8 @@ export class CryptoDataController {
 
   @EventPattern('get_yahoo_finance_data')
   async getYahooFinanceData(data: { coinId: string; days: number }) {
-    const { coinId, days } = data;
-    const result = this.cryptoDataService.getYahooFinanceData(coinId, days);
+    const { coinId } = data;
+    const result = this.cryptoDataService.getYahooFinanceData(coinId);
     return result;
   }
 

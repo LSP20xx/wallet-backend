@@ -1,14 +1,14 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Observable, from, throwError } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
-import * as moment from 'moment';
 import * as fs from 'fs';
+import * as moment from 'moment';
 import * as path from 'path';
-// import { from } from 'rxjs';
-import { PrismaClient } from '@prisma/client';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { ClientProxy } from '@nestjs/microservices';
+import { PrismaClient } from '@prisma/client';
+
 @Injectable()
 export class CryptoDataService implements OnModuleInit {
   private readonly logger = new Logger(CryptoDataService.name);
@@ -26,162 +26,149 @@ export class CryptoDataService implements OnModuleInit {
     this.startCronJobs();
   }
 
-  async setKey(key: string, value: string) {
-    console.log('Setting key', key);
-    console.log('Setting value', value);
-    return this.redisClient.send('set', {
-      key,
-      value,
-    });
-  }
-
-  async getKey(key: string) {
-    return this.redisClient.send('get', {
-      key,
-    });
-  }
-
   async updateFiveMinutesData() {
-    const mainnetTokens = await this.prisma.token.findMany({
-      where: {
-        network: 'MAINNET',
-      },
-    });
-    const tickers = mainnetTokens.map(
-      (token) => `${token.symbol.toUpperCase()}-USD`,
-    );
-    const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
+    try {
+      const mainnetTokens = await this.prisma.token.findMany({
+        where: { network: 'MAINNET' },
+      });
 
-    for (let i = 0; i < mainnetTokens.length; i++) {
-      const ticker = tickers[i];
-      const tokenName = tokenNames[i];
+      for (const token of mainnetTokens) {
+        const tokenName = token.name.toLowerCase();
+        const ticker = `${token.symbol.toUpperCase()}-USD`;
 
-      from(this.getCoinGeckoData(tokenName, 1, ticker))
-        .pipe(
-          mergeMap((data) => data),
-          map((data) => {
-            console.log('Data', data);
-            this.setKey(`${tokenName}_1d`, JSON.stringify(data));
-            return data;
-          }),
-        )
-        .subscribe({
-          next: (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_1d`, dataString);
-          },
-          error: (error) => console.error('Error processing data:', error),
-        });
-      /* from(this.getCoinGeckoData(tokenName, 90))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${tokenName}_90d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_90d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        }); */
+        const dataObservable = await this.getCoinGeckoData(
+          tokenName,
+          1,
+          ticker,
+        );
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                { key: `${tokenName}_1d`, value: JSON.stringify(data) },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(`Redis set result for ${tokenName}_1d:`, setResult),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${tokenName}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(`Error fetching data for ${tokenName}:`, error),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
     }
-    /*  for (const tokenName of tokensNames) {
-      from(this.getCoinGeckoData(tokenName, 1))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${tokenName}_1d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_1d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        });
-    } */
   }
 
   async updateOneHourData() {
-    const mainnetTokens = await this.prisma.token.findMany({
-      where: {
-        network: 'MAINNET',
-      },
-    });
-    const tickers = mainnetTokens.map(
-      (token) => `${token.symbol.toUpperCase()}-USD`,
-    );
-    const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
+    try {
+      const mainnetTokens = await this.prisma.token.findMany({
+        where: {
+          network: 'MAINNET',
+        },
+      });
+      const tickers = mainnetTokens.map(
+        (token) => `${token.symbol.toUpperCase()}-USD`,
+      );
+      const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
 
-    for (let i = 0; i < mainnetTokens.length; i++) {
-      const ticker = tickers[i];
-      const tokenName = tokenNames[i];
+      for (let i = 0; i < mainnetTokens.length; i++) {
+        const ticker = tickers[i];
+        const tokenName = tokenNames[i];
 
-      from(this.getCoinGeckoData(tokenName, 90, ticker))
-        .pipe(
-          mergeMap((data) => data),
-          map((data) => {
-            this.setKey(`${tokenName}_90d`, JSON.stringify(data));
-            return data;
-          }),
-        )
-        .subscribe({
-          next: (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_90d`, dataString);
-          },
-          error: (error) => console.error('Error processing data:', error),
-        });
-      /* from(this.getCoinGeckoData(tokenName, 90))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${tokenName}_90d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_90d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        }); */
+        const dataObservable = await this.getCoinGeckoData(
+          tokenName,
+          90,
+          ticker,
+        );
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                { key: `${tokenName}_90d`, value: JSON.stringify(data) },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${tokenName}_90d:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${tokenName}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for ${tokenName}:`, error);
+          });
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
     }
-    /*  for (const tokenName of tokensNames) {
-      from(this.getCoinGeckoData(tokenName, 1))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${tokenName}_1d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${tokenName}_1d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        });
-    } */
+  }
+
+  async updateOneDayData() {
+    try {
+      const mainnetTokens = await this.prisma.token.findMany({
+        where: {
+          network: 'MAINNET',
+        },
+      });
+
+      const tickers = mainnetTokens.map(
+        (token) => `${token.symbol.toUpperCase()}-USD`,
+      );
+
+      const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
+
+      for (let i = 0; i < mainnetTokens.length; i++) {
+        const ticker = tickers[i];
+        const tokenName = tokenNames[i];
+
+        const dataObservable = await this.getYahooFinanceData(ticker);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                { key: `${tokenName}_ALL`, value: JSON.stringify(data) },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${tokenName}_ALL:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(`Error setting Redis value for ${ticker}:`, err),
+              );
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for ${ticker}:`, error);
+          });
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
   }
 
   startCronJobs() {
@@ -190,6 +177,9 @@ export class CryptoDataService implements OnModuleInit {
     }, 30000);
     setInterval(() => {
       this.updateOneHourData();
+    }, 60000);
+    setInterval(() => {
+      this.updateOneDayData();
     }, 60000);
   }
 
@@ -237,6 +227,7 @@ export class CryptoDataService implements OnModuleInit {
         }),
       );
   }
+
   private constructDownloadUrl(
     ticker: string,
     period1: string,
@@ -254,7 +245,7 @@ export class CryptoDataService implements OnModuleInit {
   }
 
   private convertToCsv(data: any[]): string {
-    let csvContent = 'Date,Close\n';
+    let csvContent: string;
     data.forEach((item) => {
       const localTimestamp = new Date(item[0]);
       const utcTimestamp = new Date(localTimestamp.getTime());
@@ -283,10 +274,8 @@ export class CryptoDataService implements OnModuleInit {
     const directory = path.dirname(csvFilePath);
 
     try {
-      // Crear el directorio si no existe
       await fs.promises.mkdir(directory, { recursive: true });
 
-      // Escribir los datos en el archivo CSV
       await fs.promises.writeFile(csvFilePath, csvData);
       return lines;
     } catch (error) {
@@ -294,9 +283,9 @@ export class CryptoDataService implements OnModuleInit {
     }
   };
 
-  public async getYahooFinanceData(ticker: string, days: number) {
+  public async getYahooFinanceData(ticker: string) {
     const currentDate = moment().format('YYYY-MM-DD');
-    const previousDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
+    const previousDate = '1970-01-01';
 
     const url = this.constructDownloadUrl(
       ticker,
