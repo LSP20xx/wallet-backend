@@ -55,7 +55,6 @@ export class AuthService implements OnModuleInit {
           data: userData,
         });
 
-        /* 
         const allowedChains = this.configService
           .get('ALLOWED_CHAINS_IDS')
           .split(',');
@@ -69,12 +68,12 @@ export class AuthService implements OnModuleInit {
             );
         }
 
-        await this.utxoWalletService.createWallet(
-          user.id,
-          'bitcoin',
-          'mainnet',
-          transaction,
-        );
+        // await this.utxoWalletService.createWallet(
+        //   user.id,
+        //   'bitcoin',
+        //   'mainnet',
+        //   transaction,
+        // );
         await this.utxoWalletService.createWallet(
           user.id,
           'bitcoin',
@@ -82,30 +81,30 @@ export class AuthService implements OnModuleInit {
           transaction,
         );
 
-        await this.utxoWalletService.createWallet(
-          user.id,
-          'litecoin',
-          'mainnet',
-          transaction,
-        );
+        // await this.utxoWalletService.createWallet(
+        //   user.id,
+        //   'litecoin',
+        //   'mainnet',
+        //   transaction,
+        // );
         await this.utxoWalletService.createWallet(
           user.id,
           'litecoin',
           'testnet',
           transaction,
         );
-        await this.utxoWalletService.createWallet(
-          user.id,
-          'dogecoin',
-          'mainnet',
-          transaction,
-        );
+        // await this.utxoWalletService.createWallet(
+        //   user.id,
+        //   'dogecoin',
+        //   'mainnet',
+        //   transaction,
+        // );
         await this.utxoWalletService.createWallet(
           user.id,
           'dogecoin',
           'testnet',
           transaction,
-        ); */
+        );
 
         return {
           userId: user.id,

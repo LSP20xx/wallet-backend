@@ -4,55 +4,17 @@ import { DatabaseService } from '../../database/services/database/database.servi
 import { ClientProxy } from '@nestjs/microservices';
 import { ChainType, Network } from '@prisma/client';
 import { tokensConfig } from 'config/coins/coins';
-import { map } from 'rxjs/operators';
-import { from } from 'rxjs';
 
 @Injectable()
 export class TokensService implements OnModuleInit {
   constructor(
     private databaseService: DatabaseService,
-    @Inject('CRYPTO_DATA_SERVICE') private client: ClientProxy,
     @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
   ) {}
 
   async onModuleInit() {
     await this.initializeTokens();
     await this.initializeTokensForAllWallets();
-    await this.initializeCryptocurrencyData();
-    await this.checkRedis();
-  }
-
-  async checkRedis() {
-    try {
-      const data = await this.getKey('BTC-USD_1d');
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async getYahooFinanceData(coinId: string, days: number) {
-    const eventPayload = { coinId, days };
-    return this.client.send('get_yahoo_finance_data', eventPayload);
-  }
-
-  async getCoinGeckoData(coinId: string, days: number, ticker: string) {
-    const eventPayload = { coinId, days, ticker };
-    return this.client.send('get_coin_gecko_data', eventPayload);
-  }
-
-  async setKey(key: string, value: string) {
-    return this.redisClient.send('set', {
-      key,
-      value,
-    });
-  }
-
-  async getKey(key: string) {
-    return this.redisClient
-      .send('get', {
-        key,
-      })
-      .toPromise();
   }
 
   private async initializeTokens() {
@@ -67,9 +29,7 @@ export class TokensService implements OnModuleInit {
             if (!existingToken) {
               await this.databaseService.token.create({
                 data: {
-                  symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
-                    tokenData.symbol
-                  }`,
+                  symbol: `${tokenData.symbol}`,
                   name: tokenData.name,
                   contractAddress: tokenData.contractAddress,
                   chainType: tokenData.chainType as ChainType,
@@ -85,9 +45,7 @@ export class TokensService implements OnModuleInit {
             if (!existingToken) {
               await this.databaseService.token.create({
                 data: {
-                  symbol: `${tokenData.network === 'TESTNET' ? 't' : ''}${
-                    tokenData.symbol
-                  }`,
+                  symbol: `${tokenData.symbol}`,
                   name: tokenData.name,
                   contractAddress: tokenData.contractAddress,
                   chainType: tokenData.chainType as ChainType,
@@ -99,89 +57,6 @@ export class TokensService implements OnModuleInit {
           }
         }
       }
-    }
-  }
-
-  async initializeCryptocurrencyData() {
-    const mainnetTokens = await this.databaseService.token.findMany({
-      where: {
-        network: 'MAINNET',
-      },
-    });
-
-    const tickers = mainnetTokens.map(
-      (token) => `${token.symbol.toUpperCase()}-USD`,
-    );
-
-    const names = mainnetTokens.map((token) => token.name.toLowerCase());
-
-    for (let i = 0; i < mainnetTokens.length; i++) {
-      const ticker = tickers[i];
-      from(this.getYahooFinanceData(ticker, 1400000))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              console.log(data);
-              this.setKey(`${ticker}_ALL`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${ticker}_ALL`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        });
-    }
-
-    for (let i = 0; i < mainnetTokens.length; i++) {
-      const ticker = tickers[i];
-      const name = names[i];
-      from(this.getCoinGeckoData(name, 1, ticker))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${ticker}_1d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${ticker}_1d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        });
-    }
-
-    for (let i = 0; i < mainnetTokens.length; i++) {
-      const ticker = tickers[i];
-      const name = names[i];
-      from(this.getCoinGeckoData(name, 90, ticker))
-        .pipe(
-          map((data) => {
-            data.subscribe((data) => {
-              this.setKey(`${ticker}_90d`, JSON.stringify(data));
-              return data;
-            });
-          }),
-        )
-        .subscribe({
-          next: async (processedData) => {
-            const dataString = JSON.stringify(processedData);
-            this.setKey(`${ticker}_90d`, dataString);
-          },
-          error: (error) => {
-            console.error('Error processing data:', error);
-          },
-        });
     }
   }
 
@@ -209,5 +84,110 @@ export class TokensService implements OnModuleInit {
         }
       }
     }
+  }
+
+  async getLittleLineCharts() {
+    const mainnetTokens = await this.databaseService.token.findMany({
+      where: { network: 'MAINNET' },
+    });
+
+    const tokenNames = mainnetTokens.map(
+      (token) => `${token.name.toLowerCase()}_90d`,
+    );
+    let allTokensData = [];
+
+    const tokenDataPromises = tokenNames.map((tokenName) =>
+      this.redisClient
+        .send({ cmd: 'get' }, { key: tokenName })
+        .toPromise()
+        .then((result) => {
+          if (!result.value) {
+            console.error(`No data found for ${tokenName}`);
+            return null;
+          }
+          const data = JSON.parse(result.value);
+          const last7DaysData = data
+            .filter((item: string) => item.trim() !== '')
+            .slice(-168)
+            .map((line: string) => {
+              const parts = line.split(',');
+              return { date: parts[0], close: parseFloat(parts[1]) };
+            });
+          return { assetName: tokenName.replace('_90d', ''), last7DaysData };
+        })
+        .catch((err) => {
+          console.error(`Error getting Redis value for ${tokenName}:`, err);
+          return null;
+        }),
+    );
+
+    allTokensData = await Promise.all(tokenDataPromises);
+    allTokensData = allTokensData.filter((data) => data !== null);
+    return allTokensData;
+  }
+
+  calculatePriceVariation(lastPrice: number, openingPrice: number) {
+    const variation = ((lastPrice - openingPrice) / openingPrice) * 100;
+    return variation ? variation.toFixed(2) : 0;
+  }
+
+  async getStoredPrices() {
+    const mainnetTokens = await this.databaseService.token.findMany({
+      where: { network: 'MAINNET' },
+    });
+
+    const tokenNames = mainnetTokens.map(
+      (token) => `${token.name.toLowerCase()}_1d`,
+    );
+
+    let allTokensData = [];
+
+    const tokenDataPromises = tokenNames.map((tokenName) =>
+      this.redisClient
+        .send({ cmd: 'get' }, { key: tokenName })
+        .toPromise()
+        .then((result) => {
+          if (!result.value) {
+            console.error(`No data found for ${tokenName}`);
+            return null;
+          }
+          const data = JSON.parse(result.value);
+
+          const openingPriceData = data
+            .filter((item: string) => item.trim() !== '')
+            .slice(1, 2)
+            .map((line: string) => {
+              const parts = line.split(',');
+              return parseFloat(parts[1]);
+            })[0];
+
+          const lastPriceData = data
+            .filter((item: string) => item.trim() !== '')
+            .slice(-1)
+            .map((line: string) => {
+              const parts = line.split(',');
+              return parseFloat(parts[1]);
+            })[0];
+
+          const priceVariation = this.calculatePriceVariation(
+            lastPriceData,
+            openingPriceData,
+          );
+
+          return {
+            assetName: tokenName.replace('_1d', ''),
+            price: lastPriceData,
+            priceVariation: priceVariation,
+          };
+        })
+        .catch((err) => {
+          console.error(`Error getting Redis value for ${tokenName}:`, err);
+          return null;
+        }),
+    );
+
+    allTokensData = await Promise.all(tokenDataPromises);
+    allTokensData = allTokensData.filter((data) => data !== null);
+    return allTokensData;
   }
 }

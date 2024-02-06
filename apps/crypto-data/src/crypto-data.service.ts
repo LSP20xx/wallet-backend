@@ -245,7 +245,7 @@ export class CryptoDataService implements OnModuleInit {
   }
 
   private convertToCsv(data: any[]): string {
-    let csvContent: string;
+    let csvContent = 'Date,Close\n';
     data.forEach((item) => {
       const localTimestamp = new Date(item[0]);
       const utcTimestamp = new Date(localTimestamp.getTime());

@@ -50,6 +50,7 @@ export class EvmWalletService {
     const currentBlock = await this.web3Service
       .getWeb3Instance(chainId)
       .eth.getBlockNumber();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const previousBlock = currentBlock - BigInt(1);
     const wallets = await this.findAllByChainId(chainId);
     const addresses = wallets.map((wallet) => wallet.address);

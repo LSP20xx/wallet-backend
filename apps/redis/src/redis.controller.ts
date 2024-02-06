@@ -14,12 +14,10 @@ export class RedisController {
 
   @EventPattern({ cmd: 'get' })
   async getKey(data: { key: string }) {
-    console.log(`Key GET: ${data.key}`);
     const value = await this.redisService.get(data.key);
     if (value === null) {
       return { message: 'Key not found' };
     }
-    console.log(`Value GET: ${value}`);
     return { key: data.key, value };
   }
 
