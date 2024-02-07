@@ -8,6 +8,7 @@ import { TransactionsModule } from '../transactions/transaction.module';
 import { GraphQueryService } from 'apps/billete/src/networks/services/graph-query.service';
 import { UtxoWalletService } from './services/utxo-wallet.service';
 import { default as QueueType } from './queue/types.queue';
+import { BalancesService } from './services/balance.service';
 
 @Module({
   imports: [
@@ -21,7 +22,12 @@ import { default as QueueType } from './queue/types.queue';
     ),
   ],
   controllers: [EvmWalletController],
-  providers: [UtxoWalletService, EvmWalletService, GraphQueryService],
-  exports: [UtxoWalletService, EvmWalletService],
+  providers: [
+    UtxoWalletService,
+    EvmWalletService,
+    GraphQueryService,
+    BalancesService,
+  ],
+  exports: [UtxoWalletService, EvmWalletService, BalancesService],
 })
 export class WalletsModule {}

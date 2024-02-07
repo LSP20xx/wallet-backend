@@ -19,6 +19,7 @@ import { Web3Module } from './web3/web3.module';
 import { LambdaModule } from './lambda/lambda.module';
 import { KrakenGateway } from 'gateways/kraken.gateway';
 import { EmailModule } from './email/email.module';
+import { BalanceGateway } from 'gateways/balance.gateway';
 
 @Module({
   imports: [
@@ -56,6 +57,6 @@ import { EmailModule } from './email/email.module';
     AuthModule,
     LambdaModule,
   ],
-  providers: [KrakenGateway],
+  providers: [KrakenGateway, BalanceGateway],
 })
 export class AppModule {}
