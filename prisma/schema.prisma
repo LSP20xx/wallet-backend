@@ -16,7 +16,6 @@ model Blockchain {
   tokens       Token[]        @relation("TokenChain")
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-
   @@map("blockchains")
 }
 
@@ -24,11 +23,12 @@ model WalletToken {
   id        String   @id @default(uuid())
   walletId  String
   tokenId   String
-  balance   String   
+  balance   String  
   wallet    Wallet   @relation(fields: [walletId], references: [id])
   token     Token    @relation(fields: [tokenId], references: [id])
 
   @@unique([walletId, tokenId])
+  @@map("wallet_tokens")
 }
 
 model Wallet {
@@ -65,6 +65,7 @@ model Token {
   symbol          String
   name            String
   contractAddress String?
+  isNative        Boolean         @default(false)
   wallet          Wallet?         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String?
   chainType       ChainType

@@ -5,6 +5,7 @@ interface TokenConfig {
   chainType: string;
   network: string;
   blockchainId: string;
+  isNative?: boolean;
 }
 interface TokensConfig {
   ethereum: {
@@ -70,14 +71,6 @@ export const tokensConfig: TokensConfig = {
     //   },
     // },
     testnet: {
-      // MKT: {
-      //   symbol: 'MKT',
-      //   name: 'MarketToken',
-      //   contractAddress: '0xcFBa2EdFb93C775F42E9bD007D29dd2E88E37cD6',
-      //   chainType: 'EVM',
-      //   network: 'TESTNET',
-      //   blockchainId: '5',
-      // },
       ETH: {
         symbol: 'ETH',
         name: 'Ethereum',
@@ -85,6 +78,7 @@ export const tokensConfig: TokensConfig = {
         chainType: 'EVM',
         network: 'TESTNET',
         blockchainId: '5',
+        isNative: true,
       },
       USDT: {
         symbol: 'USDT',
@@ -93,6 +87,16 @@ export const tokensConfig: TokensConfig = {
         chainType: 'EVM',
         network: 'TESTNET',
         blockchainId: '5',
+        isNative: false,
+      },
+      USDC: {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        chainType: 'EVM',
+        network: 'TESTNET',
+        blockchainId: '5',
+        isNative: false,
       },
     },
   },
@@ -115,6 +119,7 @@ export const tokensConfig: TokensConfig = {
         chainType: 'UTXO',
         network: 'TESTNET',
         blockchainId: 'BITCOIN-TESTNET',
+        isNative: true,
       },
     },
   },
@@ -137,6 +142,7 @@ export const tokensConfig: TokensConfig = {
         chainType: 'UTXO',
         network: 'TESTNET',
         blockchainId: 'LITECOIN-TESTNET',
+        isNative: true,
       },
     },
   },
@@ -159,6 +165,7 @@ export const tokensConfig: TokensConfig = {
         chainType: 'UTXO',
         network: 'TESTNET',
         blockchainId: 'DOGECOIN-TESTNET',
+        isNative: true,
       },
     },
   },

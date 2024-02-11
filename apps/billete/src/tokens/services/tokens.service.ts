@@ -18,7 +18,7 @@ export class TokensService implements OnModuleInit {
   }
 
   private async initializeTokens() {
-    console.log(tokensConfig);
+    console.log(JSON.stringify(tokensConfig));
     for (const [, networkTypes] of Object.entries(tokensConfig)) {
       for (const [, tokens] of Object.entries(networkTypes)) {
         for (const [, tokenData] of Object.entries(tokens)) {
@@ -35,6 +35,7 @@ export class TokensService implements OnModuleInit {
                   chainType: tokenData.chainType as ChainType,
                   network: tokenData.network as Network,
                   blockchainId: tokenData.blockchainId,
+                  isNative: tokenData.isNative ?? false,
                 },
               });
             }
@@ -51,6 +52,7 @@ export class TokensService implements OnModuleInit {
                   chainType: tokenData.chainType as ChainType,
                   network: tokenData.network as Network,
                   blockchainId: tokenData.blockchainId,
+                  isNative: tokenData.isNative ?? false,
                 },
               });
             }
