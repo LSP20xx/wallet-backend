@@ -28,6 +28,7 @@ export class BlockchainModule implements OnModuleInit {
     name: any;
     chainId: string;
     isEvmCompatible: boolean;
+    nativeTokenSymbol?: string;
   }[] = [];
 
   constructor(
@@ -40,6 +41,10 @@ export class BlockchainModule implements OnModuleInit {
   }
 
   async syncBlockchains(): Promise<void> {
+    const evmTokenSymbols = {
+      '1': 'ETH',
+      '5': 'ETH',
+    };
     this.allowedChains = this.configService
       .get('ALLOWED_CHAINS_IDS')
       .split(',');
@@ -51,21 +56,33 @@ export class BlockchainModule implements OnModuleInit {
         chainId: chainId.trim(),
         name: networkName || `Unknown Network for Chain ID ${chainId}`,
         isEvmCompatible: true,
+        nativeTokenSymbol: evmTokenSymbols[chainId.trim()],
       };
     });
 
     const coinNetworks = {
-      bitcoin: ['bitcoin-mainnet', 'bitcoin-testnet'],
-      litecoin: ['litecoin-mainnet', 'litecoin-testnet'],
-      dogecoin: ['dogecoin-mainnet', 'dogecoin-testnet'],
+      bitcoin: {
+        networks: ['bitcoin-mainnet', 'bitcoin-testnet'],
+        symbol: 'BTC',
+      },
+      litecoin: {
+        networks: ['litecoin-mainnet', 'litecoin-testnet'],
+        symbol: 'LTC',
+      },
+      dogecoin: {
+        networks: ['dogecoin-mainnet', 'dogecoin-testnet'],
+        symbol: 'DOGE',
+      },
     };
 
-    Object.values(coinNetworks).forEach((networks) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(coinNetworks).forEach(([_, { networks, symbol }]) => {
       networks.forEach((network) => {
         this.networkData.push({
           name: network,
           chainId: network.toUpperCase(),
           isEvmCompatible: false,
+          nativeTokenSymbol: symbol,
         });
       });
     });
@@ -80,6 +97,7 @@ export class BlockchainModule implements OnModuleInit {
           data: {
             name: network.name,
             blockchainId: network.chainId,
+            nativeTokenSymbol: network.nativeTokenSymbol,
           },
         });
       }

@@ -19,17 +19,25 @@ export class BalancesService {
     });
 
     return userWallets.map((wallet) => {
-      const token = wallet.walletTokens[0]?.token;
+      let tokens = [];
+
+      if (wallet.chainType === 'EVM') {
+        tokens = wallet.walletTokens
+          .filter((wt) => !wt.token.isNative)
+          .map((wt) => ({
+            id: wt.token.id,
+            symbol: wt.token.symbol,
+            balance: wt.balance,
+          }));
+      }
 
       return {
         id: wallet.id,
         address: wallet.address,
         balance: wallet.balance,
         chainType: wallet.chainType,
-        blockchainName:
-          wallet.blockchain?.name.split('-')[0].charAt(0).toUpperCase() +
-          wallet.blockchain?.name.split('-')[0].slice(1),
-        tokenSymbol: token?.symbol,
+        symbol: wallet.blockchain?.nativeTokenSymbol,
+        tokens,
       };
     });
   }

@@ -11,6 +11,7 @@ model Blockchain {
   id           String         @id @default(uuid())
   name         String
   blockchainId String         @unique
+  nativeTokenSymbol String
   wallets      Wallet[]       @relation("WalletChain")
   transactions Transaction[]  @relation("TransactionChain")
   tokens       Token[]        @relation("TokenChain")
