@@ -126,12 +126,6 @@ export class AuthService implements OnModuleInit {
   async signInUser(signInDTO: SignInDTO): Promise<{
     userId: string;
   }> {
-    const tempPasswordResponse = await this.getTempPassword(signInDTO.tempId);
-
-    if (!tempPasswordResponse || !tempPasswordResponse.encryptedPassword) {
-      throw new ForbiddenException('Session expired or invalid.');
-    }
-
     const user = await this.databaseService.user.findFirst({
       where: {
         OR: [{ email: signInDTO.login }, { phoneNumber: signInDTO.login }],
@@ -139,10 +133,6 @@ export class AuthService implements OnModuleInit {
     });
 
     if (!user) {
-      throw new ForbiddenException('Invalid credentials.');
-    }
-
-    if (user.encryptedPassword !== tempPasswordResponse.encryptedPassword) {
       throw new ForbiddenException('Invalid credentials.');
     }
 
@@ -245,7 +235,7 @@ export class AuthService implements OnModuleInit {
           tempId: tempId,
           token: preRegistrationToken,
           message: 'Verification required',
-          verificationMethods: user.verificationMethods,
+          verificationMethods: authData.email ? ['EMAIL'] : ['SMS'],
           email: user.email,
           phoneNumber: user.phoneNumber,
         };

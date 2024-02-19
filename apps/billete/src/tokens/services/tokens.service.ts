@@ -18,7 +18,6 @@ export class TokensService implements OnModuleInit {
   }
 
   private async initializeTokens() {
-    console.log(JSON.stringify(tokensConfig));
     for (const [, networkTypes] of Object.entries(tokensConfig)) {
       for (const [, tokens] of Object.entries(networkTypes)) {
         for (const [, tokenData] of Object.entries(tokens)) {
@@ -89,13 +88,9 @@ export class TokensService implements OnModuleInit {
   }
 
   async getLittleLineCharts() {
-    const mainnetTokens = await this.databaseService.token.findMany({
-      where: { network: 'MAINNET' },
-    });
+    const tokens = await this.databaseService.token.findMany();
 
-    const tokenNames = mainnetTokens.map(
-      (token) => `${token.name.toLowerCase()}_90d`,
-    );
+    const tokenNames = tokens.map((token) => `${token.name.toLowerCase()}_90d`);
     let allTokensData = [];
 
     const tokenDataPromises = tokenNames.map((tokenName) =>
@@ -115,6 +110,7 @@ export class TokensService implements OnModuleInit {
               const parts = line.split(',');
               return { date: parts[0], close: parseFloat(parts[1]) };
             });
+          console.log('last7DaysData', last7DaysData);
           return { assetName: tokenName.replace('_90d', ''), last7DaysData };
         })
         .catch((err) => {
@@ -134,13 +130,9 @@ export class TokensService implements OnModuleInit {
   }
 
   async getStoredPrices() {
-    const mainnetTokens = await this.databaseService.token.findMany({
-      where: { network: 'MAINNET' },
-    });
+    const tokens = await this.databaseService.token.findMany();
 
-    const tokenNames = mainnetTokens.map(
-      (token) => `${token.name.toLowerCase()}_1d`,
-    );
+    const tokenNames = tokens.map((token) => `${token.name.toLowerCase()}_1d`);
 
     let allTokensData = [];
 

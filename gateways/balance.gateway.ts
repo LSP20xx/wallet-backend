@@ -19,7 +19,6 @@ export class BalanceGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { userId: string },
   ): Promise<void> {
-    console.log('llega a balance gateway');
     const balances = await this.balancesService.getBalancesForUser(data.userId);
     client.emit('balance-update', balances);
   }

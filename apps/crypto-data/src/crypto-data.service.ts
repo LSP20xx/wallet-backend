@@ -28,11 +28,11 @@ export class CryptoDataService implements OnModuleInit {
 
   async updateFiveMinutesData() {
     try {
-      const mainnetTokens = await this.prisma.token.findMany({
-        where: { network: 'MAINNET' },
-      });
+      const tokens = await this.prisma.token.findMany();
 
-      for (const token of mainnetTokens) {
+      console.log('Fetching data for 5 minutes');
+
+      for (const token of tokens) {
         const tokenName = token.name.toLowerCase();
         const ticker = `${token.symbol.toUpperCase()}-USD`;
 
@@ -72,17 +72,15 @@ export class CryptoDataService implements OnModuleInit {
 
   async updateOneHourData() {
     try {
-      const mainnetTokens = await this.prisma.token.findMany({
-        where: {
-          network: 'MAINNET',
-        },
-      });
-      const tickers = mainnetTokens.map(
+      const tokens = await this.prisma.token.findMany();
+      const tickers = tokens.map(
         (token) => `${token.symbol.toUpperCase()}-USD`,
       );
-      const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
+      const tokenNames = tokens.map((token) => token.name.toLowerCase());
 
-      for (let i = 0; i < mainnetTokens.length; i++) {
+      console.log('Fetching data for 90 days');
+
+      for (let i = 0; i < tokens.length; i++) {
         const ticker = tickers[i];
         const tokenName = tokenNames[i];
 
@@ -125,19 +123,17 @@ export class CryptoDataService implements OnModuleInit {
 
   async updateOneDayData() {
     try {
-      const mainnetTokens = await this.prisma.token.findMany({
-        where: {
-          network: 'MAINNET',
-        },
-      });
+      const tokens = await this.prisma.token.findMany();
 
-      const tickers = mainnetTokens.map(
+      const tickers = tokens.map(
         (token) => `${token.symbol.toUpperCase()}-USD`,
       );
 
-      const tokenNames = mainnetTokens.map((token) => token.name.toLowerCase());
+      const tokenNames = tokens.map((token) => token.name.toLowerCase());
 
-      for (let i = 0; i < mainnetTokens.length; i++) {
+      console.log('Fetching data for 1 day');
+
+      for (let i = 0; i < tokens.length; i++) {
         const ticker = tickers[i];
         const tokenName = tokenNames[i];
 
@@ -173,12 +169,15 @@ export class CryptoDataService implements OnModuleInit {
 
   startCronJobs() {
     setInterval(() => {
+      console.log('Updating 5 minutes data');
       this.updateFiveMinutesData();
     }, 30000);
     setInterval(() => {
+      console.log('Updating 1 hour data');
       this.updateOneHourData();
     }, 60000);
     setInterval(() => {
+      console.log('Updating 1 day data');
       this.updateOneDayData();
     }, 60000);
   }
