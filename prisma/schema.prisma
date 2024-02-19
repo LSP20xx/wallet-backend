@@ -10,6 +10,7 @@ datasource db {
 model Blockchain {
   id           String         @id @default(uuid())
   name         String
+  symbol       String @default("TEMP")
   blockchainId String         @unique
   nativeTokenSymbol String
   wallets      Wallet[]       @relation("WalletChain")
