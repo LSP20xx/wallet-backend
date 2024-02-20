@@ -184,4 +184,21 @@ export class TokensService implements OnModuleInit {
     allTokensData = allTokensData.filter((data) => data !== null);
     return allTokensData;
   }
+
+  async getBlockchainsForTokenSymbol(symbol: string) {
+    const tokens = await this.databaseService.token.findMany({
+      where: {
+        symbol: symbol,
+      },
+      include: {
+        blockchain: true,
+      },
+    });
+    return tokens.map((token) => ({
+      tokenId: token.id,
+      blockchainName: token.blockchain.name,
+      blockchainSymbol: token.blockchain.symbol,
+      blockchainId: token.blockchainId,
+    }));
+  }
 }
