@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as handlebars from 'handlebars';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class EmailService {
@@ -15,12 +18,23 @@ export class EmailService {
     });
   }
 
-  async sendMail(to: string, subject: string, text: string): Promise<void> {
+  async sendMail(
+    to: string,
+    subject: string,
+    template: string,
+    context: any,
+  ): Promise<void> {
+    const templatePath = join(__dirname, 'templates', `${template}.hbs`);
+    const templateSource = readFileSync(templatePath, 'utf-8');
+    const compiledTemplate = handlebars.compile(templateSource);
+
+    const html = compiledTemplate(context);
+
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: to,
       subject: subject,
-      text: text,
+      html: html,
     };
 
     console.log('Sending email: ', mailOptions);
