@@ -185,11 +185,9 @@ export class TokensService implements OnModuleInit {
     return allTokensData;
   }
 
-  async getBlockchainsForTokenSymbol(symbol: string) {
+  async getBlockchainsForTokens() {
+    console.log('Getting blockchains for tokens');
     const tokens = await this.databaseService.token.findMany({
-      where: {
-        symbol: symbol,
-      },
       include: {
         blockchain: true,
       },

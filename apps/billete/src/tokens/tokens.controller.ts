@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { TokensService } from './services/tokens.service';
 
 @Controller('tokens')
@@ -15,8 +15,8 @@ export class TokensController {
     return await this.tokensService.getLittleLineCharts();
   }
 
-  @Get('get-blockchains-for-token-symbol/:symbol')
-  async getBlockchainsForTokenSymbol(@Param('symbol') symbol: string) {
-    return await this.tokensService.getBlockchainsForTokenSymbol(symbol);
+  @Get('get-blockchains-for-tokens')
+  async getBlockchainsForTokenSymbol() {
+    return await this.tokensService.getBlockchainsForTokens();
   }
 }
