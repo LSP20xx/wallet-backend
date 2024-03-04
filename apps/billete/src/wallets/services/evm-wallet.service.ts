@@ -12,6 +12,7 @@ import { Web3Service } from 'apps/billete/src/web3/services/web3.service';
 const coinsConfig = {
   ETH: {
     decimals: 18,
+    companyFee: '0.0027',
   },
 };
 
@@ -134,6 +135,7 @@ export class EvmWalletService {
   }
 
   async withdraw(withdrawDto: WithdrawDto): Promise<{ message: string }> {
+    const companyFee = coinsConfig[withdrawDto.coin].companyFee;
     const wallet = await this.databaseService.wallet.findUnique({
       where: { address: withdrawDto.from },
     });
@@ -144,8 +146,6 @@ export class EvmWalletService {
       'transaction',
       {
         amount: withdrawDto.amount.toString(),
-        fee: withdrawDto.fee.toString(),
-        feePrice: withdrawDto.feePrice.toString(),
         from: withdrawDto.from,
         to: withdrawDto.to,
         transactionType: 'WITHDRAWAL',
@@ -157,6 +157,7 @@ export class EvmWalletService {
         network: withdrawDto.blockchainId === '1' ? 'MAINNET' : 'TESTNET',
         coin: withdrawDto.coin,
         isNativeCoin: isNativeCoin(withdrawDto.coin),
+        companyFee: companyFee,
         uuid: uuidv4(),
       },
       {

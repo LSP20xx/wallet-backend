@@ -195,8 +195,6 @@ const sendErc20Token = async (
   to,
   amountInTokens,
   decimals,
-  fee,
-  feePrice,
 ) => {
   const tokenContract = new ethers.Contract(
     tokenContractAddress,

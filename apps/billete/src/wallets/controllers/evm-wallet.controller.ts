@@ -44,16 +44,12 @@ export class EvmWalletController {
     return await this.walletService.createWallet(req.user.id, blockchainId);
   }
 
-  @Post('withdraw/:blockchainId')
-  @UseGuards(AuthenticatedGuard)
+  @Post('withdraw')
+  // @UseGuards(AuthenticatedGuard)
   async withdraw(
-    @Request() req: any,
-    @Param('blockchainId') blockchainId: string,
     @Body() withdrawDto: WithdrawDto,
   ): Promise<{ message: string }> {
     try {
-      withdrawDto.userId = req.user.id;
-      withdrawDto.blockchainId = blockchainId;
       return await this.walletService.withdraw(withdrawDto);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -16,7 +16,7 @@ export class TokensController {
   }
 
   @Get('get-blockchains-for-tokens')
-  async getBlockchainsForTokenSymbol() {
+  async getBlockchainsForTokens() {
     return await this.tokensService.getBlockchainsForTokens();
   }
 }

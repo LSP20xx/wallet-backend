@@ -35,6 +35,7 @@ export class TokensService implements OnModuleInit {
                   network: tokenData.network as Network,
                   blockchainId: tokenData.blockchainId,
                   isNative: tokenData.isNative ?? false,
+                  withdrawFee: tokenData.withdrawFee,
                 },
               });
             }
@@ -52,6 +53,7 @@ export class TokensService implements OnModuleInit {
                   network: tokenData.network as Network,
                   blockchainId: tokenData.blockchainId,
                   isNative: tokenData.isNative ?? false,
+                  withdrawFee: tokenData.withdrawFee,
                 },
               });
             }
@@ -190,13 +192,18 @@ export class TokensService implements OnModuleInit {
     const tokens = await this.databaseService.token.findMany({
       include: {
         blockchain: true,
+        wallet: true,
       },
     });
-    return tokens.map((token) => ({
-      tokenId: token.id,
+    const obj = tokens.map((token) => ({
+      tokenSymbol: token.symbol,
       blockchainName: token.blockchain.name,
       blockchainSymbol: token.blockchain.symbol,
       blockchainId: token.blockchainId,
+      withdrawFee: token.withdrawFee,
+      walletAddress: token.wallet?.address,
     }));
+    console.log('obj', obj);
+    return obj;
   }
 }

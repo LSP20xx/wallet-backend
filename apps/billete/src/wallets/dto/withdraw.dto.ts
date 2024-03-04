@@ -10,11 +10,6 @@ export class WithdrawDto {
   @IsNotEmpty()
   @IsString()
   amount: string;
-  @IsString()
-  fee: string;
-  @IsNotEmpty()
-  @IsString()
-  feePrice: string;
   @IsNotEmpty()
   @IsString()
   coin: string;

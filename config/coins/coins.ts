@@ -6,6 +6,7 @@ interface TokenConfig {
   network: string;
   blockchainId: string;
   isNative?: boolean;
+  withdrawFee?: string;
 }
 interface TokensConfig {
   ethereum: {
@@ -79,6 +80,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: '5',
         isNative: true,
+        withdrawFee: '0.0027',
       },
       USDT: {
         symbol: 'USDT',
@@ -88,6 +90,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: '5',
         isNative: false,
+        withdrawFee: '8',
       },
       USDC: {
         symbol: 'USDC',
@@ -97,6 +100,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: '5',
         isNative: false,
+        withdrawFee: '8',
       },
     },
   },
@@ -120,6 +124,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: 'BITCOIN-TESTNET',
         isNative: true,
+        withdrawFee: '0.00068',
       },
     },
   },
@@ -143,6 +148,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: 'LITECOIN-TESTNET',
         isNative: true,
+        withdrawFee: '0.001',
       },
     },
   },
@@ -166,6 +172,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: 'DOGECOIN-TESTNET',
         isNative: true,
+        withdrawFee: '5',
       },
     },
   },

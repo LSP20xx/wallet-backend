@@ -28,10 +28,10 @@ export class VerificationController {
 
     const { smsMessage } = this.smsService.createSMSMessage(code);
 
-    const smsResult = await this.smsService.sendSMS(
-      sendVerificationDto.to,
-      smsMessage,
-    );
+    // const smsResult = await this.smsService.sendSMS(
+    //   sendVerificationDto.to,
+    //   smsMessage,
+    // );
 
     const encryptedCode = this.encryptionsService.encrypt(code);
 
@@ -41,13 +41,15 @@ export class VerificationController {
     );
 
     return {
-      smsResult,
+      smsMessage,
     };
   }
 
   @Post('verify-sms-code')
   async verifySmsCode(@Body() verifySmsCodeDto: VerifySmsCodeDto) {
     const { to, code } = verifySmsCodeDto;
+
+    console.log('verifySmsCodeDto', verifySmsCodeDto);
 
     const smsRecord =
       await this.verificationsService.findLatestSMSByPhoneNumber(to);

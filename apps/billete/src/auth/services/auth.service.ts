@@ -17,6 +17,7 @@ import { hash, verify } from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { SignInDTO } from '../dtos/sign-in.dto';
 import { ClientProxy } from '@nestjs/microservices';
+import { CheckAuthDataDTO } from '../dtos/check-auth-data.dto';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -159,22 +160,17 @@ export class AuthService implements OnModuleInit {
     });
   }
 
-  async checkAuthData(authData: {
-    email?: string;
-    phoneNumber?: string;
-    password: string;
-    isLogin: boolean;
-  }) {
+  async checkAuthData(checkAuthDataDTO: CheckAuthDataDTO) {
     const whereClause = {};
 
-    if (authData.email) {
-      whereClause['email'] = authData.email;
+    if (checkAuthDataDTO.email) {
+      whereClause['email'] = checkAuthDataDTO.email;
     }
-    if (authData.phoneNumber) {
-      whereClause['phoneNumber'] = authData.phoneNumber;
+    if (checkAuthDataDTO.phoneNumber) {
+      whereClause['phoneNumber'] = checkAuthDataDTO.phoneNumber;
     }
 
-    if (!authData.email && !authData.phoneNumber) {
+    if (!checkAuthDataDTO.email && !checkAuthDataDTO.phoneNumber) {
       throw new Error('Email or phone number must be provided');
     }
 
@@ -183,33 +179,33 @@ export class AuthService implements OnModuleInit {
     });
 
     if (!user) {
-      if (authData.isLogin) {
+      if (checkAuthDataDTO.isLogin) {
         throw new ForbiddenException('Invalid credentials.');
       } else {
         const tempId = await this.storeTempPassword(
-          authData.email ?? authData.phoneNumber,
-          authData.password,
+          checkAuthDataDTO.email ?? checkAuthDataDTO.phoneNumber,
+          checkAuthDataDTO.password,
         );
 
         const preRegistrationToken = this.generatePreVerificationToken({
-          email: authData.email,
-          phoneNumber: authData.phoneNumber,
+          email: checkAuthDataDTO.email,
+          phoneNumber: checkAuthDataDTO.phoneNumber,
         });
 
         return {
           tempId: tempId,
           token: preRegistrationToken,
           message: 'Verification required',
-          verificationMethods: authData.email ? ['EMAIL'] : ['SMS'],
-          email: authData.email,
-          phoneNumber: authData.phoneNumber,
+          verificationMethods: checkAuthDataDTO.email ? ['EMAIL'] : ['SMS'],
+          email: checkAuthDataDTO.email,
+          phoneNumber: checkAuthDataDTO.phoneNumber,
         };
       }
     } else {
-      if (authData.isLogin) {
+      if (checkAuthDataDTO.isLogin) {
         const isPasswordValid = await verify(
           user.encryptedPassword,
-          authData.password,
+          checkAuthDataDTO.password,
         );
 
         if (!isPasswordValid) {
@@ -227,7 +223,7 @@ export class AuthService implements OnModuleInit {
 
       const tempId = await this.storeTempPassword(
         user.email ?? user.phoneNumber,
-        authData.password,
+        checkAuthDataDTO.password,
       );
 
       if (tempId) {
@@ -235,7 +231,7 @@ export class AuthService implements OnModuleInit {
           tempId: tempId,
           token: preRegistrationToken,
           message: 'Verification required',
-          verificationMethods: authData.email ? ['EMAIL'] : ['SMS'],
+          verificationMethods: checkAuthDataDTO.email ? ['EMAIL'] : ['SMS'],
           email: user.email,
           phoneNumber: user.phoneNumber,
         };

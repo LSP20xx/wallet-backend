@@ -78,6 +78,7 @@ model Token {
   blockchain      Blockchain?    @relation(fields: [blockchainId], references: [blockchainId], name: "TokenChain")
   blockchainId    String?
   walletTokens    WalletToken[]
+  withdrawFee     String         @default("0")
   cryptocurrencyDataId String? @map("cryptocurrency_data_id")
   cryptocurrencyData CryptocurrencyData? @relation(fields: [cryptocurrencyDataId], references: [id])
 
@@ -122,6 +123,8 @@ model Transaction {
   blockchainId String?
   token      Token?     @relation(fields: [tokenId], references: [id], name: "TokenTransactions")
   tokenId    String?
+  companyFee      String   @default("0")
+  networkFee      String?   @default("0")
   isNativeCoin   Boolean    @default(false)
 
   @@map("transactions")

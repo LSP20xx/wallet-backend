@@ -21,7 +21,7 @@ export class CheckAuthDataDTO {
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(20)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,20}$/, {
     message: 'Password is too weak',
   })
   password: string;
