@@ -30,6 +30,22 @@ export class AuthService implements OnModuleInit {
     @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
   ) {}
 
+  async storeTempSession(emailOrPhone: string): Promise<string> {
+    const tempId = uuidv4();
+
+    this.redisClient
+      .send(
+        { cmd: 'set' },
+        {
+          key: tempId,
+          value: emailOrPhone,
+          expire: 259200,
+        },
+      )
+      .toPromise();
+
+    return tempId;
+  }
   async signUpUser(signUpDTO: SignUpDTO): Promise<{ userId: string }> {
     const prisma = new PrismaClient();
 
@@ -44,6 +60,10 @@ export class AuthService implements OnModuleInit {
             'Session expired or invalid, or key not found.',
           );
         }
+
+        const sessionTempId = await this.storeTempSession(
+          signUpDTO.email ?? signUpDTO.phoneNumber,
+        );
 
         const userData = {
           email: signUpDTO.email,
@@ -61,7 +81,7 @@ export class AuthService implements OnModuleInit {
           .split(',');
 
         for (const chainId of allowedChains) {
-          if (chainId === '5')
+          if (chainId === '11155111')
             await this.evmWalletService.createWallet(
               user.id,
               chainId,

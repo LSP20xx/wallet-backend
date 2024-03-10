@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../database/services/database/database.service';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class BalancesService {
+  private subscribers: Record<string, Socket[]> = {};
+
   constructor(private databaseService: DatabaseService) {}
 
   async getBalancesForUser(userId: string): Promise<any> {
@@ -40,5 +43,25 @@ export class BalancesService {
         tokens,
       };
     });
+  }
+
+  subscribeToBalanceUpdate(userId: string, client: Socket): void {
+    if (!this.subscribers[userId]) {
+      this.subscribers[userId] = [];
+    }
+    this.subscribers[userId].push(client);
+
+    this.updateBalanceForUser(userId);
+  }
+
+  async updateBalanceForUser(userId: string): Promise<void> {
+    const balances = await this.getBalancesForUser(userId);
+    this.subscribers[userId]?.forEach((client) => {
+      client.emit('balance-update', balances);
+    });
+  }
+
+  notifyBalanceChange(userId: string): void {
+    this.updateBalanceForUser(userId);
   }
 }

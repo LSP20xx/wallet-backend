@@ -2,6 +2,17 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const Redis = require('ioredis');
+const redis = new Redis();
+
+redis.on('connect', () => {
+  console.log('Conectado a Redis');
+});
+
+redis.on('error', (err) => {
+  console.error('Error en la conexión Redis:', err);
+});
+
 const approveTransaction = async (job) => {
   try {
     console.log('Processing job:', job);
@@ -45,6 +56,19 @@ const approveTransaction = async (job) => {
       await prisma.transaction.update({
         where: { id: transactionId },
         data: { status: 'APPROVED' },
+      });
+
+      const message = JSON.stringify({
+        userId: wallet.userId,
+        balance: newBalance,
+      });
+
+      await redis.publish('balanceUpdate', message, (err, count) => {
+        if (err) {
+          console.error('Error publishing balance update:', err);
+        } else {
+          console.log('Balance update published to', count, 'subscribers');
+        }
       });
     });
 

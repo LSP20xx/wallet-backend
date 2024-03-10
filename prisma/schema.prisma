@@ -79,6 +79,7 @@ model Token {
   blockchainId    String?
   walletTokens    WalletToken[]
   withdrawFee     String         @default("0")
+  description     String?        @default("No description available")
   cryptocurrencyDataId String? @map("cryptocurrency_data_id")
   cryptocurrencyData CryptocurrencyData? @relation(fields: [cryptocurrencyDataId], references: [id])
 

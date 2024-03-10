@@ -36,6 +36,7 @@ export class TokensService implements OnModuleInit {
                   blockchainId: tokenData.blockchainId,
                   isNative: tokenData.isNative ?? false,
                   withdrawFee: tokenData.withdrawFee,
+                  description: tokenData.description,
                 },
               });
             }
@@ -54,6 +55,7 @@ export class TokensService implements OnModuleInit {
                   blockchainId: tokenData.blockchainId,
                   isNative: tokenData.isNative ?? false,
                   withdrawFee: tokenData.withdrawFee,
+                  description: tokenData.description,
                 },
               });
             }
@@ -114,6 +116,44 @@ export class TokensService implements OnModuleInit {
             });
           console.log('last7DaysData', last7DaysData);
           return { assetName: tokenName.replace('_90d', ''), last7DaysData };
+        })
+        .catch((err) => {
+          console.error(`Error getting Redis value for ${tokenName}:`, err);
+          return null;
+        }),
+    );
+
+    allTokensData = await Promise.all(tokenDataPromises);
+    allTokensData = allTokensData.filter((data) => data !== null);
+    return allTokensData;
+  }
+
+  async getBigLineCharts() {
+    const tokens = await this.databaseService.token.findMany();
+
+    const tokenNames = tokens.map(
+      (token) => `${token.name.toLowerCase()}_365d`,
+    );
+    let allTokensData = [];
+
+    const tokenDataPromises = tokenNames.map((tokenName) =>
+      this.redisClient
+        .send({ cmd: 'get' }, { key: tokenName })
+        .toPromise()
+        .then((result) => {
+          if (!result.value) {
+            console.error(`No data found for ${tokenName}`);
+            return null;
+          }
+          const data = JSON.parse(result.value);
+          const last30DaysData = data
+            .filter((item: string) => item.trim() !== '')
+            .slice(-720)
+            .map((line: string) => {
+              const parts = line.split(',');
+              return { date: parts[0], close: parseFloat(parts[1]) };
+            });
+          return { assetName: tokenName.replace('_365d', ''), last30DaysData };
         })
         .catch((err) => {
           console.error(`Error getting Redis value for ${tokenName}:`, err);
@@ -195,6 +235,7 @@ export class TokensService implements OnModuleInit {
         wallet: true,
       },
     });
+    console.log('tokens', tokens);
     const obj = tokens.map((token) => ({
       tokenSymbol: token.symbol,
       blockchainName: token.blockchain.name,
@@ -202,6 +243,7 @@ export class TokensService implements OnModuleInit {
       blockchainId: token.blockchainId,
       withdrawFee: token.withdrawFee,
       walletAddress: token.wallet?.address,
+      description: token.description,
     }));
     console.log('obj', obj);
     return obj;

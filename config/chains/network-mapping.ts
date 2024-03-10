@@ -1,4 +1,6 @@
-export const networkMapping = {
+const networkMapping = {
   '1': 'MAINNET',
   default: 'TESTNET',
 };
+
+module.exports = { networkMapping };

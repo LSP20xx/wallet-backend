@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const GeneratorFactory = require('./factories/generatorFactory');
 
 let amount = parseInt(process.argv[2]) || 0;
-const blockchainId = process.argv[3] || '5';
+const blockchainId = process.argv[3] || '11155111';
 const chainType = process.argv[4] || 'EVM';
 const network = process.argv[5] || 'TESTNET';
 

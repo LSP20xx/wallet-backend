@@ -7,6 +7,7 @@ interface TokenConfig {
   blockchainId: string;
   isNative?: boolean;
   withdrawFee?: string;
+  description?: string;
 }
 interface TokensConfig {
   ethereum: {
@@ -78,9 +79,11 @@ export const tokensConfig: TokensConfig = {
         contractAddress: '',
         chainType: 'EVM',
         network: 'TESTNET',
-        blockchainId: '5',
+        blockchainId: '11155111',
         isNative: true,
         withdrawFee: '0.0027',
+        description:
+          'Ethereum, lanzado en 2015, es una plataforma descentralizada que permite la creación de contratos inteligentes y aplicaciones descentralizadas. Su criptomoneda, Ether, no tiene un suministro máximo definido, ajustando su emisión anual.',
       },
       USDT: {
         symbol: 'USDT',
@@ -88,9 +91,11 @@ export const tokensConfig: TokensConfig = {
         contractAddress: '0xcFBa2EdFb93C775F42E9bD007D29dd2E88E37cD6',
         chainType: 'EVM',
         network: 'TESTNET',
-        blockchainId: '5',
+        blockchainId: '11155111',
         isNative: false,
         withdrawFee: '8',
+        description:
+          'USDT (Tether), creado en 2014, es un stablecoin que busca mantener paridad con el dólar estadounidense mediante el respaldo de reservas equivalentes. Su objetivo es combinar la estabilidad del dólar con la eficiencia de la tecnología blockchain.',
       },
       USDC: {
         symbol: 'USDC',
@@ -98,9 +103,11 @@ export const tokensConfig: TokensConfig = {
         contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         chainType: 'EVM',
         network: 'TESTNET',
-        blockchainId: '5',
+        blockchainId: '11155111',
         isNative: false,
         withdrawFee: '8',
+        description:
+          'USDC (USD Coin), lanzado en 2018, es un stablecoin que mantiene una relación de 1:1 con el dólar estadounidense, respaldado por reservas de activos equivalentes. Facilita transacciones globales rápidas y seguras en el ecosistema digital.',
       },
     },
   },
@@ -125,6 +132,8 @@ export const tokensConfig: TokensConfig = {
         blockchainId: 'BITCOIN-TESTNET',
         isNative: true,
         withdrawFee: '0.00068',
+        description:
+          'Bitcoin, la primera criptomoneda lanzada en 2009, es una moneda digital descentralizada que elimina la necesidad de intermediarios financieros. Con un suministro finito de 21 millones de monedas, su sistema está diseñado para reducir su emisión diaria a la mitad cada cuatro años.',
       },
     },
   },
@@ -149,6 +158,8 @@ export const tokensConfig: TokensConfig = {
         blockchainId: 'LITECOIN-TESTNET',
         isNative: true,
         withdrawFee: '0.001',
+        description:
+          'Litecoin, creado en 2011 por Charlie Lee, es una criptomoneda diseñada para proporcionar transacciones rápidas, seguras y de bajo costo. Inspirado en Bitcoin, se diferencia por tener un tiempo de bloque más corto, facilitando pagos eficientes.',
       },
     },
   },
@@ -173,6 +184,8 @@ export const tokensConfig: TokensConfig = {
         blockchainId: 'DOGECOIN-TESTNET',
         isNative: true,
         withdrawFee: '5',
+        description:
+          'Dogecoin, introducida en 2013, se distingue por su leal comunidad y uso práctico en transacciones digitales. Aunque inspirada en un meme, ha ganado seriedad como medio de intercambio, favoreciendo transacciones eficientes y económicas. Su suministro es ilimitado.',
       },
     },
   },

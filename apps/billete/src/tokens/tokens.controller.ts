@@ -15,6 +15,11 @@ export class TokensController {
     return await this.tokensService.getLittleLineCharts();
   }
 
+  @Get('big-line-charts')
+  async getBigLineCharts() {
+    return await this.tokensService.getBigLineCharts();
+  }
+
   @Get('get-blockchains-for-tokens')
   async getBlockchainsForTokens() {
     return await this.tokensService.getBlockchainsForTokens();

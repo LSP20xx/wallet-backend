@@ -36,7 +36,7 @@ export class CryptoDataService implements OnModuleInit {
         const tokenName = token.name.toLowerCase();
         const ticker = `${token.symbol.toUpperCase()}-USD`;
 
-        const dataObservable = await this.getCoinGeckoData(
+        const dataObservable = await this.getCoinGeckoOhlcData(
           tokenName,
           1,
           ticker,
@@ -84,7 +84,7 @@ export class CryptoDataService implements OnModuleInit {
         const ticker = tickers[i];
         const tokenName = tokenNames[i];
 
-        const dataObservable = await this.getCoinGeckoData(
+        const dataObservable = await this.getCoinGeckoOhlcData(
           tokenName,
           90,
           ticker,
@@ -181,7 +181,51 @@ export class CryptoDataService implements OnModuleInit {
       this.updateOneDayData();
     }, 60000);
   }
+  public async getCoinGeckoOhlcData(
+    coinId: string,
+    days: number,
+    ticker: string,
+  ): Promise<Observable<any>> {
+    const apiKey = this.configService.get('COINGECKO_API_KEY');
+    if (!apiKey) {
+      this.logger.error('API Key is missing');
+      throw new Error('API Key for CoinGecko is not configured');
+    }
 
+    const params = { vs_currency: 'usd', days: days };
+    const url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc`;
+    const headers = {
+      x_cg_demo_api_key: apiKey,
+    };
+
+    this.logger.log(`Requesting CoinGecko for ${coinId}`);
+
+    return this.httpService
+      .get(url, { headers, params, responseType: 'text' })
+      .pipe(
+        map((response) => {
+          if (typeof response.data === 'string') {
+            const interval = days > 1 ? '90d' : '1d';
+            console.log('data:', response.data);
+            const jsonData = JSON.parse(response.data);
+            const csvData = this.convertToCsv(jsonData);
+            return this.saveCsv(csvData, ticker, interval);
+          } else {
+            throw new Error('Received non-CSV response');
+          }
+        }),
+        catchError((error) => {
+          this.logger.error(`Error status: ${error.response?.status}`);
+          this.logger.error(
+            `Error message: ${error.response?.data?.message || error.message}`,
+          );
+          return throwError(
+            () =>
+              new Error(`Error fetching data from CoinGecko: ${error.message}`),
+          );
+        }),
+      );
+  }
   public async getCoinGeckoData(
     coinId: string,
     days: number,
@@ -244,7 +288,7 @@ export class CryptoDataService implements OnModuleInit {
   }
 
   private convertToCsv(data: any[]): string {
-    let csvContent = 'Date,Close\n';
+    let csvContent = 'Date,Open,High,Low,Close\n';
     data.forEach((item) => {
       const localTimestamp = new Date(item[0]);
       const utcTimestamp = new Date(localTimestamp.getTime());
@@ -257,7 +301,7 @@ export class CryptoDataService implements OnModuleInit {
       const minutes = utcTimestamp.getUTCMinutes().toString().padStart(2, '0');
       const seconds = utcTimestamp.getUTCSeconds().toString().padStart(2, '0');
       const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-      csvContent += `${formattedDate},${item[1]}\n`;
+      csvContent += `${formattedDate},${item[1]},${item[2]},${item[3]},${item[4]}\n`;
     });
     return csvContent;
   }

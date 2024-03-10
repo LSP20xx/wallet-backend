@@ -5,7 +5,7 @@ const web3 = require('web3');
 const coinsConfig = require('../../../../../config/coins/info');
 
 const chainType = 'EVM';
-const blockchainId = '5';
+const blockchainId = '11155111';
 const coin = 'ETH';
 const transactionsQueue = new Queue(`${coin.toLowerCase()}-transactions`);
 
