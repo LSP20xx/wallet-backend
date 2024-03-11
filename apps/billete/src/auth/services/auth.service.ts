@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, VerificationMethod } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { SignTokenDTO } from 'apps/billete/src/auth/dtos/sign-token.dto';
 import { SignUpDTO } from 'apps/billete/src/auth/dtos/sign-up.dto';
@@ -61,15 +61,18 @@ export class AuthService implements OnModuleInit {
           );
         }
 
-        const sessionTempId = await this.storeTempSession(
-          signUpDTO.email ?? signUpDTO.phoneNumber,
-        );
+        // const sessionTempId = await this.storeTempSession(
+        //   signUpDTO.email ?? signUpDTO.phoneNumber,
+        // );
 
         const userData = {
           email: signUpDTO.email,
           phoneNumber: signUpDTO.phoneNumber,
           encryptedPassword: tempPasswordResponse.encryptedPassword,
           verified: false,
+          verificationMethods: signUpDTO.email
+            ? [VerificationMethod.EMAIL]
+            : [VerificationMethod.SMS],
         };
 
         const user = await transaction.user.create({
@@ -129,6 +132,12 @@ export class AuthService implements OnModuleInit {
 
         return {
           userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          verified: user.verified,
+          verificationMethods: user.verificationMethods,
         };
       });
       return result;
@@ -146,6 +155,12 @@ export class AuthService implements OnModuleInit {
 
   async signInUser(signInDTO: SignInDTO): Promise<{
     userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    verified: boolean;
+    verificationMethods: string[];
   }> {
     const user = await this.databaseService.user.findFirst({
       where: {
@@ -159,6 +174,12 @@ export class AuthService implements OnModuleInit {
 
     return {
       userId: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      verified: user.verified,
+      verificationMethods: user.verificationMethods,
     };
   }
 
