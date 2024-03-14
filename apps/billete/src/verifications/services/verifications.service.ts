@@ -38,4 +38,14 @@ export class VerificationsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async findLatestEmailByEmailAddress(
+    emailAddress: string,
+  ): Promise<VerificationToken | null> {
+    console.log('llega a findLatestEmailByEmailAddress');
+    return this.databaseService.verificationToken.findFirst({
+      where: { to: emailAddress },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

@@ -24,7 +24,14 @@ export class EmailService {
     template: string,
     context: any,
   ): Promise<void> {
-    const templatePath = join(__dirname, '..', 'templates', `${template}.hbs`);
+    const templatePath = join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'templates',
+      `${template}.hbs`,
+    );
     const templateSource = readFileSync(templatePath, 'utf-8');
     const compiledTemplate = handlebars.compile(templateSource);
 

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class VerifySmsCodeDto {
+export class VerifyCodeDto {
   @IsNotEmpty()
   @IsString()
   to: string;

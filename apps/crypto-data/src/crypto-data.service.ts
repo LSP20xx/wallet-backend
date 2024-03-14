@@ -36,7 +36,7 @@ export class CryptoDataService implements OnModuleInit {
         const tokenName = token.name.toLowerCase();
         const ticker = `${token.symbol.toUpperCase()}-USD`;
 
-        const dataObservable = await this.getCoinGeckoOhlcData(
+        const dataObservable = await this.getCoinGeckoData(
           tokenName,
           1,
           ticker,
@@ -84,7 +84,7 @@ export class CryptoDataService implements OnModuleInit {
         const ticker = tickers[i];
         const tokenName = tokenNames[i];
 
-        const dataObservable = await this.getCoinGeckoOhlcData(
+        const dataObservable = await this.getCoinGeckoData(
           tokenName,
           90,
           ticker,
