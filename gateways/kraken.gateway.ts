@@ -28,7 +28,11 @@ export class KrakenGateway {
 
     this.ws.on('message', (data: WebSocket.RawData) => {
       const messageString = JSON.parse(data.toString());
-      this.server.emit('kraken-data', messageString);
+      if (this.server) {
+        this.server.emit('kraken-data', messageString);
+      } else {
+        console.error('Server not initialized');
+      }
       this.lastHeartbeat = new Date();
     });
 
