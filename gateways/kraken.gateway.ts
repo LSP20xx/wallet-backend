@@ -23,13 +23,33 @@ export class KrakenGateway {
     this.ws.on('open', () => {
       console.log('Connection opened');
       this.subscribeToChannels();
+      this.subscribeToOHLCOneMinute();
+      this.subscribeToOHLCFiveMinutes();
+      this.subscribeToOHLCFifteenMinutes();
+      this.subscribeToOHLCOneHour();
+      this.subscribeToOHLCFourHours();
+      this.subscribeToOHLCOneDay();
+      this.subscribeToOHLCOneWeek();
+      this.subscribeToOHLCOneMonth();
       this.lastHeartbeat = new Date();
     });
 
     this.ws.on('message', (data: WebSocket.RawData) => {
-      const messageString = JSON.parse(data.toString());
+      const message = JSON.parse(data.toString());
       if (this.server) {
-        this.server.emit('kraken-data', messageString);
+        if (message[2]?.includes('ohlc')) {
+          console.log('OHLC:', message[2]);
+          this.server.emit('kraken-ohlc', message);
+        } else if (message[2] == 'ticker') {
+          console.log('TICKER:', message[2]);
+          this.server.emit('kraken-data', message);
+        }
+        // if (message.includes('ohlc')) {
+        //   console.log('OHLC:', message.includes('ohlc'));
+        //   this.server.emit('kraken-ohlc', message);
+        // } else if (message.includes('ticker')) {
+        //   this.server.emit('kraken-data', message);
+        // }
       } else {
         console.error('Server not initialized');
       }
@@ -61,6 +81,102 @@ export class KrakenGateway {
           event: 'subscribe',
           pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
           subscription: { name: 'ticker' },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCOneMinute() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 1 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCFiveMinutes() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 5 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCFifteenMinutes() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 15 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCOneHour() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 60 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCFourHours() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 240 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCOneDay() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 1440 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCOneWeek() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 10080 },
+        }),
+      );
+    }
+  }
+
+  subscribeToOHLCOneMonth() {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          event: 'subscribe',
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          subscription: { name: 'ohlc', interval: 43200 },
         }),
       );
     }
