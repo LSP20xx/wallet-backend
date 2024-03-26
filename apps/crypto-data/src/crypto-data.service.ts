@@ -1,13 +1,13 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
+import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as moment from 'moment';
 import * as path from 'path';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { ClientProxy } from '@nestjs/microservices';
-import { PrismaClient } from '@prisma/client';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, delay, map, retryWhen } from 'rxjs/operators';
 
 @Injectable()
 export class CryptoDataService implements OnModuleInit {
@@ -24,6 +24,412 @@ export class CryptoDataService implements OnModuleInit {
 
   onModuleInit() {
     this.startCronJobs();
+  }
+
+  calculateOHLC(trades: any, interval: number) {
+    const ohlc = [];
+    let currentInterval = [];
+    let startTime = trades[0][2];
+
+    trades.forEach((trade) => {
+      if (trade[2] - startTime < interval) {
+        currentInterval.push(trade);
+      } else {
+        const open = currentInterval[0][0];
+        const high = Math.max(...currentInterval.map((t) => t[0]));
+        const low = Math.min(...currentInterval.map((t) => t[0]));
+        const close = currentInterval[currentInterval.length - 1][0];
+        ohlc.push([startTime, open, high, low, close]);
+        startTime = trade[2];
+        currentInterval = [trade];
+      }
+    });
+
+    if (currentInterval.length > 0) {
+      const open = currentInterval[0][0];
+      const high = Math.max(...currentInterval.map((t) => t[0]));
+      const low = Math.min(...currentInterval.map((t) => t[0]));
+      const close = currentInterval[currentInterval.length - 1][0];
+      ohlc.push([startTime, open, high, low, close]);
+    }
+
+    return ohlc;
+  }
+
+  async updateOneMinuteDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 5 minutes from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 5, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_5m`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_5m:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateFiveMinutesDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 5 minutes from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 5, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_5m`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_5m:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateFifteenMinutesDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 15 minutes from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 15, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_15m`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_15m:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateOneHourDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 1 hour from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 60, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_1h`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_1h:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateFourHoursDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 4 hours from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 240, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_4h`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_4h:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateOneDayDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 1 day from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 1440, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_1d`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_1d:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateOneWeekDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 1 week from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 10080, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_1w`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_1w:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
+  }
+
+  async updateOneMonthDataFromKraken() {
+    try {
+      const tokens = await this.prisma.token.findMany();
+
+      console.log('Fetching data for 1 month from Kraken');
+
+      for (const token of tokens) {
+        const ticker = `${token.symbol.toUpperCase()}/USD`;
+        const dataObservable = await this.getKrakenOhlcData(ticker, 43200, 0);
+
+        dataObservable
+          .toPromise()
+          .then((data) => {
+            this.redisClient
+              .send(
+                { cmd: 'set' },
+                {
+                  key: `${token.name.toLowerCase()}_1m`,
+                  value: JSON.stringify(data),
+                },
+              )
+              .toPromise()
+              .then((setResult) =>
+                console.log(
+                  `Redis set result for ${token.name.toLowerCase()}_1m:`,
+                  setResult,
+                ),
+              )
+              .catch((err) =>
+                console.error(
+                  `Error setting Redis value for ${token.name.toLowerCase()}:`,
+                  err,
+                ),
+              );
+          })
+          .catch((error) =>
+            console.error(
+              `Error fetching data for ${token.name.toLowerCase()}:`,
+              error,
+            ),
+          );
+      }
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+    }
   }
 
   async updateFiveMinutesData() {
@@ -70,7 +476,7 @@ export class CryptoDataService implements OnModuleInit {
     }
   }
 
-  async updateOneHourData() {
+  async updateNinetyDaysData() {
     try {
       const tokens = await this.prisma.token.findMany();
       const tickers = tokens.map(
@@ -170,15 +576,19 @@ export class CryptoDataService implements OnModuleInit {
   startCronJobs() {
     setInterval(() => {
       console.log('Updating 5 minutes data');
-      this.updateFiveMinutesData();
+      this.updateOneMinuteDataFromKraken();
+      this.updateFiveMinutesDataFromKraken();
+      this.updateFifteenMinutesDataFromKraken();
     }, 30000);
     setInterval(() => {
       console.log('Updating 1 hour data');
-      this.updateOneHourData();
-    }, 60000);
-    setInterval(() => {
-      console.log('Updating 1 day data');
-      this.updateOneDayData();
+
+      this.updateNinetyDaysData();
+      this.updateOneHourDataFromKraken();
+      this.updateFourHoursDataFromKraken();
+      this.updateOneDayDataFromKraken();
+      this.updateOneWeekDataFromKraken();
+      this.updateOneMonthDataFromKraken();
     }, 60000);
   }
   public async getCoinGeckoOhlcData(
@@ -208,7 +618,7 @@ export class CryptoDataService implements OnModuleInit {
             const interval = days > 1 ? '90d' : '1d';
             console.log('data:', response.data);
             const jsonData = JSON.parse(response.data);
-            const csvData = this.convertToCsv(jsonData);
+            const csvData = this.convertToCsv(jsonData, false);
             return this.saveCsv(csvData, ticker, interval);
           } else {
             throw new Error('Received non-CSV response');
@@ -226,6 +636,41 @@ export class CryptoDataService implements OnModuleInit {
         }),
       );
   }
+
+  public async getKrakenOhlcData(
+    pair: string,
+    interval: number,
+    since: number,
+  ): Promise<Observable<any>> {
+    console.log('llega a getKrakenOhlcData');
+    const url = `https://api.kraken.com/0/public/OHLC?pair=${pair}&interval=${interval}&since=${since}`;
+    return this.httpService.get(url, { responseType: 'text' }).pipe(
+      map((response) => {
+        if (typeof response.data === 'string') {
+          const parsedData = JSON.parse(response.data);
+          if (!parsedData.result || !parsedData.result[pair]) {
+            this.logger.warn(`No data found for pair ${pair}, skipping.`);
+            return of([]);
+          }
+          const jsonData = parsedData.result[pair];
+          const csvData = this.convertToCsv(jsonData, true);
+          return this.saveCsv(csvData, pair, interval.toString());
+        } else {
+          throw new Error('Received non-CSV response');
+        }
+      }),
+      catchError((error) => {
+        this.logger.error(`Error status: ${error.response?.status}`);
+        this.logger.error(
+          `Error message: ${error.response?.data?.message || error.message}`,
+        );
+        return throwError(
+          () => new Error(`Error fetching data from Kraken: ${error.message}`),
+        );
+      }),
+    );
+  }
+
   public async getCoinGeckoData(
     coinId: string,
     days: number,
@@ -258,6 +703,23 @@ export class CryptoDataService implements OnModuleInit {
             throw new Error('Received non-CSV response');
           }
         }),
+        retryWhen((errors) =>
+          errors.pipe(
+            delay(5000), // Delay for 5 seconds before retrying
+            catchError((error) => {
+              if (error.response?.status === 429) {
+                return throwError(
+                  () =>
+                    new Error(
+                      `Gave up fetching data from CoinGecko: ${error.message}`,
+                    ),
+                );
+              } else {
+                return throwError(() => error);
+              }
+            }),
+          ),
+        ),
         catchError((error) => {
           this.logger.error(`Error status: ${error.response?.status}`);
           this.logger.error(
@@ -287,10 +749,10 @@ export class CryptoDataService implements OnModuleInit {
     return url;
   }
 
-  private convertToCsv(data: any[]): string {
+  private convertToCsv(data: any[], inMilliseconds = true): string {
     let csvContent = 'Date,Open,High,Low,Close\n';
     data.forEach((item) => {
-      const localTimestamp = new Date(item[0]);
+      const localTimestamp = new Date(item[0] * (inMilliseconds ? 1 : 1000));
       const utcTimestamp = new Date(localTimestamp.getTime());
       const year = utcTimestamp.getUTCFullYear();
       const month = (utcTimestamp.getUTCMonth() + 1)
