@@ -64,7 +64,7 @@ export class CryptoDataService implements OnModuleInit {
 
       for (const token of tokens) {
         const ticker = `${token.symbol.toUpperCase()}/USD`;
-        const dataObservable = await this.getKrakenOhlcData(ticker, 5, 0);
+        const dataObservable = await this.getKrakenOhlcData(ticker, 1, 0);
 
         dataObservable
           .toPromise()
@@ -73,14 +73,14 @@ export class CryptoDataService implements OnModuleInit {
               .send(
                 { cmd: 'set' },
                 {
-                  key: `${token.name.toLowerCase()}_5m`,
+                  key: `${token.name.toLowerCase()}_1m`,
                   value: JSON.stringify(data),
                 },
               )
               .toPromise()
               .then((setResult) =>
                 console.log(
-                  `Redis set result for ${token.name.toLowerCase()}_5m:`,
+                  `Redis set result for ${token.name.toLowerCase()}_1m:`,
                   setResult,
                 ),
               )
@@ -653,7 +653,7 @@ export class CryptoDataService implements OnModuleInit {
             return of([]);
           }
           const jsonData = parsedData.result[pair];
-          const csvData = this.convertToCsv(jsonData, true);
+          const csvData = this.convertToCsv(jsonData, false);
           return this.saveCsv(csvData, pair, interval.toString());
         } else {
           throw new Error('Received non-CSV response');
@@ -752,18 +752,9 @@ export class CryptoDataService implements OnModuleInit {
   private convertToCsv(data: any[], inMilliseconds = true): string {
     let csvContent = 'Date,Open,High,Low,Close\n';
     data.forEach((item) => {
-      const localTimestamp = new Date(item[0] * (inMilliseconds ? 1 : 1000));
-      const utcTimestamp = new Date(localTimestamp.getTime());
-      const year = utcTimestamp.getUTCFullYear();
-      const month = (utcTimestamp.getUTCMonth() + 1)
-        .toString()
-        .padStart(2, '0');
-      const day = utcTimestamp.getUTCDate().toString().padStart(2, '0');
-      const hours = utcTimestamp.getUTCHours().toString().padStart(2, '0');
-      const minutes = utcTimestamp.getUTCMinutes().toString().padStart(2, '0');
-      const seconds = utcTimestamp.getUTCSeconds().toString().padStart(2, '0');
-      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-      csvContent += `${formattedDate},${item[1]},${item[2]},${item[3]},${item[4]}\n`;
+      const localTimestamp = item[0] * (inMilliseconds ? 1000 : 1);
+
+      csvContent += `${localTimestamp},${item[1]},${item[2]},${item[3]},${item[4]}\n`;
     });
     return csvContent;
   }

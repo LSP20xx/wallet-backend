@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { TokensService } from './services/tokens.service';
 
 @Controller('tokens')
@@ -15,9 +15,10 @@ export class TokensController {
     return await this.tokensService.getLittleLineCharts();
   }
 
-  @Get('big-line-charts')
-  async getBigLineCharts() {
-    return await this.tokensService.getBigLineCharts();
+  @Get('candlestick-chart/:nameAndInterval')
+  async getCandlestickChart(@Param('nameAndInterval') nameAndInterval: string) {
+    console.log('nameAndInterval', nameAndInterval);
+    return await this.tokensService.getCandlestickChart(nameAndInterval);
   }
 
   @Get('get-blockchains-for-tokens')

@@ -24,10 +24,37 @@ export class BalanceGateway implements OnModuleInit {
   }
 
   private handleRedisMessage(channel: string, message: string) {
+    console.log('Redis Message Received', message);
     if (channel === 'balanceUpdate') {
-      const { userId, balance } = JSON.parse(message);
-      this.server.to(userId).emit('balance-update', { balance });
+      const parsedMessage = JSON.parse(message);
+      const { userId, balance } = parsedMessage;
+      if (userId && balance !== undefined) {
+        console.log(
+          `Emitting balance update to userId: ${userId} with balance: ${balance}`,
+        );
+        try {
+          this.server.to(userId).emit('balance-update', { balance });
+        } catch (error) {
+          console.error(`Error emitting to userId ${userId}:`, error);
+        }
+      } else {
+        console.error('Invalid message format received from Redis:', message);
+      }
     }
+  }
+
+  @SubscribeMessage('subscribeToBalanceUpdate')
+  handleSubscribeToBalanceUpdate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { userId: string },
+  ) {
+    client.join(data.userId);
+    console.log(
+      `Client subscribed to balance updates for userId: ${data.userId}`,
+    );
+    // this.server
+    //   .to(data.userId)
+    //   .emit('balance-update', { balance: 'Test Balance' });
   }
 
   @SubscribeMessage('requestBalanceUpdate')

@@ -56,6 +56,7 @@ export class BalancesService {
 
   async updateBalanceForUser(userId: string): Promise<void> {
     const balances = await this.getBalancesForUser(userId);
+    console.log('USER BALANCES', balances);
     this.subscribers[userId]?.forEach((client) => {
       client.emit('balance-update', balances);
     });

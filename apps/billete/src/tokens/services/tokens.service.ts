@@ -128,42 +128,57 @@ export class TokensService implements OnModuleInit {
     return allTokensData;
   }
 
-  async getBigLineCharts() {
-    const tokens = await this.databaseService.token.findMany();
-
-    const tokenNames = tokens.map(
-      (token) => `${token.name.toLowerCase()}_365d`,
-    );
-    let allTokensData = [];
-
-    const tokenDataPromises = tokenNames.map((tokenName) =>
-      this.redisClient
-        .send({ cmd: 'get' }, { key: tokenName })
-        .toPromise()
-        .then((result) => {
-          if (!result.value) {
-            console.error(`No data found for ${tokenName}`);
-            return null;
-          }
-          const data = JSON.parse(result.value);
-          const last30DaysData = data
-            .filter((item: string) => item.trim() !== '')
-            .slice(-720)
-            .map((line: string) => {
-              const parts = line.split(',');
-              return { date: parts[0], close: parseFloat(parts[1]) };
-            });
-          return { assetName: tokenName.replace('_365d', ''), last30DaysData };
-        })
-        .catch((err) => {
-          console.error(`Error getting Redis value for ${tokenName}:`, err);
+  async getCandlestickChart(nameAndInterval: string) {
+    const tokenDataPromise = this.redisClient
+      .send({ cmd: 'get' }, { key: nameAndInterval })
+      .toPromise()
+      .then((result) => {
+        if (!result.value) {
+          console.error(`No data found for ${nameAndInterval}`);
           return null;
-        }),
-    );
+        }
+        const data = JSON.parse(result.value);
+        console.log('before filteredData', data.length);
+        const filteredData = data
+          .filter((item: string) => {
+            const parts = item.split(',');
+            return (
+              parts.length === 5 && parts.every((part) => part.trim() !== '')
+            );
+          })
+          .map((line: string) => {
+            const parts = line.split(',');
+            const time = parseInt(parts[0]);
+            const open = parseFloat(parts[1]);
+            const high = parseFloat(parts[2]);
+            const low = parseFloat(parts[3]);
+            const close = parseFloat(parts[4]);
 
-    allTokensData = await Promise.all(tokenDataPromises);
-    allTokensData = allTokensData.filter((data) => data !== null);
-    return allTokensData;
+            if (
+              !isNaN(time) &&
+              !isNaN(open) &&
+              !isNaN(high) &&
+              !isNaN(low) &&
+              !isNaN(close)
+            ) {
+              return { time, open, high, low, close };
+            }
+            return null;
+          })
+          .filter((item) => item !== null);
+        console.log('after filteredData', filteredData.length);
+        return {
+          assetName: nameAndInterval.replace('_365d', ''),
+          filteredData,
+        };
+      })
+      .catch((err) => {
+        console.error(`Error getting Redis value for ${nameAndInterval}:`, err);
+        return null;
+      });
+
+    const allTokensData = await Promise.all([tokenDataPromise]);
+    return allTokensData.filter((data) => data !== null);
   }
 
   calculatePriceVariation(lastPrice: number, openingPrice: number) {

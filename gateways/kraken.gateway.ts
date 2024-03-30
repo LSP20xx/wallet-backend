@@ -38,10 +38,8 @@ export class KrakenGateway {
       const message = JSON.parse(data.toString());
       if (this.server) {
         if (message[2]?.includes('ohlc')) {
-          console.log('OHLC:', message[2]);
           this.server.emit('kraken-ohlc', message);
         } else if (message[2] == 'ticker') {
-          console.log('TICKER:', message[2]);
           this.server.emit('kraken-data', message);
         }
         // if (message.includes('ohlc')) {
