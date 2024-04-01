@@ -228,14 +228,14 @@ export class AuthService implements OnModuleInit {
           checkAuthDataDTO.password,
         );
 
-        const preRegistrationToken = this.generatePreVerificationToken({
+        const preVerificationToken = this.generatePreVerificationToken({
           email: checkAuthDataDTO.email,
           phoneNumber: checkAuthDataDTO.phoneNumber,
         });
 
         return {
           tempId: tempId,
-          token: preRegistrationToken,
+          preVerificationToken: preVerificationToken,
           message: 'Verification required',
           verificationMethods: checkAuthDataDTO.email ? ['EMAIL'] : ['SMS'],
           email: checkAuthDataDTO.email,
@@ -257,7 +257,7 @@ export class AuthService implements OnModuleInit {
         throw new ForbiddenException('User already exists.');
       }
 
-      const preRegistrationToken = this.generatePreVerificationToken({
+      const preVerificationToken = this.generatePreVerificationToken({
         email: user.email,
         phoneNumber: user.phoneNumber,
       });
@@ -270,7 +270,7 @@ export class AuthService implements OnModuleInit {
       if (tempId) {
         return {
           tempId: tempId,
-          token: preRegistrationToken,
+          preVerificationToken: preVerificationToken,
           message: 'Verification required',
           verificationMethods: checkAuthDataDTO.email ? ['EMAIL'] : ['SMS'],
           email: user.email,
@@ -287,7 +287,7 @@ export class AuthService implements OnModuleInit {
 
     const secret = this.configService.get<string>('JWT_SECRET');
     return this.jwtService.signAsync(payload, {
-      expiresIn: '2d',
+      expiresIn: '7d',
       secret: secret,
     });
   }
