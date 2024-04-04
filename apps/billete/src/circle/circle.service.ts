@@ -28,6 +28,7 @@ export class CircleService {
       idempotencyKey: uuidv4(),
       entitySecretCipherText: entitySecretCipherText,
       walletSetId: this.CIRCLE_WALLET_SET_ID,
+      blockchains: ['ETH-SEPOLIA', 'AVAX-FUJI', 'MATIC-AMOY'],
       count: 20,
     };
 
