@@ -77,7 +77,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ticker' },
         }),
       );
@@ -89,7 +89,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 1 },
         }),
       );
@@ -101,7 +101,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 5 },
         }),
       );
@@ -113,7 +113,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 15 },
         }),
       );
@@ -125,7 +125,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 60 },
         }),
       );
@@ -137,7 +137,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 240 },
         }),
       );
@@ -149,7 +149,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 1440 },
         }),
       );
@@ -161,7 +161,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 10080 },
         }),
       );
@@ -173,7 +173,7 @@ export class KrakenGateway {
       this.ws.send(
         JSON.stringify({
           event: 'subscribe',
-          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDT/USD'],
+          pair: ['XBT/USD', 'ETH/USD', 'DOGE/USD', 'LTC/USD', 'USDC/USD'],
           subscription: { name: 'ohlc', interval: 43200 },
         }),
       );
