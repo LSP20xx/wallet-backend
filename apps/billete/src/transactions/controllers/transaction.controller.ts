@@ -4,9 +4,7 @@ import { TransactionsService } from '../services/transaction.service';
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionService: TransactionsService) {}
-
-  @Get(':userId')
-  async getAllTransactions(@Param('userId') userId: string) {
+  @Get(':userId') async getAllTransactions(@Param('userId') userId: string) {
     return this.transactionService.getAllTransactions(userId);
   }
 
@@ -17,6 +15,4 @@ export class TransactionsController {
   ) {
     return this.transactionService.getTransaction(userId, transactionId);
   }
-}
-
 }
