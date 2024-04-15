@@ -109,7 +109,7 @@ export class TokensService implements OnModuleInit {
           const data = JSON.parse(result.value);
           const last7DaysData = data
             .filter((item: string) => item.trim() !== '')
-            .slice(-168)
+            .slice(-7)
             .map((line: string) => {
               const parts = line.split(',');
               return { date: parts[0], close: parseFloat(parts[1]) };

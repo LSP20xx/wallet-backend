@@ -43,7 +43,17 @@ export class BlockchainModule implements OnModuleInit {
   async syncBlockchains(): Promise<void> {
     const evmTokenSymbols = {
       '1': 'ETH',
+      '42161': 'ETH',
+      '43114': 'AVAX',
+      '8453': 'ETH',
+      '84532': 'ETH',
+      '10': 'ETH',
+      '137': 'MATIC',
+      '421613': 'ETH',
+      '43113': 'AVAX',
       '11155111': 'ETH',
+      '420': 'ETH',
+      '1666600000': 'MATIC',
     };
     this.allowedChains = this.configService
       .get('ALLOWED_CHAINS_IDS')

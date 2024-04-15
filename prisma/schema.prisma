@@ -16,6 +16,7 @@ model Blockchain {
   wallets      Wallet[]       @relation("WalletChain")
   transactions Transaction[]  @relation("TransactionChain")
   tokens       Token[]        @relation("TokenChain")
+  exampleAddress      String        @default("")
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   @@map("blockchains")
@@ -50,6 +51,7 @@ model Wallet {
   transactions        Transaction[] @relation("WalletTransactions")
   tokens              Token[]       @relation("WalletTokens")
   walletTokens        WalletToken[]
+  favoriteAddresses   Json?         
   @@map("wallets")
 }
 
@@ -124,6 +126,7 @@ model Transaction {
   blockchainId String?
   token      Token?     @relation(fields: [tokenId], references: [id], name: "TokenTransactions")
   tokenId    String?
+  tokenSymbol String @default("DEFAULT_TOKEN_NAME")
   companyFee      String   @default("0")
   networkFee      String?   @default("0")
   isNativeCoin   Boolean    @default(false)
