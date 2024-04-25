@@ -83,6 +83,10 @@ export class BlockchainModule implements OnModuleInit {
         networks: ['dogecoin-mainnet', 'dogecoin-testnet'],
         symbol: 'DOGE',
       },
+      solana: {
+        networks: ['solana-mainnet', 'solana-testnet'],
+        symbol: 'SOL',
+      },
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

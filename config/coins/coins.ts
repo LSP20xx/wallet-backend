@@ -6,6 +6,7 @@ interface TokenConfig {
   network: string;
   blockchainId: string;
   isNative?: boolean;
+  isLiquidity?: boolean;
   withdrawFee?: string;
   description?: string;
 }
@@ -41,6 +42,11 @@ interface TokensConfig {
     // mainnet: {
     //   [key: string]: TokenConfig;
     // };
+  };
+  solana: {
+    testnet: {
+      [key: string]: TokenConfig;
+    };
   };
 }
 
@@ -93,6 +99,7 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: '11155111',
         isNative: false,
+        isLiquidity: false,
         withdrawFee: '8',
         description:
           'USDT (Tether), creado en 2014, es un stablecoin que busca mantener paridad con el dólar estadounidense mediante el respaldo de reservas equivalentes. Su objetivo es combinar la estabilidad del dólar con la eficiencia de la tecnología blockchain.',
@@ -105,9 +112,22 @@ export const tokensConfig: TokensConfig = {
         network: 'TESTNET',
         blockchainId: '11155111',
         isNative: false,
+        isLiquidity: false,
         withdrawFee: '8',
         description:
           'USDC (USD Coin), lanzado en 2018, es un stablecoin que mantiene una relación de 1:1 con el dólar estadounidense, respaldado por reservas de activos equivalentes. Facilita transacciones globales rápidas y seguras en el ecosistema digital.',
+      },
+      USD: {
+        symbol: 'USD',
+        name: 'US Dollar',
+        contractAddress: '0x',
+        chainType: 'EVM',
+        network: 'TESTNET',
+        blockchainId: '11155111',
+        isNative: false,
+        isLiquidity: false,
+        withdrawFee: '8',
+        description: 'USD.',
       },
     },
   },
@@ -186,6 +206,22 @@ export const tokensConfig: TokensConfig = {
         withdrawFee: '5',
         description:
           'Dogecoin, introducida en 2013, se distingue por su leal comunidad y uso práctico en transacciones digitales. Aunque inspirada en un meme, ha ganado seriedad como medio de intercambio, favoreciendo transacciones eficientes y económicas. Su suministro es ilimitado.',
+      },
+    },
+  },
+  solana: {
+    testnet: {
+      SOL: {
+        symbol: 'SOL',
+        name: 'Solana',
+        contractAddress: '',
+        chainType: 'SOLANA',
+        network: 'TESTNET',
+        blockchainId: 'SOLANA-TESTNET',
+        isNative: true,
+        withdrawFee: '0.01',
+        description:
+          'Solana, lanzada en 2020, se caracteriza por su arquitectura de alta velocidad y baja latencia, ideal para aplicaciones descentralizadas. Conocida por su capacidad para procesar miles de transacciones por segundo, Solana ofrece una infraestructura robusta para el desarrollo DeFi y NFT. Su suministro es limitado, lo que añade un potencial de valorización a largo plazo.',
       },
     },
   },

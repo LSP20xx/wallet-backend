@@ -77,4 +77,13 @@ export class EvmWalletController {
   remove(@Param('id') id: string): Promise<void> {
     return this.walletService.remove(id);
   }
+
+  @Post('save-favorite-address/:userId')
+  saveFavoriteAddress(
+    @Param('userId') userId: string,
+    @Body() favoriteAddressData: any,
+  ) {
+    console.log('User ID:', userId);
+    console.log('Favorite Data:', favoriteAddressData);
+  }
 }

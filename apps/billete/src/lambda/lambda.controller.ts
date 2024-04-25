@@ -6,7 +6,7 @@ import { LambdaService } from './lambda.service';
 export class LambdaController {
   constructor(private readonly lambdaService: LambdaService) {}
 
-  @UseGuards(AuthenticatedGuard)
+  // @UseGuards(AuthenticatedGuard)
   @Post('withdraw-from-kraken')
   async invoke(@Body() body: any) {
     return await this.lambdaService.invokeLambdaFunction(

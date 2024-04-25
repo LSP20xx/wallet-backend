@@ -138,6 +138,7 @@ export class AuthService implements OnModuleInit {
           phoneNumber: user.phoneNumber,
           verified: user.verified,
           verificationMethods: user.verificationMethods,
+          termsAndConditionsAccepted: false,
         };
       });
       return result;

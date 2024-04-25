@@ -14,13 +14,13 @@ export class TransactionsService {
     });
   }
 
-  async getTransaction(userId: string, transactionId: string): Promise<Transaction | null> {
+  async getTransaction(
+    userId: string,
+    transactionId: string,
+  ): Promise<Transaction | null> {
     return this.databaseService.transaction.findFirst({
       where: {
-        AND: [
-          { userId: userId },
-          { id: transactionId },
-        ],
+        AND: [{ userId: userId }, { id: transactionId }],
       },
     });
   }
@@ -30,8 +30,5 @@ export class TransactionsService {
       data: txData,
     });
     return transaction;
-  }
-}
-
   }
 }

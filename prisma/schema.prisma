@@ -70,6 +70,7 @@ model Token {
   name            String
   contractAddress String?
   isNative        Boolean         @default(false)
+  isLiquidity     Boolean         @default(false)
   wallet          Wallet?         @relation(fields: [walletId], references: [id], name: "WalletTokens")
   walletId        String?
   chainType       ChainType
@@ -246,6 +247,7 @@ enum UserRole {
 enum ChainType {
   EVM
   UTXO
+  SOLANA
 }
 
 enum Network {

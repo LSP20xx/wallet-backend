@@ -35,6 +35,7 @@ export class TokensService implements OnModuleInit {
                   network: tokenData.network as Network,
                   blockchainId: tokenData.blockchainId,
                   isNative: tokenData.isNative ?? false,
+                  isLiquidity: tokenData.isLiquidity ?? false,
                   withdrawFee: tokenData.withdrawFee,
                   description: tokenData.description,
                 },
@@ -109,7 +110,7 @@ export class TokensService implements OnModuleInit {
           const data = JSON.parse(result.value);
           const last7DaysData = data
             .filter((item: string) => item.trim() !== '')
-            .slice(-7)
+            .slice(-24)
             .map((line: string) => {
               const parts = line.split(',');
               return { date: parts[0], close: parseFloat(parts[1]) };
@@ -161,7 +162,7 @@ export class TokensService implements OnModuleInit {
               !isNaN(low) &&
               !isNaN(close)
             ) {
-              return { time, open, high, low, close };
+              return { time, open, high, low, close, value: close };
             }
             return null;
           })
