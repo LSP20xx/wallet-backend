@@ -5,6 +5,7 @@ import { DatabaseService } from 'apps/billete/src/database/services/database/dat
 
 @Injectable()
 export class TradeOrdersService {
+private balanceService: BalanceService,  // Inyecta el servicio de balance
   constructor(private databaseService: DatabaseService) {}
 
   findAll(): Promise<TradeOrder[]> {
