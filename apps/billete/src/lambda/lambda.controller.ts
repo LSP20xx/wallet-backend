@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthenticatedGuard } from 'apps/billete/src/auth/guards/authenticated.guard';
 import { LambdaService } from './lambda.service';
 
@@ -8,9 +14,21 @@ export class LambdaController {
 
   // @UseGuards(AuthenticatedGuard)
   @Post('withdraw-from-kraken')
-  async invoke(@Body() body: any) {
+  async withdrawFromKraken(@Body() body: any) {
     return await this.lambdaService.invokeLambdaFunction(
       'WithdrawFromKraken',
+      body,
+    );
+  }
+
+  @Post('convert-on-kraken')
+  async convertOnKraken(@Body() body: any) {
+    if (!body.operation || !body.amount) {
+      throw new BadRequestException('Operation and amount must be provided');
+    }
+
+    return await this.lambdaService.invokeLambdaFunction(
+      'ConvertFromKraken',
       body,
     );
   }
