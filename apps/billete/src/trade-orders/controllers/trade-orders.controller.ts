@@ -1,17 +1,6 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Post,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-} from '@nestjs/common';
-import { TradeOrdersService } from '../services/trade-orders.service';
+import { Body, Controller, Post } from '@nestjs/common';
 import { BalancesService } from '../../wallets/services/balance.service';
+import { TradeOrdersService } from '../services/trade-orders.service';
 
 @Controller('trade-orders')
 export class TradeOrdersController {
@@ -20,8 +9,21 @@ export class TradeOrdersController {
     private readonly balancesService: BalancesService,
   ) {}
 
-  @Post()
-  convert() {
-    return null;
+  @Post('convert')
+  convert(
+    @Body()
+    convertDto: {
+      userId: string;
+      coin: string;
+      amount: number;
+      operation: string;
+    },
+  ) {
+    this.tradeOrderService.convert(
+      convertDto.userId,
+      convertDto.coin,
+      convertDto.amount,
+      convertDto.operation,
+    );
   }
 }

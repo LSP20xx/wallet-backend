@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthenticatedGuard } from 'apps/billete/src/auth/guards/authenticated.guard';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { LambdaService } from './lambda.service';
 
 @Controller('lambda')
