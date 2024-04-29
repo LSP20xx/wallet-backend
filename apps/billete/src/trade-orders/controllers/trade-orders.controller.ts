@@ -1,5 +1,4 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { BalancesService } from '../../wallets/services/balance.service';
 import { TradeOrdersService } from '../services/trade-orders.service';
 
 @Controller('trade-orders')
