@@ -5,9 +5,9 @@ import { TradeOrdersService } from './services/trade-orders.service';
 import { BalancesService } from '../wallets/services/balance.service';
 
 @Module({
-  imports: [BalancesService],
+  imports: [],
   controllers: [TradeOrdersController],
-  providers: [TradeOrdersService],
+  providers: [TradeOrdersService, BalancesService],
   exports: [TradeOrdersService],
 })
 export class TradeOrdersModule {}

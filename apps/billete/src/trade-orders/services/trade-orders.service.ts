@@ -10,10 +10,35 @@ export class TradeOrdersService {
     private balanceService: BalancesService,
   ) {}
 
-  convert(userId: string, coin: string, amount: number, operation: string) {
-    const balances = this.balanceService.getBalancesForUser(userId);
-    console.log('balances', balances);
-    console.log(coin, amount, operation);
+  async convert(
+    userId: string,
+    symbol: string,
+    amount: string,
+    operation: string,
+  ) {
+    try {
+      const balances = await this.balanceService.getBalancesForUser(userId);
+
+      balances.forEach((balance) => {
+        if (balance.symbol === symbol) {
+          console.log(
+            `Found matching symbol in balances: ${balance.symbol} with balance ${balance.balance}`,
+          );
+        }
+
+        if (balance.tokens && balance.tokens.length > 0) {
+          balance.tokens.forEach((token) => {
+            if (token.symbol === symbol) {
+              console.log(
+                `Found matching symbol in tokens: ${token.symbol} with balance ${token.balance}`,
+              );
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching balances:', error);
+    }
   }
 
   // findAll(): Promise<TradeOrder[]> {
