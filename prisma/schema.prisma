@@ -33,6 +33,21 @@ model WalletToken {
   @@unique([walletId, tokenId])
   @@map("wallet_tokens")
 }
+model WalletFiat {
+  id          String @id @default(uuid())
+  userId      String
+  currencyId  String
+  balance     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User @relation(fields: [userId], references: [id])
+  currency    FiatCurrency @relation(fields: [currencyId], references: [id])
+  platform    Platform @relation(fields: [platformId], references: [id], name: "PlatformFiatWallets")
+  platformId  String
+
+  @@unique([userId, currencyId])
+  @@map("wallet_fiats")
+}
 
 model Wallet {
   id                  String        @id @default(uuid())
@@ -51,7 +66,10 @@ model Wallet {
   transactions        Transaction[] @relation("WalletTransactions")
   tokens              Token[]       @relation("WalletTokens")
   walletTokens        WalletToken[]
-  favoriteAddresses   Json?         
+  favoriteAddresses   Json?       
+  platform            Platform      @relation(fields: [platformId], references: [id], name: "PlatformWallets")
+  platformId          String
+  
   @@map("wallets")
 }
 
@@ -85,9 +103,41 @@ model Token {
   description     String?        @default("No description available")
   cryptocurrencyDataId String? @map("cryptocurrency_data_id")
   cryptocurrencyData CryptocurrencyData? @relation(fields: [cryptocurrencyDataId], references: [id])
-
+  ticker1 Ticker[] @relation(name: "TickerToken1")
+  ticker2 Ticker[] @relation(name: "TickerToken2")
   @@map("tokens")
 }
+
+model FiatCurrency {
+  id       String   @id @default(uuid())
+  code     String   @unique
+  name     String
+  symbol   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ticker1 Ticker[] @relation(name: "TickerFiat1")
+  ticker2 Ticker[] @relation(name: "TickerFiat2")
+  walletFiats WalletFiat[]
+
+  @@map("fiat_currencies")
+}
+
+model Ticker {
+  id       String @id @default(uuid())
+  symbol   String
+  token1Id String?
+  token2Id String?
+  fiat1Id  String?
+  fiat2Id  String?
+  platform String
+  token1 Token? @relation(fields: [token1Id], references: [id], name: "TickerToken1")
+  token2 Token? @relation(fields: [token2Id], references: [id], name: "TickerToken2")
+  fiat1  FiatCurrency? @relation(fields: [fiat1Id], references: [id], name: "TickerFiat1")
+  fiat2  FiatCurrency? @relation(fields: [fiat2Id], references: [id], name: "TickerFiat2")
+
+  @@map("tickers")
+}
+
 
 model CryptocurrencyData {
   id            String    @id @default(uuid())
@@ -145,6 +195,7 @@ model User {
   encryptedPassword String
   userRole          UserRole      @default(USER)
   wallets           Wallet[]      @relation("UserWallets")
+  walletFiats       WalletFiat[]
   sellOrders        TradeOrder[]  @relation("UserSellOrders")
   buyOrders         TradeOrder[]  @relation("UserBuyOrders")
   sessions          Session[]     @relation("UserSessions")
@@ -196,10 +247,21 @@ model TradeOrder {
   pricePerUnit String
   blockchainName BlockchainName
   tradeStatus  TradeStatus
+  platform     Platform    @relation(fields: [platformId], references: [id], name: "PlatformOrders")
+  platformId   String
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
   @@map("trade_orders")
+}
+
+model Platform {
+  id       String      @id @default(uuid())
+  name     String
+  address  String?
+  orders   TradeOrder[] @relation("PlatformOrders")
+  wallets  Wallet[] @relation("PlatformWallets")
+  fiatWallets WalletFiat[] @relation("PlatformFiatWallets")
 }
 
 enum ConnectionStatus {
