@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SignInDTO } from '../dtos/sign-in.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { CheckAuthDataDTO } from '../dtos/check-auth-data.dto';
+import { FiatWalletsService } from '../../wallets/services/fiat-wallets.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -27,6 +28,7 @@ export class AuthService implements OnModuleInit {
     private configService: ConfigService,
     private evmWalletService: EvmWalletService,
     private utxoWalletService: UtxoWalletService,
+    private fiatWalletService: FiatWalletsService,
     @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
   ) {}
 

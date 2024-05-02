@@ -64,6 +64,8 @@ export class BalanceGateway implements OnModuleInit {
   ): Promise<void> {
     console.log('requestBalanceUpdate', data);
     const balances = await this.balancesService.getBalancesForUser(data.userId);
+
+    console.log('BALANCES', balances);
     client.emit('balance-update', balances);
   }
 }

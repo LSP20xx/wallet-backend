@@ -117,18 +117,6 @@ export const tokensConfig: TokensConfig = {
         description:
           'USDC (USD Coin), lanzado en 2018, es un stablecoin que mantiene una relación de 1:1 con el dólar estadounidense, respaldado por reservas de activos equivalentes. Facilita transacciones globales rápidas y seguras en el ecosistema digital.',
       },
-      USD: {
-        symbol: 'USD',
-        name: 'US Dollar',
-        contractAddress: '0x',
-        chainType: 'EVM',
-        network: 'TESTNET',
-        blockchainId: '11155111',
-        isNative: false,
-        isLiquidity: false,
-        withdrawFee: '8',
-        description: 'USD.',
-      },
     },
   },
   bitcoin: {

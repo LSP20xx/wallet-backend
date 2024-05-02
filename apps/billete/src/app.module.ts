@@ -21,6 +21,7 @@ import { KrakenGateway } from 'gateways/kraken.gateway';
 import { EmailModule } from './email/email.module';
 import { BalanceGateway } from 'gateways/balance.gateway';
 import { CircleModule } from './circle/circle.module';
+import { InitModule } from './init/init.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { CircleModule } from './circle/circle.module';
     AuthModule,
     LambdaModule,
     CircleModule,
+    InitModule,
   ],
   providers: [KrakenGateway, BalanceGateway],
 })

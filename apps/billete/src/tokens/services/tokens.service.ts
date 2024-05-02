@@ -264,4 +264,8 @@ export class TokensService implements OnModuleInit {
     console.log('obj', obj);
     return obj;
   }
+
+  async getFiatCurrencies() {
+    return await this.databaseService.fiatCurrency.findMany();
+  }
 }

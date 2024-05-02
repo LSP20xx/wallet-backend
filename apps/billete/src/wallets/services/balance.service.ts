@@ -21,6 +21,12 @@ export class BalancesService {
       },
     });
 
+    const fiatWallets = await this.databaseService.walletFiat.findMany({
+      where: { userId },
+    });
+
+    console.log('fiat-wallets', fiatWallets);
+
     return userWallets.map((wallet) => {
       let tokens = [];
 
@@ -31,6 +37,10 @@ export class BalancesService {
             id: wt.token.id,
             symbol: wt.token.symbol,
             balance: wt.balance,
+            chainType: wt.token.chainType,
+            assetName: wt.token.name,
+            address: '',
+            assetDecimals: 4,
           }));
       }
 
@@ -41,6 +51,7 @@ export class BalancesService {
         chainType: wallet.chainType,
         symbol: wallet.blockchain?.nativeTokenSymbol,
         tokens,
+        fiatWallets,
       };
     });
   }

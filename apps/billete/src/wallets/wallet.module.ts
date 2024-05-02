@@ -9,6 +9,7 @@ import { GraphQueryService } from 'apps/billete/src/networks/services/graph-quer
 import { UtxoWalletService } from './services/utxo-wallet.service';
 import { default as QueueType } from './queue/types.queue';
 import { BalancesService } from './services/balance.service';
+import { FiatWalletsService } from './services/fiat-wallets.service';
 
 @Module({
   imports: [
@@ -25,9 +26,15 @@ import { BalancesService } from './services/balance.service';
   providers: [
     UtxoWalletService,
     EvmWalletService,
+    FiatWalletsService,
     GraphQueryService,
     BalancesService,
   ],
-  exports: [UtxoWalletService, EvmWalletService, BalancesService],
+  exports: [
+    UtxoWalletService,
+    EvmWalletService,
+    BalancesService,
+    FiatWalletsService,
+  ],
 })
 export class WalletsModule {}
