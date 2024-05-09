@@ -35,14 +35,14 @@ export class EvmWalletController {
     return await this.walletService.findOne(id);
   }
 
-  @Post('create/:chainId')
-  @UseGuards(AuthenticatedGuard)
-  async createWallet(
-    @Request() req: any,
-    @Param('blockchainId') blockchainId: string,
-  ): Promise<Wallet> {
-    return await this.walletService.createWallet(req.user.id, blockchainId);
-  }
+  // @Post('create/:chainId')
+  // @UseGuards(AuthenticatedGuard)
+  // async createWallet(
+  //   @Request() req: any,
+  //   @Param('blockchainId') blockchainId: string,
+  // ): Promise<Wallet> {
+  //   return await this.walletService.createWallet(req.user.id, blockchainId);
+  // }
 
   @Post('withdraw')
   // @UseGuards(AuthenticatedGuard)

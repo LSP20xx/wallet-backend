@@ -11,6 +11,7 @@ export class InitService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
+    await this.createBilletePlatform();
     await this.setupFiatCurrenciesAndPlatforms();
     await this.createFiatWallets();
     await this.removeDuplicatePlatforms();
@@ -77,6 +78,25 @@ export class InitService implements OnModuleInit {
     }
   }
 
+  async createBilletePlatform() {
+    try {
+      let existingPlatform = await this.databaseService.platform.findUnique({
+        where: { name: 'Billete' },
+      });
+
+      if (!existingPlatform) {
+        existingPlatform = await this.databaseService.platform.create({
+          data: { name: 'Billete' },
+        });
+        console.log('Plataforma Billete creada');
+      } else {
+        console.log('La plataforma Billete ya existe');
+      }
+    } catch (error) {
+      console.error('Error al crear la plataforma Billete:', error);
+    }
+  }
+
   async createFiatWallets() {
     try {
       let existingPlatform = await this.databaseService.platform.findUnique({
@@ -133,6 +153,7 @@ export class InitService implements OnModuleInit {
                 user.id,
                 currency.id,
                 currency.name,
+                currency.symbol,
                 '0',
                 existingPlatform.id,
                 platform.name,

@@ -51,6 +51,12 @@ export class AuthService implements OnModuleInit {
   async signUpUser(signUpDTO: SignUpDTO): Promise<{ userId: string }> {
     const prisma = new PrismaClient();
 
+    const platforms = [
+      { name: 'Kraken', currencyCode: 'USD', currencyName: 'Dollar' },
+    ];
+
+    let userId;
+
     try {
       const result = await prisma.$transaction(async (transaction) => {
         const tempPasswordResponse = await this.getTempPassword(
@@ -91,6 +97,8 @@ export class AuthService implements OnModuleInit {
               user.id,
               chainId,
               transaction,
+              'TESTNET',
+              'ETH',
             );
         }
 
@@ -104,6 +112,7 @@ export class AuthService implements OnModuleInit {
           user.id,
           'bitcoin',
           'testnet',
+          'BTC',
           transaction,
         );
 
@@ -117,6 +126,7 @@ export class AuthService implements OnModuleInit {
           user.id,
           'litecoin',
           'testnet',
+          'LTC',
           transaction,
         );
         // await this.utxoWalletService.createWallet(
@@ -129,9 +139,10 @@ export class AuthService implements OnModuleInit {
           user.id,
           'dogecoin',
           'testnet',
+          'DOGE',
           transaction,
         );
-
+        userId = user.id;
         return {
           userId: user.id,
           firstName: user.firstName,
@@ -145,6 +156,7 @@ export class AuthService implements OnModuleInit {
       });
       return result;
     } catch (error) {
+      console.log('error', error);
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ForbiddenException('Credentials already in use.');
@@ -152,6 +164,47 @@ export class AuthService implements OnModuleInit {
       }
       throw error;
     } finally {
+      const userCheck = await this.databaseService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!userCheck) {
+        console.error('El usuario no fue creado correctamente.');
+        throw new Error('Error en la creación del usuario.');
+      }
+
+      for (const platform of platforms) {
+        let existingPlatform = await this.databaseService.platform.findUnique({
+          where: { name: platform.name },
+          include: { fiatWallets: true },
+        });
+
+        const currency = await this.databaseService.fiatCurrency.findUnique({
+          where: { code: platform.currencyCode },
+        });
+
+        if (!currency) {
+          throw new Error(`La moneda ${platform.currencyCode} no se encontró`);
+        }
+
+        if (!existingPlatform) {
+          existingPlatform = await this.databaseService.platform.create({
+            data: { name: platform.name },
+            include: { fiatWallets: true },
+          });
+          console.log(`Se creó la plataforma: ${platform.name}`);
+        }
+        await this.fiatWalletService.createWallet(
+          userId,
+          currency.id,
+          currency.name,
+          currency.code,
+          '0',
+          existingPlatform.id,
+          platform.name,
+        );
+      }
+
       await prisma.$disconnect();
     }
   }

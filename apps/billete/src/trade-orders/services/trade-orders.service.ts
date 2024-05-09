@@ -68,59 +68,61 @@ export class TradeOrdersService {
     userId: string,
     fromSymbol: string,
     toSymbol: string,
-    amount: string,
+    fromAmount: string,
+    toAmount: string,
   ) {
     try {
-      const balances = await this.balanceService.getBalancesForUser(userId);
-      const amountBN = new BigNumber(amount);
-      let totalBalanceBNOnBillete = new BigNumber(0);
-      let totalBalanceBNOutsideBillete = new BigNumber(0);
+      const balances =
+        await this.balanceService.getBalancesForUserByPlatform(userId);
+      console.log('balances', balances);
+      console.log('fromSymbol', fromSymbol);
+      console.log('toSymbol', toSymbol);
+      console.log('fromAmount', fromAmount);
+      console.log('toAmount', toAmount);
 
-      balances.forEach((balance: any) => {
-        if (balance.platformName === 'Billete') {
-          // Acumula los fondos en Billete
-          if (balance.symbol === fromSymbol) {
-            totalBalanceBNOnBillete = totalBalanceBNOnBillete.plus(
-              new BigNumber(balance.balance),
-            );
-          }
+      let remainingAmount = new BigNumber(fromAmount);
 
-          if (balance.tokens && balance.tokens.length > 0) {
-            balance.tokens.forEach((token: any) => {
-              if (token.symbol === fromSymbol) {
-                totalBalanceBNOnBillete = totalBalanceBNOnBillete.plus(
-                  new BigNumber(token.balance),
-                );
-              }
-            });
+      balances.Kraken.forEach((balance) => {
+        if (balance.symbol === fromSymbol) {
+          const currentBalance = new BigNumber(balance.balance);
+          if (currentBalance.gte(remainingAmount)) {
+            balance.balance = currentBalance.minus(remainingAmount).toFixed(8);
+            remainingAmount = new BigNumber(0);
+          } else {
+            balance.balance = '0';
+            remainingAmount = remainingAmount.minus(currentBalance);
           }
-        } else {
-          // Acumula los fondos en otras plataformas
-          totalBalanceBNOutsideBillete = totalBalanceBNOutsideBillete.plus(
-            new BigNumber(balance.balance),
-          );
         }
       });
 
-      if (!totalBalanceBNOnBillete.isZero()) {
-        const path = this.findConversionPath('USD', toSymbol);
-        console.log(
-          `Converting ${totalBalanceBNOnBillete} USD in Billete to ${toSymbol} via path: ${path}`,
-        );
-        await this.invokeConversion(path, totalBalanceBNOnBillete.toString());
+      if (remainingAmount.gt(0)) {
+        balances.Billete.forEach((balance) => {
+          if (balance.symbol === fromSymbol) {
+            const currentBalance = new BigNumber(balance.balance);
+            if (currentBalance.gte(remainingAmount)) {
+              balance.balance = currentBalance
+                .minus(remainingAmount)
+                .toFixed(8);
+              remainingAmount = new BigNumber(0);
+            } else {
+              balance.balance = '0';
+              remainingAmount = remainingAmount.minus(currentBalance);
+            }
+          }
+        });
       }
 
-      if (!totalBalanceBNOutsideBillete.isZero()) {
-        const path = this.findConversionPath(fromSymbol, toSymbol);
-        console.log(
-          `Converting ${totalBalanceBNOutsideBillete} ${fromSymbol} on external platforms to ${toSymbol} via path: ${path}`,
-        );
-        await this.invokeConversion(
-          path,
-          totalBalanceBNOutsideBillete.toString(),
-        );
+      if (remainingAmount.gt(0)) {
+        throw new Error('Insufficient funds for conversion.');
       }
 
+      await this.balanceService.updateBalancesForUserByPlatform(
+        userId,
+        fromSymbol,
+        toSymbol,
+        balances,
+      );
+      console.log('SUFICIENTE**');
       return { success: true };
     } catch (error) {
       console.log(`Error: ${error}`);

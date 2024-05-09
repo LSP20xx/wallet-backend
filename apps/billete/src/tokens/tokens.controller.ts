@@ -21,8 +21,19 @@ export class TokensController {
     return await this.tokensService.getCandlestickChart(nameAndInterval);
   }
 
+  @Get('linear-chart/:symbol')
+  async getLinearChart(@Param('symbol') symbol: string) {
+    console.log('name', symbol);
+    return await this.tokensService.getLinearChart(symbol);
+  }
+
   @Get('get-blockchains-for-tokens')
   async getBlockchainsForTokens() {
     return await this.tokensService.getBlockchainsForTokens();
+  }
+
+  @Get('get-fiat-currencies')
+  async getFiatCurrencies() {
+    return await this.tokensService.getFiatCurrencies();
   }
 }

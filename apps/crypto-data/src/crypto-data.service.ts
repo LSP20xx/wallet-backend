@@ -454,7 +454,10 @@ export class CryptoDataService implements OnModuleInit {
             this.redisClient
               .send(
                 { cmd: 'set' },
-                { key: `${tokenName}_1d`, value: JSON.stringify(data) },
+                {
+                  key: `${token.symbol.toUpperCase()}-USD_1d`,
+                  value: JSON.stringify(data),
+                },
               )
               .toPromise()
               .then((setResult) =>
@@ -581,9 +584,9 @@ export class CryptoDataService implements OnModuleInit {
       this.updateFifteenMinutesDataFromKraken();
     }, 30000);
     setInterval(() => {
-      console.log('Updating 1 hour data');
-
+      this.updateFiveMinutesData();
       this.updateNinetyDaysData();
+      this.updateOneDayData();
       this.updateOneHourDataFromKraken();
       this.updateFourHoursDataFromKraken();
       this.updateOneDayDataFromKraken();

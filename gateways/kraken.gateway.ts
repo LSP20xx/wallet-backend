@@ -1,4 +1,5 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import BigNumber from 'bignumber.js';
 import * as WebSocket from 'ws';
 
 @WebSocketGateway()
@@ -40,6 +41,9 @@ export class KrakenGateway {
         if (message[2]?.includes('ohlc')) {
           this.server.emit('kraken-ohlc', message);
         } else if (message[2] == 'ticker') {
+          const closePrice = new BigNumber(message[1]['c'][0]);
+          const spreadValue = closePrice.multipliedBy(0.99);
+          message[1]['s'] = [spreadValue];
           this.server.emit('kraken-data', message);
         }
         // if (message.includes('ohlc')) {

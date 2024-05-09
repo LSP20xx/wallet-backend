@@ -8,6 +8,7 @@ import QueueType from '../queue/types.queue';
 import { WithdrawDto } from '../dto/withdraw.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { Web3Service } from 'apps/billete/src/web3/services/web3.service';
+import { ConfigService } from '@nestjs/config';
 
 const coinsConfig = {
   ETH: {
@@ -22,10 +23,13 @@ const isNativeCoin = (coin: any) => {
 
 @Injectable()
 export class EvmWalletService {
+  private allowedChains: string[] = [];
+
   constructor(
     private databaseService: DatabaseService,
     private graphQueryService: GraphQueryService,
     private web3Service: Web3Service,
+    private configService: ConfigService,
 
     @InjectQueue(QueueType.WITHDRAW_REQUEST) private withdrawQueue: Queue,
     @InjectQueue(QueueType.ETH_TRANSACTIONS) private transactionQueue: Queue,
@@ -86,40 +90,98 @@ export class EvmWalletService {
 
     return transfers;
   }
-
   async createWallet(
     userId: string,
     blockchainId: string,
-    transaction?: Prisma.TransactionClient,
-  ): Promise<Wallet> {
+    transaction: Prisma.TransactionClient,
+    networkType: string,
+    symbol: string,
+  ) {
+    const tokens = await this.databaseService.token.findMany();
+
     const walletContract = await this.databaseService.walletContract.findFirst({
-      where: { blockchainId: blockchainId, reserved: false },
+      where: { blockchainId, reserved: false },
     });
+    if (!walletContract) throw new Error('No available wallets');
 
+    const billetePlatform = await this.databaseService.platform.findUnique({
+      where: { name: 'Billete' },
+    });
+    const krakenPlatform = await this.databaseService.platform.findUnique({
+      where: { name: 'Kraken' },
+    });
     const blockchain = await this.databaseService.blockchain.findUnique({
-      where: { blockchainId: blockchainId },
+      where: { blockchainId },
     });
+    if (!billetePlatform || !krakenPlatform || !blockchain)
+      throw new Error('Required platform or blockchain not found');
 
-    if (!walletContract) {
-      throw new Error('No available wallets');
-    }
+    const billeteWalletId = uuidv4();
+    const krakenWalletId = uuidv4();
 
     await transaction.walletContract.update({
       where: { id: walletContract.id },
       data: { reserved: true },
     });
 
-    return transaction.wallet.create({
+    await transaction.wallet.create({
       data: {
+        id: krakenWalletId,
         address: walletContract.address,
         balance: '0',
         user: { connect: { id: userId } },
         blockchain: { connect: { id: blockchain.id } },
         chainType: ChainType.EVM,
-        network:
-          blockchainId === '11155111' ? Network.TESTNET : Network.MAINNET,
+        network: networkType === 'MAINNET' ? Network.MAINNET : Network.TESTNET,
+        platform: { connect: { id: krakenPlatform.id, name: 'Kraken' } },
+        platformName: 'Kraken',
+
+        symbol: symbol,
       },
     });
+
+    await transaction.wallet.create({
+      data: {
+        id: billeteWalletId,
+        balance: '0',
+        user: { connect: { id: userId } },
+        blockchain: { connect: { id: blockchain.id } },
+        chainType: ChainType.EVM,
+        network: networkType === 'MAINNET' ? Network.MAINNET : Network.TESTNET,
+        platform: {
+          connect: { id: billetePlatform.id, name: 'Billete' },
+        },
+        platformName: 'Billete',
+        symbol: symbol,
+      },
+    });
+
+    const tokensWithContractAddress = tokens.filter(
+      (token) => token.contractAddress !== '',
+    );
+
+    for (const token of tokensWithContractAddress) {
+      await transaction.walletToken.create({
+        data: {
+          walletId: billeteWalletId,
+          tokenId: token.id,
+          balance: '0',
+          platformId: billetePlatform.id,
+          platformName: 'Billete',
+          symbol: token.symbol,
+        },
+      });
+      await transaction.walletToken.create({
+        data: {
+          walletId: krakenWalletId,
+          tokenId: token.id,
+          balance: '0',
+          platformId: krakenPlatform.id,
+          platformName: 'Kraken',
+          symbol: token.symbol,
+        },
+      });
+    }
   }
 
   async update(id: string, walletData: Partial<Wallet>): Promise<Wallet> {
@@ -137,7 +199,7 @@ export class EvmWalletService {
 
   async withdraw(withdrawDto: WithdrawDto): Promise<{ message: string }> {
     const companyFee = coinsConfig[withdrawDto.coin].companyFee;
-    const wallet = await this.databaseService.wallet.findUnique({
+    const wallet = await this.databaseService.wallet.findFirst({
       where: { address: withdrawDto.from },
     });
     if (!wallet || wallet.userId !== withdrawDto.userId) {

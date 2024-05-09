@@ -26,12 +26,13 @@ model WalletToken {
   id        String   @id @default(uuid())
   walletId  String
   tokenId   String
+  symbol    String   @default("Default")
   balance   String  
   wallet    Wallet   @relation(fields: [walletId], references: [id])
   token     Token    @relation(fields: [tokenId], references: [id])
-  platform     Platform? @relation(fields: [platformId], references: [id], name: "PlatformWalletsTokens")
-  platformId   String?
-  @@unique([walletId, tokenId])
+  platform    Platform      @relation(fields: [platformId], references: [id], name: "PlatformWalletsTokens")
+  platformName String @default("Billete")
+  platformId  String  
   @@map("wallet_tokens")
 }
 model WalletFiat {
@@ -46,7 +47,7 @@ model WalletFiat {
   currencyName String @default("default")
   currencySymbol  String? @default("default")
   platform    Platform      @relation(fields: [platformId], references: [id], name: "PlatformFiatWallets")
-  platformName String @default("default")
+  platformName String @default("Billete")
   platformId  String  
   @@map("wallet_fiats")
 }
@@ -54,8 +55,9 @@ model WalletFiat {
 model Wallet {
   id                  String        @id @default(uuid())
   balance             String
-  address             String        @unique
+  address             String?       
   encryptedPrivateKey String?       @unique
+  symbol              String       @default("symbol")
   user                User          @relation(fields: [userId], references: [id], name: "UserWallets")
   userId              String
   chainType           ChainType
@@ -69,8 +71,9 @@ model Wallet {
   tokens              Token[]       @relation("WalletTokens")
   walletTokens        WalletToken[]
   favoriteAddresses   Json?       
-  platform            Platform      @relation(fields: [platformId], references: [id], name: "PlatformWallets")
-  platformId          String        @default("Billete")
+  platform    Platform      @relation(fields: [platformId], references: [id], name: "PlatformWallets")
+  platformName String @default("Billete")
+  platformId  String  
   
   @@map("wallets")
 }

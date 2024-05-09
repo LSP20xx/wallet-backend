@@ -68,28 +68,83 @@ export class TokensService implements OnModuleInit {
 
   private async initializeTokensForAllWallets() {
     const tokens = await this.databaseService.token.findMany();
-    const wallets = await this.databaseService.wallet.findMany();
-    for (const wallet of wallets) {
-      for (const token of tokens) {
-        const existingWalletToken =
-          await this.databaseService.walletToken.findFirst({
-            where: {
-              walletId: wallet.id,
-              tokenId: token.id,
-            },
-          });
+    const billetePlatform = await this.databaseService.platform.findUnique({
+      where: {
+        name: 'Billete',
+      },
+    });
+    const krakenPlatform = await this.databaseService.platform.findUnique({
+      where: {
+        name: 'Kraken',
+      },
+    });
+    const tokensWithContractAddress = tokens.filter(
+      (token) => token.contractAddress !== '',
+    );
 
-        if (!existingWalletToken) {
-          await this.databaseService.walletToken.create({
-            data: {
-              walletId: wallet.id,
-              tokenId: token.id,
-              balance: '0',
-            },
-          });
-        }
+    for (const token of tokensWithContractAddress) {
+      const wallets = await this.databaseService.wallet.findMany({
+        where: {
+          blockchainId: token.blockchainId,
+        },
+      });
+      for (const wallet of wallets) {
+        await this.databaseService.walletToken.create({
+          data: {
+            walletId: wallet.id,
+            tokenId: token.id,
+            balance: '0',
+            platformId: billetePlatform.id,
+            platformName: 'Billete',
+            symbol: token.symbol,
+          },
+        });
+        await this.databaseService.walletToken.create({
+          data: {
+            walletId: wallet.id,
+            tokenId: token.id,
+            balance: '0',
+            platformId: krakenPlatform.id,
+            platformName: 'Kraken',
+            symbol: token.symbol,
+          },
+        });
       }
     }
+
+    // for (const wallet of wallets) {
+    //   for (const token of tokens) {
+    //     const existingWalletToken =
+    //       await this.databaseService.walletToken.findFirst({
+    //         where: {
+    //           walletId: wallet.id,
+    //           tokenId: token.id,
+    //         },
+    //       });
+    //     if (!existingWalletToken) {
+    //       await this.databaseService.walletToken.create({
+    //         data: {
+    //           walletId: wallet.id,
+    //           tokenId: token.id,
+    //           balance: '0',
+    //           platformId: billetePlatform.id,
+    //           platformName: 'Billete',
+    //           symbol: token.symbol,
+    //         },
+    //       });
+    //       await this.databaseService.walletToken.create({
+    //         data: {
+    //           walletId: wallet.id,
+    //           tokenId: token.id,
+    //           balance: '0',
+    //           platformId: krakenPlatform.id,
+    //           platformName: 'Kraken',
+    //           symbol: token.symbol,
+    //         },
+    //       });
+    //     }
+    //   }
+    // }
   }
 
   async getLittleLineCharts() {
@@ -180,6 +235,37 @@ export class TokensService implements OnModuleInit {
 
     const allTokensData = await Promise.all([tokenDataPromise]);
     return allTokensData.filter((data) => data !== null);
+  }
+
+  async getLinearChart(symbol: string) {
+    const tokenName = `${symbol.toUpperCase()}-USD_1d`;
+
+    try {
+      const result = await this.redisClient
+        .send({ cmd: 'get' }, { key: tokenName })
+        .toPromise();
+      if (!result.value) {
+        console.error(`No data found for ${tokenName}`);
+        return null;
+      }
+
+      const data = JSON.parse(result.value);
+      const filteredData = data.slice(1);
+
+      const last7DaysData = filteredData
+        .filter((item) => item.trim() !== '')
+        .map((line) => {
+          const parts = line.split(',');
+          const timestamp = parseInt(parts[0]);
+          return { time: timestamp / 1000000, value: parseFloat(parts[1]) };
+        });
+
+      console.log('last7DaysData', last7DaysData);
+      return last7DaysData;
+    } catch (err) {
+      console.error(`Error getting Redis value for ${tokenName}:`, err);
+      return null;
+    }
   }
 
   calculatePriceVariation(lastPrice: number, openingPrice: number) {

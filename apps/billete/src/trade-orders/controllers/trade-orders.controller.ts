@@ -12,14 +12,16 @@ export class TradeOrdersController {
       userId: string;
       fromSymbol: string;
       toSymbol: string;
-      amount: string;
+      fromAmount: string;
+      toAmount: string;
     },
   ) {
     this.tradeOrderService.convert(
       convertDto.userId,
       convertDto.fromSymbol,
       convertDto.toSymbol,
-      convertDto.amount,
+      convertDto.fromAmount,
+      convertDto.toAmount,
     );
   }
 }

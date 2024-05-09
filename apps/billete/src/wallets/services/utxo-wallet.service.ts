@@ -97,8 +97,9 @@ export class UtxoWalletService implements IUtxoWalletService {
     userId: string,
     coinType: string,
     networkType: string,
+    symbol: string,
     transaction?: Prisma.TransactionClient,
-  ): Promise<Wallet> {
+  ): Promise<{ billeteWallet: Wallet; krakenWallet: Wallet }> {
     const netConfig = this.getNetworksConfig(coinType, networkType);
 
     if (!netConfig) {
@@ -114,18 +115,26 @@ export class UtxoWalletService implements IUtxoWalletService {
     }).address;
 
     const chainTypeEnum = this.getChainTypeEnum(coinType);
-
     const blockchainId = `${coinType.toUpperCase()}-${networkType.toUpperCase()}`;
-
     const blockchain = await this.databaseService.blockchain.findUnique({
       where: { blockchainId: blockchainId },
     });
 
     const privateKey = keyPair.toWIF();
-
     const encryptedPrivateKey = this.encryptionService.encrypt(privateKey);
 
-    const walletData = {
+    const platforms = await this.databaseService.platform.findMany({
+      where: {
+        name: {
+          in: ['Billete', 'Kraken'],
+        },
+      },
+    });
+
+    const billetePlatformId = platforms.find((p) => p.name === 'Billete')?.id;
+    const krakenPlatformId = platforms.find((p) => p.name === 'Kraken')?.id;
+
+    const billeteWalletData = {
       data: {
         address: address,
         encryptedPrivateKey: encryptedPrivateKey,
@@ -134,18 +143,42 @@ export class UtxoWalletService implements IUtxoWalletService {
         chainType: chainTypeEnum,
         network: networkType === 'mainnet' ? Network.MAINNET : Network.TESTNET,
         blockchain: { connect: { id: blockchain.id } },
+        platform: {
+          connect: { id: billetePlatformId },
+        },
+        platformName: 'Billete',
+        symbol: symbol,
+      },
+    };
+
+    const krakenWalletData = {
+      data: {
+        balance: '0',
+        user: { connect: { id: userId } },
+        chainType: chainTypeEnum,
+        network: networkType === 'mainnet' ? Network.MAINNET : Network.TESTNET,
+        blockchain: { connect: { id: blockchain.id } },
+        platform: { connect: { id: krakenPlatformId } },
+        symbol: symbol,
+        platformName: 'Kraken',
       },
     };
 
     if (transaction) {
-      return transaction.wallet.create(walletData);
+      const krakenWallet = await transaction.wallet.create(krakenWalletData);
+      const billeteWallet = await transaction.wallet.create(billeteWalletData);
+      return { billeteWallet, krakenWallet };
     } else {
-      return this.databaseService.wallet.create(walletData);
+      const krakenWallet =
+        await this.databaseService.wallet.create(krakenWalletData);
+      const billeteWallet =
+        await this.databaseService.wallet.create(billeteWalletData);
+      return { billeteWallet, krakenWallet };
     }
   }
 
   async withdraw(withdrawDto: any): Promise<{ message: string }> {
-    const wallet = await this.databaseService.wallet.findUnique({
+    const wallet = await this.databaseService.wallet.findFirst({
       where: { address: withdrawDto.from },
     });
     if (!wallet || wallet.userId !== withdrawDto.userId) {

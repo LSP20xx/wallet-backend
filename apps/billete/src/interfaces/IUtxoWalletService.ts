@@ -7,5 +7,6 @@ export interface IUtxoWalletService {
     userId: string,
     network: string,
     networkType: string,
-  ): Promise<Wallet>;
+    symbol: string,
+  ): Promise<{ billeteWallet: Wallet; krakenWallet: Wallet }>;
 }
