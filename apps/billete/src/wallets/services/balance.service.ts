@@ -70,8 +70,6 @@ export class BalancesService {
       const symbol = wallet.blockchain.nativeTokenSymbol;
       const balance = new BigNumber(wallet.balance);
 
-      if (symbol === 'ETH') console.log('symbol balance', balance);
-
       let found = false;
       assetsBalance[platform].forEach((asset) => {
         if (asset.symbol === symbol) {
@@ -119,26 +117,8 @@ export class BalancesService {
     return assetsBalance;
   }
 
-  async updateBalancesForUserByPlatform(
-    userId: string,
-    fromSymbol: string,
-    toSymbol: string,
-    updatedBalances: any,
-  ): Promise<void> {
-    const userWallets = await this.databaseService.wallet.findMany({
-      where: { id: userId },
-    });
-
-    const toSymbolWallets = userWallets.filter(
-      (userWallet) => userWallet.symbol === fromSymbol,
-    );
-
-    console.log('userWallets', userWallets);
-
-    for (const platform of Object.keys(updatedBalances)) {
-      for (const balance of updatedBalances[platform]) {
-      }
-    }
+  async updateBalancesForUser(updatedBalances: any): Promise<void> {
+    await this.databaseService.wallet.update(updatedBalances);
   }
 
   async getBalancesForUser(userId: string): Promise<any> {

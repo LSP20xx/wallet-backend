@@ -116,13 +116,14 @@ export class TradeOrdersService {
         throw new Error('Insufficient funds for conversion.');
       }
 
-      await this.balanceService.updateBalancesForUserByPlatform(
-        userId,
-        fromSymbol,
-        toSymbol,
-        balances,
-      );
-      console.log('SUFICIENTE**');
+      balances.Kraken.forEach((balance) => {
+        if (balance.symbol === toSymbol) {
+          balance.balance = new BigNumber(balance.balance)
+            .plus(toAmount)
+            .toString();
+        }
+      });
+      await this.balanceService.updateBalancesForUser(balances);
       return { success: true };
     } catch (error) {
       console.log(`Error: ${error}`);
