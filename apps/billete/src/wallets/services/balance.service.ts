@@ -2,7 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../database/services/database/database.service';
 import { Socket } from 'socket.io';
 import BigNumber from 'bignumber.js';
+type BalanceUpdate = {
+  symbol: string;
+  balance: string;
+};
 
+type UpdatedBalances = {
+  [key: string]: BalanceUpdate[];
+};
 @Injectable()
 export class BalancesService {
   private subscribers: Record<string, Socket[]> = {};
@@ -117,8 +124,71 @@ export class BalancesService {
     return assetsBalance;
   }
 
-  async updateBalancesForUser(updatedBalances: any): Promise<void> {
-    await this.databaseService.wallet.update(updatedBalances);
+  async updateBalancesForUser(
+    userId: string,
+    fromSymbol: string,
+    toSymbol: string,
+    updatedBalances: UpdatedBalances,
+  ): Promise<void> {
+    console.log('fromSymbol', fromSymbol);
+    console.log('toSymbol', toSymbol);
+    console.log('updatedBalances', updatedBalances);
+    const wallets = (await this.databaseService.wallet.findMany({
+      where: { userId: userId },
+      include: { walletTokens: true },
+    })) as any[];
+
+    const fiatWallets = (await this.databaseService.walletFiat.findMany({
+      where: { userId: userId },
+    })) as any[];
+
+    const allWallets = new Map();
+    wallets.forEach((wallet) => {
+      allWallets.set(`${wallet.platformName}-${wallet.symbol}`, wallet);
+      wallet.walletTokens.forEach((token) => {
+        allWallets.set(`${wallet.platformName}-${token.symbol}`, token);
+      });
+    });
+    fiatWallets.forEach((wallet) => {
+      allWallets.set(`${wallet.platformName}-${wallet.currencySymbol}`, wallet);
+    });
+
+    console.log('allWallets', allWallets);
+
+    // Actualizar los balances para fromSymbol y toSymbol
+    Object.entries(updatedBalances).forEach(([platform, balances]) => {
+      balances.forEach(async (balance) => {
+        if (balance.symbol === fromSymbol || balance.symbol === toSymbol) {
+          const walletKey = `${platform}-${balance.symbol}`;
+          const walletOrToken = allWallets.get(walletKey);
+          if (walletOrToken) {
+            console.log(
+              `Actualizando ${walletKey} con nuevo balance: ${balance.balance}`,
+            );
+            // Determinar si es un wallet, un wallet token o un fiat wallet y actualizar
+            if (walletOrToken.hasOwnProperty('walletId')) {
+              // Supone que es un wallet token
+              await this.databaseService.walletToken.update({
+                where: { id: walletOrToken.id },
+                data: { balance: balance.balance },
+              });
+            } else if (walletOrToken.hasOwnProperty('currencySymbol')) {
+              // Supone que es un fiat wallet
+              await this.databaseService.walletFiat.update({
+                where: { id: walletOrToken.id },
+                data: { balance: balance.balance },
+              });
+            } else {
+              // Tratamiento por defecto como crypto wallet
+              await this.databaseService.wallet.update({
+                where: { id: walletOrToken.id },
+                data: { balance: balance.balance },
+              });
+            }
+          }
+        }
+      });
+    });
   }
 
   async getBalancesForUser(userId: string): Promise<any> {
@@ -132,6 +202,7 @@ export class BalancesService {
       assetsBalance.push({
         symbol: token.symbol,
         balance: new BigNumber(0),
+        assetName: token.name,
       });
     });
 

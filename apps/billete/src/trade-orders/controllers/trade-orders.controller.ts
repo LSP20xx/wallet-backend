@@ -1,15 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import { TradeOrdersService } from '../services/trade-orders.service';
 
 @Controller('trade-orders')
 export class TradeOrdersController {
   constructor(private readonly tradeOrderService: TradeOrdersService) {}
 
-  @Post('convert')
+  @Post('convert/:userId')
   convert(
+    @Param('userId') userId: string,
     @Body()
     convertDto: {
-      userId: string;
       fromSymbol: string;
       toSymbol: string;
       fromAmount: string;
@@ -17,7 +17,7 @@ export class TradeOrdersController {
     },
   ) {
     this.tradeOrderService.convert(
-      convertDto.userId,
+      userId,
       convertDto.fromSymbol,
       convertDto.toSymbol,
       convertDto.fromAmount,

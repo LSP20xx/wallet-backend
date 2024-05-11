@@ -123,7 +123,12 @@ export class TradeOrdersService {
             .toString();
         }
       });
-      await this.balanceService.updateBalancesForUser(balances);
+      await this.balanceService.updateBalancesForUser(
+        userId,
+        fromSymbol,
+        toSymbol,
+        balances,
+      );
       return { success: true };
     } catch (error) {
       console.log(`Error: ${error}`);
