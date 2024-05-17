@@ -48,7 +48,6 @@ fs.readdir(subgraphsDir, (err, files) => {
           console.error('Error al escribir en package.json:', err);
           return;
         }
-        console.log('Scripts agregados a package.json con éxito.');
       },
     );
   });

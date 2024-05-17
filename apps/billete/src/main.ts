@@ -24,8 +24,6 @@ async function bootstrap() {
 
   const redisStore = new RedisStore({ client: redisClient });
   const logDirectory = path.join(__dirname, '..', '..', 'access.log');
-  console.log('__dirname', __dirname);
-  console.log('logDirectory', logDirectory);
 
   const accessLogStream = fs.createWriteStream(logDirectory, { flags: 'a' });
 

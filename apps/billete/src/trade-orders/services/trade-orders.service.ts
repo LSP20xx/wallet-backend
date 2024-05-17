@@ -4,6 +4,7 @@ import { DatabaseService } from 'apps/billete/src/database/services/database/dat
 import { BalancesService } from '../../wallets/services/balance.service';
 import { BigNumber } from 'bignumber.js';
 import { LambdaService } from '../../lambda/lambda.service';
+import { KrakenGateway } from 'gateways/kraken.gateway';
 
 @Injectable()
 export class TradeOrdersService {
@@ -31,11 +32,11 @@ export class TradeOrdersService {
     private databaseService: DatabaseService,
     private balanceService: BalancesService,
     private lambdaService: LambdaService,
+    private krakenGateway: KrakenGateway,
   ) {}
 
   async onModuleInit(): Promise<void> {
     this.createConversionGraph();
-    console.log(this.conversionGraph);
   }
 
   createConversionGraph() {
@@ -72,13 +73,31 @@ export class TradeOrdersService {
     toAmount: string,
   ) {
     try {
-      const balances =
-        await this.balanceService.getBalancesForUserByPlatform(userId);
-      console.log('balances', balances);
       console.log('fromSymbol', fromSymbol);
       console.log('toSymbol', toSymbol);
-      console.log('fromAmount', fromAmount);
-      console.log('toAmount', toAmount);
+      const fromPriceData = this.krakenGateway.getPrice(fromSymbol);
+      const toPriceData = this.krakenGateway.getPrice(toSymbol);
+      if (!fromPriceData || !toPriceData) {
+        throw new Error('Price data not available for symbols.');
+      }
+
+      // // Calcula el rango aceptable basado en el precio con spread
+      // const expectedToAmount = new BigNumber(fromAmount)
+      //   .dividedBy(fromPriceData.spreadPrice)
+      //   .multipliedBy(toPriceData.spreadPrice);
+      // const lowerBound = expectedToAmount.multipliedBy(new BigNumber('0.98'));
+      // const upperBound = expectedToAmount.multipliedBy(new BigNumber('1.02'));
+
+      // // Compara toAmount con el rango calculado
+      // const actualToAmount = new BigNumber(toAmount);
+      // if (
+      //   actualToAmount.isLessThan(lowerBound) ||
+      //   actualToAmount.isGreaterThan(upperBound)
+      // ) {
+      //   throw new Error('toAmount is out of the acceptable range.');
+      // }
+      const balances =
+        await this.balanceService.getBalancesForUserByPlatform(userId);
 
       let remainingAmount = new BigNumber(fromAmount);
 

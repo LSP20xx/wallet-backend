@@ -26,7 +26,6 @@ export class EvmWalletController {
   @Get()
   @UseGuards(AuthenticatedGuard)
   findAll(@Request() req: any): Promise<Wallet[]> {
-    console.log(req.user);
     return this.walletService.findAll();
   }
 

@@ -24,7 +24,6 @@ export class BalanceGateway implements OnModuleInit {
   }
 
   private handleRedisMessage(channel: string, message: string) {
-    console.log('Redis Message Received', message);
     if (channel === 'balanceUpdate') {
       const parsedMessage = JSON.parse(message);
       const { userId, balance } = parsedMessage;
@@ -62,10 +61,8 @@ export class BalanceGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { userId: string },
   ): Promise<void> {
-    console.log('requestBalanceUpdate', data);
     const balances = await this.balancesService.getBalancesForUser(data.userId);
 
-    console.log('BALANCES', balances);
     client.emit('balance-update', balances);
   }
 }

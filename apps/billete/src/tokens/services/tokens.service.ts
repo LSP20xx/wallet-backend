@@ -170,7 +170,6 @@ export class TokensService implements OnModuleInit {
               const parts = line.split(',');
               return { date: parts[0], close: parseFloat(parts[1]) };
             });
-          console.log('last7DaysData', last7DaysData);
           return { assetName: tokenName.replace('_90d', ''), last7DaysData };
         })
         .catch((err) => {
@@ -194,7 +193,6 @@ export class TokensService implements OnModuleInit {
           return null;
         }
         const data = JSON.parse(result.value);
-        console.log('before filteredData', data.length);
         const filteredData = data
           .filter((item: string) => {
             const parts = item.split(',');
@@ -222,7 +220,6 @@ export class TokensService implements OnModuleInit {
             return null;
           })
           .filter((item) => item !== null);
-        console.log('after filteredData', filteredData.length);
         return {
           assetName: nameAndInterval.replace('_365d', ''),
           filteredData,
@@ -260,7 +257,6 @@ export class TokensService implements OnModuleInit {
           return { time: timestamp / 1000000, value: parseFloat(parts[1]) };
         });
 
-      console.log('last7DaysData', last7DaysData);
       return last7DaysData;
     } catch (err) {
       console.error(`Error getting Redis value for ${tokenName}:`, err);
@@ -330,14 +326,12 @@ export class TokensService implements OnModuleInit {
   }
 
   async getBlockchainsForTokens() {
-    console.log('Getting blockchains for tokens');
     const tokens = await this.databaseService.token.findMany({
       include: {
         blockchain: true,
         wallet: true,
       },
     });
-    console.log('tokens', tokens);
     const obj = tokens.map((token) => ({
       tokenSymbol: token.symbol,
       blockchainName: token.blockchain.name,
@@ -347,7 +341,6 @@ export class TokensService implements OnModuleInit {
       walletAddress: token.wallet?.address,
       description: token.description,
     }));
-    console.log('obj', obj);
     return obj;
   }
 

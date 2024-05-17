@@ -34,9 +34,7 @@ export class InitService implements OnModuleInit {
 
         if (!existingCurrency) {
           await this.databaseService.fiatCurrency.create({ data: currency });
-          console.log(`Se creó la moneda fiduciaria: ${currency.code}`);
         } else {
-          console.log(`La moneda fiduciaria ${currency.code} ya existe`);
         }
       }
 
@@ -65,9 +63,7 @@ export class InitService implements OnModuleInit {
               name: platform.name,
             },
           });
-          console.log(`Se creó la plataforma: ${platform.name}`);
         } else {
-          console.log(`La plataforma ${platform.name} ya existe`);
         }
       }
     } catch (error) {
@@ -88,9 +84,7 @@ export class InitService implements OnModuleInit {
         existingPlatform = await this.databaseService.platform.create({
           data: { name: 'Billete' },
         });
-        console.log('Plataforma Billete creada');
       } else {
-        console.log('La plataforma Billete ya existe');
       }
     } catch (error) {
       console.error('Error al crear la plataforma Billete:', error);
@@ -102,13 +96,11 @@ export class InitService implements OnModuleInit {
       let existingPlatform = await this.databaseService.platform.findUnique({
         where: { name: 'Billete' },
       });
-      console.log('existe billete?', existingPlatform);
       if (!existingPlatform) {
         existingPlatform = await this.databaseService.platform.create({
           data: { name: 'Billete' },
         });
       }
-      console.log('Iniciando la creación de billeteras fiduciarias...');
       const users = await this.databaseService.user.findMany();
 
       const platforms = [
@@ -134,14 +126,9 @@ export class InitService implements OnModuleInit {
             data: { name: platform.name },
             include: { fiatWallets: true },
           });
-          console.log(`Se creó la plataforma: ${platform.name}`);
         }
 
         for (const user of users) {
-          console.log(
-            `Verificando billeteras fiduciarias para el usuario ${user.id} en la plataforma ${platform.name}...`,
-          );
-
           const existingWallet = existingPlatform.fiatWallets.find(
             (wallet) =>
               wallet.userId === user.id && wallet.currencyId === currency.id,
@@ -158,16 +145,10 @@ export class InitService implements OnModuleInit {
                 existingPlatform.id,
                 platform.name,
               );
-              console.log(
-                `Billetera fiduciaria creada para el usuario ${user.id} en la plataforma ${platform.name}`,
-              );
             } catch (error) {
               console.error('Error creando la billetera fiduciaria:', error);
             }
           } else {
-            console.log(
-              `El usuario ${user.id} ya tiene una billetera fiduciaria en la plataforma ${platform.name}`,
-            );
           }
         }
       }

@@ -66,9 +66,6 @@ export class BalancesService {
       },
     });
 
-    console.log('user Wallets', userWallets);
-    console.log('fiat-wallets', fiatWallets);
-
     userWallets.forEach((wallet) => {
       const platform = wallet.platformName;
       if (!assetsBalance[platform]) {
@@ -93,8 +90,6 @@ export class BalancesService {
       }
 
       wallet.walletTokens.forEach((wt) => {
-        console.log('wallet token', wt);
-
         const { symbol } = wt.token;
         const tokenBalance = new BigNumber(wt.balance);
 
@@ -130,9 +125,6 @@ export class BalancesService {
     toSymbol: string,
     updatedBalances: UpdatedBalances,
   ): Promise<void> {
-    console.log('fromSymbol', fromSymbol);
-    console.log('toSymbol', toSymbol);
-    console.log('updatedBalances', updatedBalances);
     const wallets = (await this.databaseService.wallet.findMany({
       where: { userId: userId },
       include: { walletTokens: true },
@@ -153,8 +145,6 @@ export class BalancesService {
       allWallets.set(`${wallet.platformName}-${wallet.currencySymbol}`, wallet);
     });
 
-    console.log('allWallets', allWallets);
-
     // Actualizar los balances para fromSymbol y toSymbol
     Object.entries(updatedBalances).forEach(([platform, balances]) => {
       balances.forEach(async (balance) => {
@@ -162,9 +152,6 @@ export class BalancesService {
           const walletKey = `${platform}-${balance.symbol}`;
           const walletOrToken = allWallets.get(walletKey);
           if (walletOrToken) {
-            console.log(
-              `Actualizando ${walletKey} con nuevo balance: ${balance.balance}`,
-            );
             // Determinar si es un wallet, un wallet token o un fiat wallet y actualizar
             if (walletOrToken.hasOwnProperty('walletId')) {
               // Supone que es un wallet token
@@ -232,9 +219,6 @@ export class BalancesService {
       },
     });
 
-    console.log('user Wallets', userWallets);
-    console.log('fiat-wallets', fiatWallets);
-
     userWallets.forEach((wallet) => {
       const symbol = wallet.blockchain.nativeTokenSymbol;
       const balance = new BigNumber(wallet.balance);
@@ -255,8 +239,6 @@ export class BalancesService {
       }
 
       wallet.walletTokens.forEach((wt) => {
-        console.log('wallet token', wt);
-
         const { symbol } = wt.token;
         const tokenBalance = new BigNumber(wt.balance);
 
@@ -295,7 +277,6 @@ export class BalancesService {
 
   async updateBalanceForUser(userId: string): Promise<void> {
     const balances = await this.getBalancesForUser(userId);
-    console.log('USER BALANCES', balances);
     this.subscribers[userId]?.forEach((client) => {
       client.emit('balance-update', balances);
     });

@@ -26,7 +26,6 @@ export class VerificationController {
 
   @Post('send-sms-code')
   async sendSMSCode(@Body() sendVerificationDto: SendVerificationDto) {
-    console.log('sendVerificationDto', sendVerificationDto);
     const { code } = this.verificationsService.generateVerificationCode();
 
     const { smsMessage } = this.smsService.createSMSMessage(code);
@@ -92,8 +91,6 @@ export class VerificationController {
   async verifySmsCode(@Body() verifyCodeDto: VerifyCodeDto) {
     const { to, code } = verifyCodeDto;
 
-    console.log('verifyCodeDto', verifyCodeDto);
-
     const smsRecord =
       await this.verificationsService.findLatestSMSByPhoneNumber(to);
     if (!smsRecord) {
@@ -120,7 +117,6 @@ export class VerificationController {
 
   @Post('verify-email-code')
   async verifyEmailCode(@Body() verifyCodeDto: VerifyCodeDto) {
-    console.log('verifyCodeDto', verifyCodeDto);
     const { to, code } = verifyCodeDto;
 
     const emailRecord =

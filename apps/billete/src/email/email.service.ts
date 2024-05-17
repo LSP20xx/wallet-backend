@@ -44,9 +44,6 @@ export class EmailService {
       html: html,
     };
 
-    console.log('Sending email: ', mailOptions);
-
     const result = await this.transporter.sendMail(mailOptions);
-    console.log('Email sent: ', result);
   }
 }

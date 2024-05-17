@@ -17,13 +17,11 @@ export class TokensController {
 
   @Get('candlestick-chart/:nameAndInterval')
   async getCandlestickChart(@Param('nameAndInterval') nameAndInterval: string) {
-    console.log('nameAndInterval', nameAndInterval);
     return await this.tokensService.getCandlestickChart(nameAndInterval);
   }
 
   @Get('linear-chart/:symbol')
   async getLinearChart(@Param('symbol') symbol: string) {
-    console.log('name', symbol);
     return await this.tokensService.getLinearChart(symbol);
   }
 

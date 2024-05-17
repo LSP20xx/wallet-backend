@@ -156,7 +156,6 @@ export class AuthService implements OnModuleInit {
       });
       return result;
     } catch (error) {
-      console.log('error', error);
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ForbiddenException('Credentials already in use.');
@@ -192,7 +191,6 @@ export class AuthService implements OnModuleInit {
             data: { name: platform.name },
             include: { fiatWallets: true },
           });
-          console.log(`Se creó la plataforma: ${platform.name}`);
         }
         await this.fiatWalletService.createWallet(
           userId,
@@ -309,7 +307,6 @@ export class AuthService implements OnModuleInit {
           throw new ForbiddenException('Invalid credentials.');
         }
       } else {
-        console.log('User already exists.');
         throw new ForbiddenException('User already exists.');
       }
 
@@ -394,10 +391,8 @@ export class AuthService implements OnModuleInit {
       throw new Error('Temporal data not found or expired');
     }
 
-    console.log('temp data', data);
     if (data.value && typeof data.value === 'string') {
       const parsedValue = JSON.parse(data.value);
-      console.log('parsedValue', parsedValue);
       return parsedValue;
     } else {
       throw new Error('Invalid data format from Redis');
