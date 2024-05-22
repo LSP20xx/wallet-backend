@@ -398,4 +398,33 @@ export class AuthService implements OnModuleInit {
       throw new Error('Invalid data format from Redis');
     }
   }
+
+  async acceptTermsAndConditions(userId: string) {
+    const user = await this.databaseService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    user.termsAndConditionsAccepted = true;
+
+    await this.databaseService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        termsAndConditionsAccepted: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return true;
+  }
 }

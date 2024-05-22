@@ -234,6 +234,19 @@ export class TokensService implements OnModuleInit {
     return allTokensData.filter((data) => data !== null);
   }
 
+  smoothData(data, period) {
+    const smoothed = [];
+    for (let i = 0; i < data.length; i++) {
+      const start = Math.max(0, i - period + 1);
+      const end = i + 1;
+      const subset = data.slice(start, end);
+      const sum = subset.reduce((acc, item) => acc + item.value, 0);
+      const avg = sum / subset.length;
+      smoothed.push({ time: data[i].time, value: avg });
+    }
+    return smoothed;
+  }
+
   async getLinearChart(symbol: string) {
     const tokenName = `${symbol.toUpperCase()}-USD_1d`;
 
@@ -256,8 +269,9 @@ export class TokensService implements OnModuleInit {
           const timestamp = parseInt(parts[0]);
           return { time: timestamp / 1000000, value: parseFloat(parts[1]) };
         });
+      const smoothedData = this.smoothData(last7DaysData, 30);
 
-      return last7DaysData;
+      return smoothedData;
     } catch (err) {
       console.error(`Error getting Redis value for ${tokenName}:`, err);
       return null;

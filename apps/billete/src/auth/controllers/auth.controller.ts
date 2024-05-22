@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { SignUpDTO } from 'apps/billete/src/auth/dtos/sign-up.dto';
 import { AuthService } from 'apps/billete/src/auth/services/auth.service';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
@@ -24,6 +33,14 @@ export class AuthController {
   @Post('sign-in')
   async signIn(@Body() signInDTO: SignInDTO) {
     return this.authService.signInUser(signInDTO);
+  }
+  @Post('accept-terms-and-conditions')
+  async acceptTermsAndConditions(@Body('userId') userId: string) {
+    if (!userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
+    }
+    console.log('llega?');
+    return this.authService.acceptTermsAndConditions(userId);
   }
 
   @Get('google')
