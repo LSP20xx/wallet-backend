@@ -12,8 +12,7 @@ export class UsersService {
   }
 
   public async getUserInfoById(userId: string): Promise<{
-    firstName: string;
-    lastName: string;
+    completeName: string;
     language: string;
     localCurrency: string;
     notifyByEmail: boolean;
@@ -31,8 +30,7 @@ export class UsersService {
     }
 
     return {
-      firstName: user.firstName,
-      lastName: user.lastName,
+      completeName: user.completeName,
       language: user.language,
       localCurrency: user.localCurrency,
       notifyByEmail: user.notifyByEmail,

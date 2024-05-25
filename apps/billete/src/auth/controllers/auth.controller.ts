@@ -43,6 +43,46 @@ export class AuthController {
     return this.authService.acceptTermsAndConditions(userId);
   }
 
+  @Post('update-personal-information')
+  async updatePersonalInformation(
+    @Body('userId') userId: string,
+    @Body('completeName') completeName: string,
+    @Body('dateOfBirth') dateOfBirth: string,
+  ) {
+    if (!userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
+    }
+    if (!completeName) {
+      throw new HttpException('First name is required', HttpStatus.BAD_REQUEST);
+    }
+    if (!dateOfBirth) {
+      throw new HttpException(
+        'Date of birth is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = dateOfBirth.match(dateRegex);
+    if (!match) {
+      throw new HttpException('Invalid date format', HttpStatus.BAD_REQUEST);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, day, month, year] = match;
+    const date = new Date(`${year}-${month}-${day}`);
+    if (isNaN(date.getTime())) {
+      throw new HttpException('Invalid date', HttpStatus.BAD_REQUEST);
+    }
+
+    console.log('Updating personal information for user:', userId);
+
+    return this.authService.updatePersonalInformation(userId, {
+      completeName,
+      dateOfBirth: date,
+    });
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

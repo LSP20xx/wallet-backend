@@ -193,8 +193,7 @@ model Transaction {
 
 model User {
   id                String        @id @default(uuid())
-  firstName         String?
-  lastName          String?
+  completeName      String?
   email             String?       @unique
   phoneNumber       String?       @unique
   encryptedPassword String
@@ -216,6 +215,7 @@ model User {
   language          String        @default("Español")
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+  dateOfBirth       DateTime?
 
   @@map("users")
 }

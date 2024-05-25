@@ -13,8 +13,7 @@ export class UsersController {
 
   @Get('user-info/:userId')
   getUserInfoById(@Param('userId') userId: string): Promise<{
-    firstName: string;
-    lastName: string;
+    completeName: string;
     language: string;
     localCurrency: string;
     notifyByEmail: boolean;

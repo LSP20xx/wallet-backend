@@ -3,6 +3,8 @@ import {
   Inject,
   Injectable,
   OnModuleInit,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -145,8 +147,7 @@ export class AuthService implements OnModuleInit {
         userId = user.id;
         return {
           userId: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          completeName: user.completeName,
           email: user.email,
           phoneNumber: user.phoneNumber,
           verified: user.verified,
@@ -209,8 +210,7 @@ export class AuthService implements OnModuleInit {
 
   async signInUser(signInDTO: SignInDTO): Promise<{
     userId: string;
-    firstName: string;
-    lastName: string;
+    completeName: string;
     email: string;
     phoneNumber: string;
     verified: boolean;
@@ -228,8 +228,7 @@ export class AuthService implements OnModuleInit {
 
     return {
       userId: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      completeName: user.completeName,
       email: user.email,
       phoneNumber: user.phoneNumber,
       verified: user.verified,
@@ -426,5 +425,31 @@ export class AuthService implements OnModuleInit {
     }
 
     return true;
+  }
+
+  async updatePersonalInformation(
+    userId: string,
+    personalInfo: { completeName: string; dateOfBirth: Date },
+  ) {
+    const user = await this.databaseService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    user.completeName = personalInfo.completeName;
+    user.dateOfBirth = personalInfo.dateOfBirth;
+
+    await this.databaseService.user.update({
+      where: { id: userId },
+      data: {
+        completeName: user.completeName,
+        dateOfBirth: user.dateOfBirth,
+      },
+    });
+
+    return { message: 'Personal information updated successfully' };
   }
 }
