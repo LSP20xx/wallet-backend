@@ -8,6 +8,9 @@ import { LocalStrategy } from './strategy/local.strategy';
 import { SessionSerializer } from './strategy/session.serializer';
 import { EncryptionsService } from 'apps/billete/src/encryptions/services/encryptions.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { DocumentUploadService } from '../document-upload/document-upload.service';
+import { MulterModule } from '@nestjs/platform-express';
+
 //import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
@@ -29,6 +32,9 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+    MulterModule.register({
+      dest: './uploads',
+    }),
   ],
   controllers: [AuthController],
   providers: [
@@ -38,6 +44,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     //GoogleStrategy,
     SessionSerializer,
     EncryptionsService,
+    DocumentUploadService,
   ],
 })
 export class AuthModule {}

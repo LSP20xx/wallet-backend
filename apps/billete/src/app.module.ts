@@ -22,6 +22,7 @@ import { EmailModule } from './email/email.module';
 import { BalanceGateway } from 'gateways/balance.gateway';
 import { CircleModule } from './circle/circle.module';
 import { InitModule } from './init/init.module';
+import { DocumentUploadService } from './document-upload/document-upload.service';
 
 @Module({
   imports: [
@@ -61,6 +62,6 @@ import { InitModule } from './init/init.module';
     CircleModule,
     InitModule,
   ],
-  providers: [KrakenGateway, BalanceGateway],
+  providers: [KrakenGateway, BalanceGateway, DocumentUploadService],
 })
 export class AppModule {}

@@ -189,6 +189,17 @@ model Transaction {
 
   @@map("transactions")
 }
+model Document {
+  id        String   @id @default(uuid())
+  userId    String
+  type      DocumentType?
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], name: "UserDocuments")
+
+  @@map("documents")
+}
 
 
 model User {
@@ -213,6 +224,7 @@ model User {
   notifyByWhatsApp  Boolean       @default(false)
   localCurrency     String        @default("USD")
   language          String        @default("Español")
+  documents         Document[]    @relation("UserDocuments")
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   dateOfBirth       DateTime?
@@ -329,4 +341,13 @@ enum VerificationMethod {
   GOOGLE_AUTHENTICATOR
   SIGN_IN_AND_SIGN_UP_WITH_GOOGLE
   SIGN_IN_AND_SIGN_UP_WITH_FACEBOOK
+}
+
+enum DocumentType {
+  ID_PHOTO_FRONT
+  ID_PHOTO_BACK
+  PASSPORT
+  UTILITY_BILL
+  BANK_STATEMENT
+  DRIVER_LICENSE
 }

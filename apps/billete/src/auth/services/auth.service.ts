@@ -1,14 +1,15 @@
 import {
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   OnModuleInit,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClient, VerificationMethod } from '@prisma/client';
+import { ClientProxy } from '@nestjs/microservices';
+import { DocumentType, PrismaClient, VerificationMethod } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { SignTokenDTO } from 'apps/billete/src/auth/dtos/sign-token.dto';
 import { SignUpDTO } from 'apps/billete/src/auth/dtos/sign-up.dto';
@@ -16,14 +17,19 @@ import { DatabaseService } from 'apps/billete/src/database/services/database/dat
 import { EvmWalletService } from 'apps/billete/src/wallets/services/evm-wallet.service';
 import { UtxoWalletService } from 'apps/billete/src/wallets/services/utxo-wallet.service';
 import { hash, verify } from 'argon2';
+import axios from 'axios';
+import * as crypto from 'crypto';
+import * as utf8 from 'utf8';
 import { v4 as uuidv4 } from 'uuid';
-import { SignInDTO } from '../dtos/sign-in.dto';
-import { ClientProxy } from '@nestjs/microservices';
-import { CheckAuthDataDTO } from '../dtos/check-auth-data.dto';
 import { FiatWalletsService } from '../../wallets/services/fiat-wallets.service';
+import { CheckAuthDataDTO } from '../dtos/check-auth-data.dto';
+import { SignInDTO } from '../dtos/sign-in.dto';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
+  private sumsubUrl: string;
+  private sumsubToken: string;
+  private sumsubSecretKey: string;
   constructor(
     private databaseService: DatabaseService,
     private jwtService: JwtService,
@@ -32,7 +38,11 @@ export class AuthService implements OnModuleInit {
     private utxoWalletService: UtxoWalletService,
     private fiatWalletService: FiatWalletsService,
     @Inject('REDIS_SERVICE') private redisClient: ClientProxy,
-  ) {}
+  ) {
+    this.sumsubSecretKey = this.configService.get<string>('SUMSUB_SECRET_KEY');
+    this.sumsubToken = this.configService.get<string>('SUMSUB_TOKEN');
+    this.sumsubUrl = 'https://api.sumsub.com';
+  }
 
   async storeTempSession(emailOrPhone: string): Promise<string> {
     const tempId = uuidv4();
@@ -155,6 +165,7 @@ export class AuthService implements OnModuleInit {
           termsAndConditionsAccepted: false,
         };
       });
+
       return result;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -215,6 +226,7 @@ export class AuthService implements OnModuleInit {
     phoneNumber: string;
     verified: boolean;
     verificationMethods: string[];
+    termsAndConditionsAccepted: boolean;
   }> {
     const user = await this.databaseService.user.findFirst({
       where: {
@@ -233,6 +245,7 @@ export class AuthService implements OnModuleInit {
       phoneNumber: user.phoneNumber,
       verified: user.verified,
       verificationMethods: user.verificationMethods,
+      termsAndConditionsAccepted: user.termsAndConditionsAccepted,
     };
   }
 
@@ -424,6 +437,9 @@ export class AuthService implements OnModuleInit {
       throw new Error('User not found');
     }
 
+    const response = await this.createSumsubApplicant(userId);
+    console.log(response);
+
     return true;
   }
 
@@ -451,5 +467,122 @@ export class AuthService implements OnModuleInit {
     });
 
     return { message: 'Personal information updated successfully' };
+  }
+
+  async getKycToken(userId: string): Promise<string> {
+    const payload = {
+      userId: userId,
+      levelName: 'basic-kyc-level',
+    };
+
+    const token = this.jwtService.sign(payload, {
+      secret: this.sumsubSecretKey,
+      expiresIn: '1h',
+    });
+
+    return token;
+  }
+
+  async createSumsubApplicant(userId: string): Promise<any> {
+    const user = await this.databaseService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    let applicantPayload;
+    if (!user.phoneNumber) {
+      applicantPayload = {
+        externalUserId: userId,
+        email: user.email,
+      };
+    }
+    if (!user.email) {
+      applicantPayload = {
+        externalUserId: userId,
+        phoneNumber: user.phoneNumber,
+      };
+    }
+    const payloadString = JSON.stringify(applicantPayload);
+    const httpMethod = 'POST';
+    const endpoint = '/resources/applicants';
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const valueToSign = timestamp + httpMethod + endpoint + payloadString;
+
+    const key = utf8.encode(this.sumsubSecretKey);
+    const bytes = utf8.encode(valueToSign);
+
+    const hmacSha256 = crypto.createHmac('sha256', key);
+    const digest = hmacSha256.update(bytes).digest('hex');
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-App-Token': this.sumsubToken,
+      'X-App-Access-Ts': timestamp,
+      'X-App-Access-Sig': digest,
+    };
+
+    console.log('Data to sign:', valueToSign);
+    console.log('Generated signature:', digest);
+    console.log('Headers:', headers);
+
+    try {
+      const response = await axios.post(
+        `${this.sumsubUrl}${endpoint}`,
+        applicantPayload,
+        { headers },
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        'Error creating Sumsub applicant:',
+        error.response ? error.response.data : error.message,
+      );
+      throw new HttpException(
+        'Failed to create Sumsub applicant',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateDocumentStatus(
+    userId: string,
+    documentType: DocumentType,
+    fileUrl: string,
+  ): Promise<any> {
+    try {
+      const user = await this.databaseService.user.update({
+        where: { id: userId },
+        data: {
+          documents: {
+            updateMany: {
+              where: {
+                type: documentType as any,
+              },
+              data: {
+                url: fileUrl,
+              },
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        message: 'Document status updated successfully',
+        user,
+      };
+    } catch (error) {
+      console.error('Error updating document status:', error);
+      throw new HttpException(
+        'Error updating document status',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
